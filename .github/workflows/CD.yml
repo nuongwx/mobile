@@ -49,6 +49,7 @@ jobs:
       - name: Upload APK to release
         uses: svenstaro/upload-release-action@v2
         with:
+          repo_token: ${{ secrets.SECRET_TOKEN }}
           file: ${{ env.main_project_module }}/build/outputs/apk/release/app-release-unsigned.apk
           asset_name: ${{ env.playstore_name }}.apk
           tag: 0.1.0
