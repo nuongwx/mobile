@@ -3,5 +3,50 @@
     <style name="Base.Theme.Datto" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <item name="colorError">#FFB4AB</item>
+        <item name="colorErrorContainer">#93000A</item>
+        <item name="colorOnSurfaceInverse">#372E30</item>
+        <item name="colorPrimaryInverse">#8C4A60</item>
+        <item name="colorSurfaceInverse">#EFDFE1</item>
+        <item name="colorOnError">#690005</item>
+        <item name="colorOnErrorContainer">#FFDAD6</item>
+        <item name="colorOnPrimary">#541D32</item>
+        <item name="colorOnPrimaryContainer">#FFD9E2</item>
+        <item name="colorOnPrimaryFixed">#3A071D</item>
+        <item name="colorOnPrimaryFixedVariant">#703348</item>
+        <item name="colorOnSecondary">#541D35</item>
+        <item name="colorOnSecondaryContainer">#FFD9E4</item>
+        <item name="colorOnSecondaryFixed">#39071F</item>
+        <item name="colorOnSecondaryFixedVariant">#6F334B</item>
+        <item name="colorOnSurface">#EFDFE1</item>
+        <item name="colorOnSurfaceVariant">#D5C2C6</item>
+        <item name="colorOnTertiary">#003354</item>
+        <item name="colorOnTertiaryContainer">#CEE5FF</item>
+        <item name="colorOnTertiaryFixed">#001D33</item>
+        <item name="colorOnTertiaryFixedVariant">#0F4A73</item>
+        <item name="colorOutline">#9E8C90</item>
+        <item name="colorOutlineVariant">#514347</item>
+        <item name="colorPrimary">#FFB1C8</item>
+        <item name="colorPrimaryContainer">#703348</item>
+        <item name="colorPrimaryFixed">#FFD9E2</item>
+        <item name="colorPrimaryFixedDim">#FFB1C8</item>
+        <item name="scrimBackground">#000000</item>
+        <item name="colorSecondary">#FFB0CC</item>
+        <item name="colorSecondaryContainer">#6F334B</item>
+        <item name="colorSecondaryFixed">#FFD9E4</item>
+        <item name="colorSecondaryFixedDim">#FFB0CC</item>
+        <item name="android:shadowColor">#000000</item>
+        <item name="colorSurface">#191113</item>
+        <item name="colorSurfaceBright">#413739</item>
+        <item name="colorSurfaceContainer">#261D20</item>
+        <item name="colorSurfaceContainerHigh">#31282A</item>
+        <item name="colorSurfaceContainerHighest">#3C3235</item>
+        <item name="colorSurfaceContainerLow">#22191C</item>
+        <item name="colorSurfaceContainerLowest">#140C0E</item>
+        <item name="colorSurfaceDim">#191113</item>
+        <item name="colorTertiary">#9CCBFB</item>
+        <item name="colorTertiaryContainer">#0F4A73</item>
+        <item name="colorTertiaryFixed">#CEE5FF</item>
+        <item name="colorTertiaryFixedDim">#9CCBFB</item>
     </style>
 </resources>
