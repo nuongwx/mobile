@@ -1,14 +1,10 @@
 package com.example.datto
 
-import android.content.Intent
 import android.os.Bundle
-import android.provider.MediaStore
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import com.google.android.material.appbar.MaterialToolbar
 
 // TODO: Rename parameter arguments, choose names that match
@@ -18,10 +14,10 @@ private const val ARG_PARAM2 = "param2"
 
 /**
  * A simple [Fragment] subclass.
- * Use the [Profile.newInstance] factory method to
+ * Use the [ChangePassword.newInstance] factory method to
  * create an instance of this fragment.
  */
-class Profile : Fragment() {
+class ChangePassword : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
@@ -29,14 +25,10 @@ class Profile : Fragment() {
     private fun configTopAppBar() {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
         val menuItem = appBar.menu.findItem(R.id.edit)
-        menuItem.setIcon(R.drawable.ic_edit)
-        menuItem.setOnMenuItemClickListener {
-            parentFragmentManager.beginTransaction().replace(R.id.app_fragment, ProfileEdit())
-                .addToBackStack(null)
-                .commit()
-            true
-        }
-        appBar.title = "Profile"
+        menuItem.setIcon(null)
+        menuItem.setOnMenuItemClickListener(null)
+
+        appBar.title = "Change Password"
     }
 
     private fun destroyTopAppBar() {
@@ -47,7 +39,6 @@ class Profile : Fragment() {
 
         appBar.title = "Title"
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -58,26 +49,9 @@ class Profile : Fragment() {
         configTopAppBar()
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        // Handle change password
-        val changePassword = view.findViewById<Button>(R.id.profile_change_password)
-        changePassword.setOnClickListener {
-            parentFragmentManager.beginTransaction().replace(R.id.app_fragment, ChangePassword())
-                .addToBackStack(null)
-                .commit()
-        }
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         destroyTopAppBar()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        configTopAppBar()
     }
 
     override fun onCreateView(
@@ -85,7 +59,7 @@ class Profile : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile, container, false)
+        return inflater.inflate(R.layout.fragment_change_password, container, false)
     }
 
     companion object {
@@ -95,12 +69,12 @@ class Profile : Fragment() {
          *
          * @param param1 Parameter 1.
          * @param param2 Parameter 2.
-         * @return A new instance of fragment Profile.
+         * @return A new instance of fragment ChangePassword.
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
-            Profile().apply {
+            ChangePassword().apply {
                 arguments = Bundle().apply {
                     putString(ARG_PARAM1, param1)
                     putString(ARG_PARAM2, param2)
