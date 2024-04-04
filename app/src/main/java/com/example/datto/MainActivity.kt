@@ -8,9 +8,17 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.widget.NestedScrollView
+import com.example.datto.API.APICallback
+import com.example.datto.API.APIService
+import com.example.datto.API.RetrofitInstance
+import com.example.datto.DataClass.Account
+import com.example.datto.DataClass.BaseResponse
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import retrofit2.Call
+import retrofit2.http.GET
 
 class MainActivity : AppCompatActivity() {
     // Handle back button to exit app
@@ -29,9 +37,19 @@ class MainActivity : AppCompatActivity() {
         findViewById(R.id.app_top_app_bar)
     }
 
+    interface ProfileApiService {
+        @GET("/api/accounts/660ca8b9cba91f0ee182605e")
+        fun get(): Call<BaseResponse<Account>>
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Disable dark mode
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+
+        // Set default layout
         setContentView(R.layout.activity_app_layout)
 
         supportFragmentManager.addOnBackStackChangedListener {
@@ -152,6 +170,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
         handleBackEvent()

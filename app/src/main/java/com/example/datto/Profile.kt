@@ -3,13 +3,20 @@ package com.example.datto
 import android.content.Intent
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
+import com.example.datto.API.APICallback
+import com.example.datto.API.APIService
+import com.example.datto.DataClass.Account
 import com.google.android.material.appbar.MaterialToolbar
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -25,6 +32,12 @@ class Profile : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
+
+    private lateinit var largeFullName: TextView
+    private lateinit var username: TextView
+    private lateinit var email: TextView
+    private lateinit var fullName: TextView
+    private lateinit var dob: TextView
 
     private fun configTopAppBar() {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
@@ -61,13 +74,46 @@ class Profile : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Handle change password
+        // Handle change password btn
         val changePassword = view.findViewById<Button>(R.id.profile_change_password)
         changePassword.setOnClickListener {
             parentFragmentManager.beginTransaction().replace(R.id.app_fragment, ChangePassword())
                 .addToBackStack(null)
                 .commit()
         }
+
+        /// Assign id to each element
+        largeFullName = requireView().findViewById(R.id.profile_fullName)
+        username = requireView().findViewById(R.id.profile_account_info_username)
+        email = requireView().findViewById(R.id.profile_account_info_email)
+        fullName = requireView().findViewById(R.id.profile_profile_info_fullName)
+        dob = requireView().findViewById(R.id.profile_profile_info_dob)
+
+        // Get data
+        APIService().doGet<Account>("accounts/660ca8b9cba91f0ee182605e", object : APICallback<Any> {
+            override fun onSuccess(data: Any) {
+                Log.d("API_SERVICE", "Data: $data")
+
+                // Cast data to Account
+                data as Account
+
+                // Format date of birth
+                val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                val targetFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
+                val date = originalFormat.parse(data.profile.dob)
+
+                // Set text to each element
+                largeFullName.text = data.profile.fullName
+                username.text = data.username
+                email.text = data.email
+                fullName.text = data.profile.fullName
+                dob.text = targetFormat.format(date!!)
+            }
+
+            override fun onError(error: Throwable) {
+                Log.e("API_SERVICE", "Error: ${error.message}")
+            }
+        })
     }
 
     override fun onDestroy() {
