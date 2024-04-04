@@ -1,11 +1,18 @@
 package com.example.datto
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import com.example.datto.API.APICallback
+import com.example.datto.API.APIService
+import com.example.datto.DataClass.ChangePasswordRequest
 import com.google.android.material.appbar.MaterialToolbar
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -22,11 +29,33 @@ class ChangePassword : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
 
+    private lateinit var currentPassword: com.google.android.material.textfield.TextInputEditText
+    private lateinit var newPassword: com.google.android.material.textfield.TextInputEditText
+    private lateinit var confirmPassword: com.google.android.material.textfield.TextInputEditText
+
     private fun configTopAppBar() {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
         val menuItem = appBar.menu.findItem(R.id.edit)
         menuItem.setIcon(null)
-        menuItem.setOnMenuItemClickListener(null)
+        menuItem.setOnMenuItemClickListener{
+            // Get data
+            val body = ChangePasswordRequest(currentPassword.text.toString(), newPassword.text.toString(), confirmPassword.text.toString())
+
+            // Set onClickListener to the button
+            APIService().doPatch<ChangePasswordRequest>("accounts/660ca8b9cba91f0ee182605e/password", body, object : APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    Toast.makeText(requireContext(), "Password changed successfully", Toast.LENGTH_SHORT).show()
+                    Log.d("API_SERVICE", "Data: $data")
+                }
+
+                override fun onError(error: Throwable) {
+                    Toast.makeText(requireContext(), "Error: ${error.message}", Toast.LENGTH_SHORT).show()
+                    Log.e("API_SERVICE", "Error: ${error.message}")
+                }
+            })
+
+            true
+        }
 
         appBar.title = "Change Password"
     }
@@ -47,6 +76,15 @@ class ChangePassword : Fragment() {
         }
 
         configTopAppBar()
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Assign id to each element
+        currentPassword = view.findViewById(R.id.change_password_current)
+        newPassword = view.findViewById(R.id.change_password_new)
+        confirmPassword = view.findViewById(R.id.change_password_confirm)
     }
 
     override fun onDestroy() {

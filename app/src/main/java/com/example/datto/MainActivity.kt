@@ -2,6 +2,7 @@ package com.example.datto
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.StrictMode
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +14,6 @@ import androidx.core.widget.NestedScrollView
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.API.RetrofitInstance
-import com.example.datto.DataClass.Account
 import com.example.datto.DataClass.BaseResponse
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -35,11 +35,6 @@ class MainActivity : AppCompatActivity() {
 
     val appBar: MaterialToolbar by lazy {
         findViewById(R.id.app_top_app_bar)
-    }
-
-    interface ProfileApiService {
-        @GET("/api/accounts/660ca8b9cba91f0ee182605e")
-        fun get(): Call<BaseResponse<Account>>
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

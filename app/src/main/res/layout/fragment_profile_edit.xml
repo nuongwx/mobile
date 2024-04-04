@@ -34,7 +34,7 @@
             android:textColor="@color/material_dynamic_neutral70" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/profile_edit_username"
+            android:id="@+id/profile_edit_username_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -46,13 +46,14 @@
             app:layout_constraintTop_toBottomOf="@+id/profile_edit_edit_photo">
 
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/profile_edit_username"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/profile_edit_fullName"
+            android:id="@+id/profile_edit_fullName_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -61,16 +62,17 @@
             android:hint="Fullname"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/profile_edit_username">
+            app:layout_constraintTop_toBottomOf="@+id/profile_edit_username_title">
 
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/profile_edit_fullName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/profile_edit_dob"
+            android:id="@+id/profile_edit_dob_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -79,11 +81,15 @@
             android:hint="Date of birth"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/profile_edit_fullName">
+            app:layout_constraintTop_toBottomOf="@+id/profile_edit_fullName_title">
 
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/profile_edit_dob"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:enabled="true"
+                android:focusable="false" />
 
         </com.google.android.material.textfield.TextInputLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
