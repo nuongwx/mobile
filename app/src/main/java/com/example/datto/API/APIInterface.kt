@@ -23,5 +23,5 @@ interface APIInterface {
 
     @Multipart
     @PUT("{endpoint}")
-    fun putMultipart(@Path("endpoint", encoded = true) endpoint: String, @Body body: MultipartBody.Part): Call<BaseResponse<JsonElement>>
+    fun putMultipart(@Path("endpoint", encoded = true) endpoint: String, @Part body: MultipartBody.Part): Call<BaseResponse<JsonElement>>
 }

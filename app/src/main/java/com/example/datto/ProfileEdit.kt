@@ -13,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.Toast
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.DataClass.AccountResponse
@@ -57,13 +58,17 @@ class ProfileEdit : Fragment() {
         val menuItem = appBar.menu.findItem(R.id.edit)
         menuItem.setIcon(null)
         menuItem.setOnMenuItemClickListener{
+            Toast.makeText(requireContext(), "Save", Toast.LENGTH_SHORT).show()
             Thread {
                 try {
-                    // Get avatar as multipart file
-                    val avatarBitmap = (avatar.drawable as BitmapDrawable).bitmap
-                    val byteArrayOutStream = ByteArrayOutputStream()
-                    avatarBitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutStream)
-                    val requestBody = RequestBody.create(MediaType.parse("image/*"), byteArrayOutStream.toByteArray())
+                    // Get image from avatar
+                    val bitmap = (avatar.drawable as BitmapDrawable).bitmap
+                    val stream = ByteArrayOutputStream()
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+                    val byteArray = stream.toByteArray()
+
+                    // Create multipart body
+                    val requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), byteArray)
                     val multipartBody = MultipartBody.Part.createFormData("file", "avatar.jpg", requestBody)
 
                     APIService().doPutMultipart<Any>("files", multipartBody, object :
@@ -78,6 +83,7 @@ class ProfileEdit : Fragment() {
                     })
                 } catch (e: Exception) {
                     e.printStackTrace()
+                    Log.e("API_SERVICE", "Error: ${e.message}")
                 }
             }.start()
 
