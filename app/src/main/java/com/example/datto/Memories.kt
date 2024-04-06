@@ -69,7 +69,7 @@ class Memories : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         _binding = FragmentMemoriesBinding.inflate(inflater, container, false)
         return binding.root

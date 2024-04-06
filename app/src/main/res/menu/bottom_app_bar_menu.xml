@@ -5,7 +5,7 @@
         android:id="@+id/bottom_app_bar_menu_home"
         android:icon="@drawable/ic_home"
         android:title="Home"
-        app:showAsAction="always"/>
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/bottom_app_bar_menu_memory"
@@ -16,7 +16,7 @@
         android:id="@+id/bottom_app_bar_menu_event"
         android:icon="@drawable/ic_create"
         android:title="Create"
-        app:showAsAction="always"/>
+        app:showAsAction="always" />
     <item
         android:id="@+id/bottom_app_bar_menu_notification"
         android:icon="@drawable/ic_notification"

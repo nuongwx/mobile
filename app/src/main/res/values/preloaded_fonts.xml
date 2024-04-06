@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="preloaded_fonts" translatable="false">
+        <item>@font/be_vietnam</item>
+        <item>@font/be_vietnam_bold</item>
+        <item>@font/be_vietnam_bold_italic</item>
+        <item>@font/be_vietnam_extrabold</item>
+        <item>@font/be_vietnam_extrabold_italic</item>
+        <item>@font/be_vietnam_italic</item>
+        <item>@font/be_vietnam_light</item>
+        <item>@font/be_vietnam_light_italic</item>
+        <item>@font/be_vietnam_medium</item>
+        <item>@font/be_vietnam_medium_italic</item>
+        <item>@font/be_vietnam_semibold</item>
+        <item>@font/be_vietnam_semibold_italic</item>
+        <item>@font/be_vietnam_thin</item>
+        <item>@font/be_vietnam_thin_italic</item>
+    </array>
+</resources>
