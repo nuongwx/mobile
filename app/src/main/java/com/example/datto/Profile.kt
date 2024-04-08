@@ -14,6 +14,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
+import com.example.datto.Credential.CredentialService
 import com.example.datto.DataClass.AccountResponse
 import com.example.datto.GlobalVariable.GlobalVariable
 import com.google.android.material.appbar.MaterialToolbar
@@ -90,7 +91,7 @@ class Profile : Fragment() {
         dob = requireView().findViewById(R.id.profile_profile_info_dob)
 
         // Get data
-        APIService().doGet<AccountResponse>("accounts/660ca8b9cba91f0ee182605e", object : APICallback<Any> {
+        APIService().doGet<AccountResponse>("accounts/${CredentialService().get()}", object : APICallback<Any> {
             override fun onSuccess(data: Any) {
                 Log.d("API_SERVICE", "Data: $data")
 

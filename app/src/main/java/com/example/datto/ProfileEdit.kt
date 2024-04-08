@@ -15,6 +15,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
+import com.example.datto.Credential.CredentialService
 import com.example.datto.DataClass.AccountResponse
 import com.example.datto.DataClass.BucketResponse
 import com.example.datto.DataClass.ProfileEditRequest
@@ -75,11 +76,14 @@ class ProfileEdit : Fragment() {
                         val profileEditRequest = ProfileEditRequest(username.text.toString(), fullName.text.toString(), formattedDob, "")
 
                         // Patch profile
-                        APIService().doPatch<ProfileEditRequest>("accounts/660ca8b9cba91f0ee182605e", profileEditRequest, object :
+                        APIService().doPatch<ProfileEditRequest>("accounts/${CredentialService().get()}", profileEditRequest, object :
                             APICallback<Any> {
                             override fun onSuccess(data: Any) {
                                 Log.d("API_SERVICE", "Data: $data")
                                 Toast.makeText(requireContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show()
+
+                                // Back to previous fragment
+                                parentFragmentManager.popBackStack()
                             }
 
                             override fun onError(error: Throwable) {
@@ -116,11 +120,14 @@ class ProfileEdit : Fragment() {
                                 val profileEditRequest = ProfileEditRequest(username.text.toString(), fullName.text.toString(), formattedDob, data.id)
 
                                 // Call API to patch profile
-                                APIService().doPatch<ProfileEditRequest>("accounts/660ca8b9cba91f0ee182605e", profileEditRequest, object :
+                                APIService().doPatch<ProfileEditRequest>("accounts/${CredentialService().get()}", profileEditRequest, object :
                                     APICallback<Any> {
                                     override fun onSuccess(data: Any) {
                                         Log.d("API_SERVICE", "Data: $data")
                                         Toast.makeText(requireContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show()
+
+                                        // Back to previous fragment
+                                        parentFragmentManager.popBackStack()
                                     }
 
                                     override fun onError(error: Throwable) {
@@ -166,7 +173,7 @@ class ProfileEdit : Fragment() {
         fullName = requireActivity().findViewById(R.id.profile_edit_fullName)
         dob = requireActivity().findViewById(R.id.profile_edit_dob)
 
-        APIService().doGet<AccountResponse>("accounts/660ca8b9cba91f0ee182605e", object :
+        APIService().doGet<AccountResponse>("accounts/${CredentialService().get()}", object :
             APICallback<Any> {
             override fun onSuccess(data: Any) {
                 Log.d("API_SERVICE", "Data: $data")

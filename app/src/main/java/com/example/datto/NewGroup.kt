@@ -15,6 +15,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
+import com.example.datto.Credential.CredentialService
 import com.example.datto.DataClass.BucketResponse
 import com.example.datto.DataClass.NewGroupRequest
 import com.example.datto.DataClass.NewGroupResponse
@@ -59,7 +60,7 @@ class NewGroup : Fragment() {
                 try {
                     // Case 1: Create new group without thumbnail
                     if (!thumbnailChangeStatus) {
-                        val newGroupRequest = NewGroupRequest("660ca8b9cba91f0ee182605e", name.text.toString(), "")
+                        val newGroupRequest = NewGroupRequest(CredentialService().get(), name.text.toString(), "")
 
                         APIService().doPost<NewGroupResponse>("groups", newGroupRequest, object :
                             APICallback<Any> {
@@ -101,7 +102,7 @@ class NewGroup : Fragment() {
                                 data as BucketResponse
 
                                 // Create new group with thumbnail
-                                val newGroupRequest = NewGroupRequest("660ca8b9cba91f0ee182605e", name.text.toString(), data.id)
+                                val newGroupRequest = NewGroupRequest(CredentialService().get(), name.text.toString(), data.id)
 
                                 // Call API to patch profile
                                 APIService().doPost<NewGroupResponse>("groups", newGroupRequest, object :

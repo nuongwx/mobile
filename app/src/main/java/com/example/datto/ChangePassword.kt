@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
+import com.example.datto.Credential.CredentialService
 import com.example.datto.DataClass.ChangePasswordRequest
 import com.google.android.material.appbar.MaterialToolbar
 import java.text.SimpleDateFormat
@@ -36,16 +37,21 @@ class ChangePassword : Fragment() {
     private fun configTopAppBar() {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
         val menuItem = appBar.menu.findItem(R.id.edit)
+        menuItem.isEnabled = true
+        menuItem.title = "Save"
         menuItem.setIcon(null)
         menuItem.setOnMenuItemClickListener{
             // Get data
             val body = ChangePasswordRequest(currentPassword.text.toString(), newPassword.text.toString(), confirmPassword.text.toString())
 
             // Set onClickListener to the button
-            APIService().doPatch<ChangePasswordRequest>("accounts/660ca8b9cba91f0ee182605e/password", body, object : APICallback<Any> {
+            APIService().doPatch<ChangePasswordRequest>("accounts/${CredentialService().get()}/password", body, object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Toast.makeText(requireContext(), "Password changed successfully", Toast.LENGTH_SHORT).show()
                     Log.d("API_SERVICE", "Data: $data")
+
+                    // Back to previous fragment
+                    requireActivity().supportFragmentManager.popBackStack()
                 }
 
                 override fun onError(error: Throwable) {
@@ -60,14 +66,6 @@ class ChangePassword : Fragment() {
         appBar.title = "Change Password"
     }
 
-    private fun destroyTopAppBar() {
-        val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
-        val menuItem = appBar.menu.findItem(R.id.edit)
-        menuItem.setIcon(null)
-        menuItem.setOnMenuItemClickListener(null)
-
-        appBar.title = "Title"
-    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -87,9 +85,9 @@ class ChangePassword : Fragment() {
         confirmPassword = view.findViewById(R.id.change_password_confirm)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        destroyTopAppBar()
+    override fun onResume() {
+        super.onResume()
+        configTopAppBar()
     }
 
     override fun onCreateView(

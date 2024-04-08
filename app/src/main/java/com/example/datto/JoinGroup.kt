@@ -1,11 +1,17 @@
 package com.example.datto
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.Toast
+import com.example.datto.API.APICallback
+import com.example.datto.API.APIService
+import com.example.datto.Credential.CredentialService
+import com.example.datto.DataClass.JoinGroupRequest
 import com.google.android.material.appbar.MaterialToolbar
 
 // TODO: Rename parameter arguments, choose names that match
@@ -23,6 +29,7 @@ class JoinGroup : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
 
+    private lateinit var inviteCodeField: com.google.android.material.textfield.TextInputEditText
     private lateinit var findButton: Button
 
     private fun configTopAppBar() {
@@ -49,11 +56,30 @@ class JoinGroup : Fragment() {
         configTopAppBar()
 
         // Assign id to each element
+        inviteCodeField = view.findViewById(R.id.join_group_invite_code)
         findButton = view.findViewById(R.id.join_group_find_btn)
 
         // Set onClickListener for the button
         findButton.setOnClickListener {
+            val inviteCode = inviteCodeField.text.toString()
+            val joinGroupRequest = JoinGroupRequest(CredentialService().get(), inviteCode)
 
+            // Call API to join group
+            APIService().doPost<Any>("groups/join", joinGroupRequest, object :
+                APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    Log.d("API_SERVICE", "Join group success")
+                    Toast.makeText(requireContext(), "Join group success", Toast.LENGTH_SHORT).show()
+
+                    // Back to previous fragment
+                    requireActivity().supportFragmentManager.popBackStack()
+                }
+
+                override fun onError(error: Throwable) {
+                    Log.e("API_SERVICE", "Error: ${error.message}")
+                    Toast.makeText(requireContext(), error.message, Toast.LENGTH_SHORT).show()
+                }
+            })
         }
     }
 
