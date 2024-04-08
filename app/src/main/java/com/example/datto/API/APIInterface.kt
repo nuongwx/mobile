@@ -10,6 +10,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.PATCH
+import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
@@ -24,4 +25,7 @@ interface APIInterface {
     @Multipart
     @PUT("{endpoint}")
     fun putMultipart(@Path("endpoint", encoded = true) endpoint: String, @Part body: MultipartBody.Part): Call<BaseResponse<JsonElement>>
+
+    @POST("{endpoint}")
+    fun post(@Path("endpoint", encoded = true) endpoint: String, @Body body: Any): Call<BaseResponse<JsonElement>>
 }

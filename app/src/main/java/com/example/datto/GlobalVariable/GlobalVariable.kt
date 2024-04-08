@@ -1,5 +1,5 @@
 package com.example.datto.GlobalVariable
 
 object GlobalVariable {
-    const val BASE_URL: String = "https://cfc3-115-74-141-115.ngrok-free.app/api/"
+    const val BASE_URL: String = "https://bab1-115-73-213-165.ngrok-free.app/api/"
 }

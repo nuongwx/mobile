@@ -101,7 +101,8 @@ class MainActivity : AppCompatActivity() {
                 R.id.bottom_app_bar_menu_event -> {
                     Log.d("MainActivity", "Event clicked")
                     supportFragmentManager.beginTransaction()
-                        .replace(R.id.app_fragment, Create())
+//                        .replace(R.id.app_fragment, Create())
+                        .replace(R.id.app_fragment, NewGroup())
                         .addToBackStack(null)
                         .commit()
                     true
