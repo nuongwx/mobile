@@ -7,6 +7,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.Toast
+import com.example.datto.API.APICallback
+import com.example.datto.API.APIService
+import com.example.datto.Credential.CredentialService
+import com.example.datto.DataClass.JoinGroupRequest
 import com.google.android.material.appbar.MaterialToolbar
 
 // TODO: Rename parameter arguments, choose names that match
@@ -16,29 +21,26 @@ private const val ARG_PARAM2 = "param2"
 
 /**
  * A simple [Fragment] subclass.
- * Use the [GroupList.newInstance] factory method to
+ * Use the [JoinGroup.newInstance] factory method to
  * create an instance of this fragment.
  */
-class GroupList : Fragment() {
+class JoinGroup : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
 
+    private lateinit var inviteCodeField: com.google.android.material.textfield.TextInputEditText
+    private lateinit var findButton: Button
+
     private fun configTopAppBar() {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
         val menuItem = appBar.menu.findItem(R.id.edit)
-        menuItem.isEnabled = true
-        menuItem.title = "Join"
+        menuItem.isEnabled = false
+        menuItem.title = null
         menuItem.setIcon(null)
-        menuItem.setOnMenuItemClickListener{
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.app_fragment, JoinGroup())
-                .addToBackStack(null)
-                .commit()
-            true
-        }
+        menuItem.setOnMenuItemClickListener(null)
 
-        appBar.title = "Groups"
+        appBar.title = "Join Group"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,6 +54,33 @@ class GroupList : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         configTopAppBar()
+
+        // Assign id to each element
+        inviteCodeField = view.findViewById(R.id.join_group_invite_code)
+        findButton = view.findViewById(R.id.join_group_find_btn)
+
+        // Set onClickListener for the button
+        findButton.setOnClickListener {
+            val inviteCode = inviteCodeField.text.toString()
+            val joinGroupRequest = JoinGroupRequest(CredentialService().get(), inviteCode)
+
+            // Call API to join group
+            APIService().doPost<Any>("groups/join", joinGroupRequest, object :
+                APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    Log.d("API_SERVICE", "Join group success")
+                    Toast.makeText(requireContext(), "Join group success", Toast.LENGTH_SHORT).show()
+
+                    // Back to previous fragment
+                    requireActivity().supportFragmentManager.popBackStack()
+                }
+
+                override fun onError(error: Throwable) {
+                    Log.e("API_SERVICE", "Error: ${error.message}")
+                    Toast.makeText(requireContext(), error.message, Toast.LENGTH_SHORT).show()
+                }
+            })
+        }
     }
 
     override fun onResume() {
@@ -64,19 +93,7 @@ class GroupList : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_group_list, container, false)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        val toGroupDetails: Button = view.findViewById(R.id.to_group_details)
-        toGroupDetails.setOnClickListener {
-            val transaction = parentFragmentManager.beginTransaction()
-            transaction.replace(R.id.app_fragment, GroupDetails())
-            transaction.addToBackStack(null)
-            transaction.commit()
-        }
+        return inflater.inflate(R.layout.fragment_join_group, container, false)
     }
 
     companion object {
@@ -86,12 +103,12 @@ class GroupList : Fragment() {
          *
          * @param param1 Parameter 1.
          * @param param2 Parameter 2.
-         * @return A new instance of fragment GroupList.
+         * @return A new instance of fragment JoinGroup.
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
-            GroupList().apply {
+            JoinGroup().apply {
                 arguments = Bundle().apply {
                     putString(ARG_PARAM1, param1)
                     putString(ARG_PARAM2, param2)

@@ -1,16 +1,31 @@
 package com.example.datto
 
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.StrictMode
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.widget.NestedScrollView
+import com.example.datto.API.APICallback
+import com.example.datto.API.APIService
+import com.example.datto.API.RetrofitInstance
+import com.example.datto.Credential.CredentialService
+import com.example.datto.DataClass.BaseResponse
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import retrofit2.Call
+import retrofit2.http.GET
 
 class MainActivity : AppCompatActivity() {
+    // Handle back button to exit app
+    private var backPressedTime: Long = 0
+    private val backPressInterval: Long = 2000 // 2 seconds
+
     val bottomNavigation: BottomNavigationView by lazy {
         findViewById(R.id.bottom_navigation)
     }
@@ -26,6 +41,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Disable dark mode
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+
+        // Set default layout
         setContentView(R.layout.activity_app_layout)
 
         supportFragmentManager.addOnBackStackChangedListener {
@@ -55,8 +75,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         appBar.setNavigationOnClickListener {
-            setDefaultLayout()
-            supportFragmentManager.popBackStack()
+            handleBackEvent()
         }
 
         bottomNavigation.setOnItemSelectedListener { item ->
@@ -83,7 +102,8 @@ class MainActivity : AppCompatActivity() {
                 R.id.bottom_app_bar_menu_event -> {
                     Log.d("MainActivity", "Event clicked")
                     supportFragmentManager.beginTransaction()
-                        .replace(R.id.app_fragment, Create())
+//                        .replace(R.id.app_fragment, Create())
+                        .replace(R.id.app_fragment, NewGroup())
                         .addToBackStack(null)
                         .commit()
                     true
@@ -131,5 +151,25 @@ class MainActivity : AppCompatActivity() {
             if (viewBottomNav) 80 else 0
         )
         scrollView.layoutParams = layoutParams
+    }
+
+    private fun handleBackEvent(){
+        if (supportFragmentManager.backStackEntryCount > 1) {
+            setDefaultLayout()
+            supportFragmentManager.popBackStack()
+        } else {
+            if (backPressedTime + backPressInterval > System.currentTimeMillis()) {
+                finish()
+            } else {
+                Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show()
+            }
+            backPressedTime = System.currentTimeMillis()
+        }
+    }
+
+    @Deprecated("Deprecated in Java")
+    @SuppressLint("MissingSuperCall")
+    override fun onBackPressed() {
+        handleBackEvent()
     }
 }
