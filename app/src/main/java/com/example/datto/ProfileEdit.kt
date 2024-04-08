@@ -61,7 +61,7 @@ class ProfileEdit : Fragment() {
         menuItem.isEnabled = true
         menuItem.title = "Save"
         menuItem.setIcon(null)
-        menuItem.setOnMenuItemClickListener{
+        menuItem.setOnMenuItemClickListener {
             Thread {
                 try {
                     // Case 1: Do not change avatar
@@ -69,11 +69,18 @@ class ProfileEdit : Fragment() {
                         // Format date of birth
                         val rawDate = dob.text.toString()
                         val originalFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
-                        val targetFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
-                        val formattedDob = originalFormat.parse(rawDate)!!.let { targetFormat.format(it) }
+                        val targetFormat =
+                            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                        val formattedDob =
+                            originalFormat.parse(rawDate)!!.let { targetFormat.format(it) }
 
                         // Get text from each element
-                        val profileEditRequest = ProfileEditRequest(username.text.toString(), fullName.text.toString(), formattedDob, "")
+                        val profileEditRequest = ProfileEditRequest(
+                            username.text.toString(),
+                            fullName.text.toString(),
+                            formattedDob,
+                            ""
+                        )
 
                         // Patch profile
                         APIService().doPatch<ProfileEditRequest>("accounts/${CredentialService().get()}", profileEditRequest, object :
@@ -113,11 +120,18 @@ class ProfileEdit : Fragment() {
                                 // Patch profile with new avatar
                                 val rawDate = dob.text.toString()
                                 val originalFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
-                                val targetFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
-                                val formattedDob = originalFormat.parse(rawDate)!!.let { targetFormat.format(it) }
+                                val targetFormat =
+                                    SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                                val formattedDob =
+                                    originalFormat.parse(rawDate)!!.let { targetFormat.format(it) }
 
                                 // Get text from each element
-                                val profileEditRequest = ProfileEditRequest(username.text.toString(), fullName.text.toString(), formattedDob, data.id)
+                                val profileEditRequest = ProfileEditRequest(
+                                    username.text.toString(),
+                                    fullName.text.toString(),
+                                    formattedDob,
+                                    data.id
+                                )
 
                                 // Call API to patch profile
                                 APIService().doPatch<ProfileEditRequest>("accounts/${CredentialService().get()}", profileEditRequest, object :
@@ -167,11 +181,14 @@ class ProfileEdit : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         configTopAppBar()
 
+        configTopAppBar()
+
         // Assign id to each element
         avatar = requireActivity().findViewById(R.id.profile_edit_avatar)
         username = requireActivity().findViewById(R.id.profile_edit_username)
         fullName = requireActivity().findViewById(R.id.profile_edit_fullName)
         dob = requireActivity().findViewById(R.id.profile_edit_dob)
+
 
         APIService().doGet<AccountResponse>("accounts/${CredentialService().get()}", object :
             APICallback<Any> {
@@ -186,7 +203,7 @@ class ProfileEdit : Fragment() {
                 val targetFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
                 val date = originalFormat.parse(data.profile.dob)
 
-                // Set text to each element\
+                // Set text to each element
                 username.setText(data.username)
                 fullName.setText(data.profile.fullName)
                 dob.setText(targetFormat.format(date!!))
@@ -195,7 +212,13 @@ class ProfileEdit : Fragment() {
                 Thread {
                     try {
                         activity?.runOnUiThread {
-                            Picasso.get().load(GlobalVariable.BASE_URL + "files/" + data.profile.avatar).into(avatar)
+                            val imageUrl =
+                                if (data.profile.avatar != null) GlobalVariable.BASE_URL + "files/" + data.profile.avatar else null
+                            if (imageUrl != null) {
+                                Picasso.get().load(imageUrl).into(avatar)
+                            } else {
+                                Picasso.get().load(R.drawable.avatar).into(avatar)
+                            }
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()

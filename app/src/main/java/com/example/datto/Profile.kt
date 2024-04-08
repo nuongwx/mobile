@@ -111,21 +111,27 @@ class Profile : Fragment() {
                 dob.text = targetFormat.format(date!!)
 
                 // Load image with Picasso and new thread
-                Thread {
-                    try {
-                        activity?.runOnUiThread {
-                            Picasso.get().load(GlobalVariable.BASE_URL + "files/" + data.profile.avatar).into(avatar)
+                    Thread {
+                        try {
+                            activity?.runOnUiThread {
+                                val imageUrl =
+                                    if (data.profile.avatar != null) GlobalVariable.BASE_URL + "files/" + data.profile.avatar else null
+                                if (imageUrl != null) {
+                                    Picasso.get().load(imageUrl).into(avatar)
+                                } else {
+                                    Picasso.get().load(R.drawable.avatar).into(avatar)
+                                }
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
                         }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }.start()
-            }
+                    }.start()
+                }
 
-            override fun onError(error: Throwable) {
-                Log.e("API_SERVICE", "Error: ${error.message}")
-            }
-        })
+                override fun onError(error: Throwable) {
+                    Log.e("API_SERVICE", "Error: ${error.message}")
+                }
+            })
     }
 
     override fun onResume() {
