@@ -1,10 +1,12 @@
 package com.example.datto
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.google.android.material.appbar.MaterialToolbar
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -21,12 +23,39 @@ class GroupList : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
 
+    private fun configTopAppBar() {
+        val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
+        val menuItem = appBar.menu.findItem(R.id.edit)
+        menuItem.isEnabled = true
+        menuItem.title = "Join"
+        menuItem.setIcon(null)
+        menuItem.setOnMenuItemClickListener{
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.app_fragment, JoinGroup())
+                .addToBackStack(null)
+                .commit()
+            true
+        }
+
+        appBar.title = "Groups"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        configTopAppBar()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        configTopAppBar()
     }
 
     override fun onCreateView(

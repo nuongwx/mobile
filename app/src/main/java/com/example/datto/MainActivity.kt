@@ -14,6 +14,7 @@ import androidx.core.widget.NestedScrollView
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.API.RetrofitInstance
+import com.example.datto.Credential.CredentialService
 import com.example.datto.DataClass.BaseResponse
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -101,7 +102,8 @@ class MainActivity : AppCompatActivity() {
                 R.id.bottom_app_bar_menu_event -> {
                     Log.d("MainActivity", "Event clicked")
                     supportFragmentManager.beginTransaction()
-                        .replace(R.id.app_fragment, Create())
+//                        .replace(R.id.app_fragment, Create())
+                        .replace(R.id.app_fragment, NewGroup())
                         .addToBackStack(null)
                         .commit()
                     true

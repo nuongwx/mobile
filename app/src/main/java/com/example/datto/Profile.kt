@@ -14,6 +14,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
+import com.example.datto.Credential.CredentialService
 import com.example.datto.DataClass.AccountResponse
 import com.example.datto.GlobalVariable.GlobalVariable
 import com.google.android.material.appbar.MaterialToolbar
@@ -50,6 +51,7 @@ class Profile : Fragment() {
     private fun configTopAppBar() {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
         val menuItem = appBar.menu.findItem(R.id.edit)
+        menuItem.isEnabled = true
         menuItem.setIcon(R.drawable.ic_edit)
         menuItem.setOnMenuItemClickListener {
             parentFragmentManager.beginTransaction().replace(R.id.app_fragment, ProfileEdit())
@@ -60,27 +62,17 @@ class Profile : Fragment() {
         appBar.title = "Profile"
     }
 
-    private fun destroyTopAppBar() {
-        val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
-        val menuItem = appBar.menu.findItem(R.id.edit)
-        menuItem.setIcon(null)
-        menuItem.setOnMenuItemClickListener(null)
-
-        appBar.title = "Title"
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
-
-        configTopAppBar()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        configTopAppBar()
 
         // Handle change password btn
         val changePassword = view.findViewById<Button>(R.id.profile_change_password)
@@ -99,28 +91,26 @@ class Profile : Fragment() {
         dob = requireView().findViewById(R.id.profile_profile_info_dob)
 
         // Get data
-        APIService().doGet<AccountResponse>(
-            "accounts/660c3949ce424cd3aabf4384",
-            object : APICallback<Any> {
-                override fun onSuccess(data: Any) {
-                    Log.d("API_SERVICE", "Data: $data")
+        APIService().doGet<AccountResponse>("accounts/${CredentialService().get()}", object : APICallback<Any> {
+            override fun onSuccess(data: Any) {
+                Log.d("API_SERVICE", "Data: $data")
 
-                    // Cast data to Account
-                    data as AccountResponse
+                // Cast data to Account
+                data as AccountResponse
 
-                    // Format date of birth
-                    val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
-                    val targetFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
-                    val date = originalFormat.parse(data.profile.dob)
+                // Format date of birth
+                val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                val targetFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
+                val date = originalFormat.parse(data.profile.dob)
 
-                    // Set text to each element
-                    largeFullName.text = data.profile.fullName
-                    username.text = data.username
-                    email.text = data.email
-                    fullName.text = data.profile.fullName
-                    dob.text = targetFormat.format(date!!)
+                // Set text to each element
+                largeFullName.text = data.profile.fullName
+                username.text = data.username
+                email.text = data.email
+                fullName.text = data.profile.fullName
+                dob.text = targetFormat.format(date!!)
 
-                    // Load image with Picasso and new thread
+                // Load image with Picasso and new thread
                     Thread {
                         try {
                             activity?.runOnUiThread {
@@ -142,11 +132,6 @@ class Profile : Fragment() {
                     Log.e("API_SERVICE", "Error: ${error.message}")
                 }
             })
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        destroyTopAppBar()
     }
 
     override fun onResume() {

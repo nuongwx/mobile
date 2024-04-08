@@ -6,14 +6,13 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Toast
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.Credential.CredentialService
-import com.example.datto.DataClass.ChangePasswordRequest
+import com.example.datto.DataClass.JoinGroupRequest
 import com.google.android.material.appbar.MaterialToolbar
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -22,48 +21,26 @@ private const val ARG_PARAM2 = "param2"
 
 /**
  * A simple [Fragment] subclass.
- * Use the [ChangePassword.newInstance] factory method to
+ * Use the [JoinGroup.newInstance] factory method to
  * create an instance of this fragment.
  */
-class ChangePassword : Fragment() {
+class JoinGroup : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
 
-    private lateinit var currentPassword: com.google.android.material.textfield.TextInputEditText
-    private lateinit var newPassword: com.google.android.material.textfield.TextInputEditText
-    private lateinit var confirmPassword: com.google.android.material.textfield.TextInputEditText
+    private lateinit var inviteCodeField: com.google.android.material.textfield.TextInputEditText
+    private lateinit var findButton: Button
 
     private fun configTopAppBar() {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
         val menuItem = appBar.menu.findItem(R.id.edit)
-        menuItem.isEnabled = true
-        menuItem.title = "Save"
+        menuItem.isEnabled = false
+        menuItem.title = null
         menuItem.setIcon(null)
-        menuItem.setOnMenuItemClickListener{
-            // Get data
-            val body = ChangePasswordRequest(currentPassword.text.toString(), newPassword.text.toString(), confirmPassword.text.toString())
+        menuItem.setOnMenuItemClickListener(null)
 
-            // Set onClickListener to the button
-            APIService().doPatch<ChangePasswordRequest>("accounts/${CredentialService().get()}/password", body, object : APICallback<Any> {
-                override fun onSuccess(data: Any) {
-                    Toast.makeText(requireContext(), "Password changed successfully", Toast.LENGTH_SHORT).show()
-                    Log.d("API_SERVICE", "Data: $data")
-
-                    // Back to previous fragment
-                    requireActivity().supportFragmentManager.popBackStack()
-                }
-
-                override fun onError(error: Throwable) {
-                    Toast.makeText(requireContext(), "Error: ${error.message}", Toast.LENGTH_SHORT).show()
-                    Log.e("API_SERVICE", "Error: ${error.message}")
-                }
-            })
-
-            true
-        }
-
-        appBar.title = "Change Password"
+        appBar.title = "Join Group"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,17 +49,38 @@ class ChangePassword : Fragment() {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
-
-        configTopAppBar()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        configTopAppBar()
 
         // Assign id to each element
-        currentPassword = view.findViewById(R.id.change_password_current)
-        newPassword = view.findViewById(R.id.change_password_new)
-        confirmPassword = view.findViewById(R.id.change_password_confirm)
+        inviteCodeField = view.findViewById(R.id.join_group_invite_code)
+        findButton = view.findViewById(R.id.join_group_find_btn)
+
+        // Set onClickListener for the button
+        findButton.setOnClickListener {
+            val inviteCode = inviteCodeField.text.toString()
+            val joinGroupRequest = JoinGroupRequest(CredentialService().get(), inviteCode)
+
+            // Call API to join group
+            APIService().doPost<Any>("groups/join", joinGroupRequest, object :
+                APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    Log.d("API_SERVICE", "Join group success")
+                    Toast.makeText(requireContext(), "Join group success", Toast.LENGTH_SHORT).show()
+
+                    // Back to previous fragment
+                    requireActivity().supportFragmentManager.popBackStack()
+                }
+
+                override fun onError(error: Throwable) {
+                    Log.e("API_SERVICE", "Error: ${error.message}")
+                    Toast.makeText(requireContext(), error.message, Toast.LENGTH_SHORT).show()
+                }
+            })
+        }
     }
 
     override fun onResume() {
@@ -95,7 +93,7 @@ class ChangePassword : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_change_password, container, false)
+        return inflater.inflate(R.layout.fragment_join_group, container, false)
     }
 
     companion object {
@@ -105,12 +103,12 @@ class ChangePassword : Fragment() {
          *
          * @param param1 Parameter 1.
          * @param param2 Parameter 2.
-         * @return A new instance of fragment ChangePassword.
+         * @return A new instance of fragment JoinGroup.
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
-            ChangePassword().apply {
+            JoinGroup().apply {
                 arguments = Bundle().apply {
                     putString(ARG_PARAM1, param1)
                     putString(ARG_PARAM2, param2)
