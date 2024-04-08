@@ -99,41 +99,49 @@ class Profile : Fragment() {
         dob = requireView().findViewById(R.id.profile_profile_info_dob)
 
         // Get data
-        APIService().doGet<AccountResponse>("accounts/660ca8b9cba91f0ee182605e", object : APICallback<Any> {
-            override fun onSuccess(data: Any) {
-                Log.d("API_SERVICE", "Data: $data")
+        APIService().doGet<AccountResponse>(
+            "accounts/660c3949ce424cd3aabf4384",
+            object : APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    Log.d("API_SERVICE", "Data: $data")
 
-                // Cast data to Account
-                data as AccountResponse
+                    // Cast data to Account
+                    data as AccountResponse
 
-                // Format date of birth
-                val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
-                val targetFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
-                val date = originalFormat.parse(data.profile.dob)
+                    // Format date of birth
+                    val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                    val targetFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
+                    val date = originalFormat.parse(data.profile.dob)
 
-                // Set text to each element
-                largeFullName.text = data.profile.fullName
-                username.text = data.username
-                email.text = data.email
-                fullName.text = data.profile.fullName
-                dob.text = targetFormat.format(date!!)
+                    // Set text to each element
+                    largeFullName.text = data.profile.fullName
+                    username.text = data.username
+                    email.text = data.email
+                    fullName.text = data.profile.fullName
+                    dob.text = targetFormat.format(date!!)
 
-                // Load image with Picasso and new thread
-                Thread {
-                    try {
-                        activity?.runOnUiThread {
-                            Picasso.get().load(GlobalVariable.BASE_URL + "files/" + data.profile.avatar).into(avatar)
+                    // Load image with Picasso and new thread
+                    Thread {
+                        try {
+                            activity?.runOnUiThread {
+                                val imageUrl =
+                                    if (data.profile.avatar != null) GlobalVariable.BASE_URL + "files/" + data.profile.avatar else null
+                                if (imageUrl != null) {
+                                    Picasso.get().load(imageUrl).into(avatar)
+                                } else {
+                                    Picasso.get().load(R.drawable.avatar).into(avatar)
+                                }
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
                         }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }.start()
-            }
+                    }.start()
+                }
 
-            override fun onError(error: Throwable) {
-                Log.e("API_SERVICE", "Error: ${error.message}")
-            }
-        })
+                override fun onError(error: Throwable) {
+                    Log.e("API_SERVICE", "Error: ${error.message}")
+                }
+            })
     }
 
     override fun onDestroy() {

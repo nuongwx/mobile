@@ -4,7 +4,6 @@ import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
-import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
@@ -23,15 +22,10 @@ import com.example.datto.GlobalVariable.GlobalVariable
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.squareup.picasso.Picasso
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import java.io.ByteArrayOutputStream
-import java.io.File
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.ZoneId
@@ -64,102 +58,49 @@ class ProfileEdit : Fragment() {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
         val menuItem = appBar.menu.findItem(R.id.edit)
         menuItem.setIcon(null)
-        menuItem.setOnMenuItemClickListener{
+        menuItem.setOnMenuItemClickListener {
             Thread {
                 try {
-//                    // Create a new coroutine scope
-//                    val scope = CoroutineScope(Dispatchers.IO)
-//
-//                    scope.launch {
-//                        try {
-//                            // Format date of birth
-//                            val rawDate = dob.text.toString()
-//                            val originalFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
-//                            val targetFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
-//                            val formattedDob = originalFormat.parse(rawDate)!!.let { targetFormat.format(it) }
-//
-//                            // Get text from each element
-//                            val profileEditRequest = ProfileEditRequest(username.text.toString(), fullName.text.toString(), formattedDob, "")
-//
-//                            // Only upload avatar if it's changed
-//                            if (avatarChangeStatus) {
-//                                // Get image from avatar
-//                                val bitmap = (avatar.drawable as BitmapDrawable).bitmap
-//                                val stream = ByteArrayOutputStream()
-//                                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
-//                                val byteArray = stream.toByteArray()
-//
-//                                // Create multipart body
-//                                val requestBody =
-//                                    RequestBody.create(MediaType.parse("multipart/form-data"), byteArray)
-//                                val multipartBody =
-//                                    MultipartBody.Part.createFormData("file", "avatar.jpg", requestBody)
-//
-//                                APIService().doPutMultipart<BucketResponse>("files", multipartBody, object :
-//                                    APICallback<Any> {
-//                                    override fun onSuccess(data: Any) {
-//                                        // Cast data to BucketResponse
-//                                        data as BucketResponse
-//
-//                                        // Patch profile with new avatar
-//                                        profileEditRequest.avatar = data.id
-//                                        Log.e("ID", data.id)
-//
-//                                        Log.d("API_SERVICE", "ProfileEditRequest: $data")
-//                                    }
-//
-//                                    override fun onError(error: Throwable) {
-//                                        Log.e("API_SERVICE", "Error: ${error.message}")
-//                                    }
-//                                })
-//
-//                                withContext(Dispatchers.Main) {
-//                                    // Log profile edit request
-//                                    Log.e("API_SERVICE_PROFILE", "ProfileEditRequest: $profileEditRequest")
-//
-//                                    // Patch profile
-//                                    APIService().doPatch<ProfileEditRequest>("accounts/660ca8b9cba91f0ee182605e", profileEditRequest, object :
-//                                        APICallback<Any> {
-//                                        override fun onSuccess(data: Any) {
-//                                            Log.d("API_SERVICE", "Data: $data")
-//                                        }
-//
-//                                        override fun onError(error: Throwable) {
-//                                            Log.e("API_SERVICE", "Error: ${error.message}")
-//                                        }
-//                                    })
-//                                }
-//                            }
-//                        } catch (e: Exception) {
-//                            Log.e("API_SERVICE", "Error: ${e.message}")
-//                        }
-//                    }
                     // Case 1: Do not change avatar
                     if (!avatarChangeStatus) {
                         // Format date of birth
                         val rawDate = dob.text.toString()
                         val originalFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
-                        val targetFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
-                        val formattedDob = originalFormat.parse(rawDate)!!.let { targetFormat.format(it) }
+                        val targetFormat =
+                            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                        val formattedDob =
+                            originalFormat.parse(rawDate)!!.let { targetFormat.format(it) }
 
                         // Get text from each element
-                        val profileEditRequest = ProfileEditRequest(username.text.toString(), fullName.text.toString(), formattedDob, "")
+                        val profileEditRequest = ProfileEditRequest(
+                            username.text.toString(),
+                            fullName.text.toString(),
+                            formattedDob,
+                            ""
+                        )
 
                         // Log profile edit request
                         Log.e("API_SERVICE_PROFILE", "ProfileEditRequest: $profileEditRequest")
 
                         // Patch profile
-                        APIService().doPatch<ProfileEditRequest>("accounts/660ca8b9cba91f0ee182605e", profileEditRequest, object :
-                            APICallback<Any> {
-                            override fun onSuccess(data: Any) {
-                                Log.d("API_SERVICE", "Data: $data")
-                                Toast.makeText(requireContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show()
-                            }
+                        APIService().doPatch<ProfileEditRequest>(
+                            "accounts/660c3949ce424cd3aabf4384",
+                            profileEditRequest,
+                            object :
+                                APICallback<Any> {
+                                override fun onSuccess(data: Any) {
+                                    Log.d("API_SERVICE", "Data: $data")
+                                    Toast.makeText(
+                                        requireContext(),
+                                        "Profile updated successfully",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
 
-                            override fun onError(error: Throwable) {
-                                Log.e("API_SERVICE", "Error: ${error.message}")
-                            }
-                        })
+                                override fun onError(error: Throwable) {
+                                    Log.e("API_SERVICE", "Error: ${error.message}")
+                                }
+                            })
                     } else {
                         // Case 2: Change avatar
                         // Get image from avatar
@@ -183,24 +124,38 @@ class ProfileEdit : Fragment() {
                                 // Patch profile with new avatar
                                 val rawDate = dob.text.toString()
                                 val originalFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
-                                val targetFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
-                                val formattedDob = originalFormat.parse(rawDate)!!.let { targetFormat.format(it) }
+                                val targetFormat =
+                                    SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                                val formattedDob =
+                                    originalFormat.parse(rawDate)!!.let { targetFormat.format(it) }
 
                                 // Get text from each element
-                                val profileEditRequest = ProfileEditRequest(username.text.toString(), fullName.text.toString(), formattedDob, data.id)
+                                val profileEditRequest = ProfileEditRequest(
+                                    username.text.toString(),
+                                    fullName.text.toString(),
+                                    formattedDob,
+                                    data.id
+                                )
 
                                 // Call API to patch profile
-                                APIService().doPatch<ProfileEditRequest>("accounts/660ca8b9cba91f0ee182605e", profileEditRequest, object :
-                                    APICallback<Any> {
-                                    override fun onSuccess(data: Any) {
-                                        Log.d("API_SERVICE", "Data: $data")
-                                        Toast.makeText(requireContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show()
-                                    }
+                                APIService().doPatch<ProfileEditRequest>(
+                                    "accounts/660c3949ce424cd3aabf4384",
+                                    profileEditRequest,
+                                    object :
+                                        APICallback<Any> {
+                                        override fun onSuccess(data: Any) {
+                                            Log.d("API_SERVICE", "Data: $data")
+                                            Toast.makeText(
+                                                requireContext(),
+                                                "Profile updated successfully",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
 
-                                    override fun onError(error: Throwable) {
-                                        Log.e("API_SERVICE", "Error: ${error.message}")
-                                    }
-                                })
+                                        override fun onError(error: Throwable) {
+                                            Log.e("API_SERVICE", "Error: ${error.message}")
+                                        }
+                                    })
 
                                 Log.d("API_SERVICE", "ProfileEditRequest: $data")
                             }
@@ -237,12 +192,12 @@ class ProfileEdit : Fragment() {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
-
-        configTopAppBar()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        configTopAppBar()
 
         // Assign id to each element
         avatar = requireActivity().findViewById(R.id.profile_edit_avatar)
@@ -250,7 +205,7 @@ class ProfileEdit : Fragment() {
         fullName = requireActivity().findViewById(R.id.profile_edit_fullName)
         dob = requireActivity().findViewById(R.id.profile_edit_dob)
 
-        APIService().doGet<AccountResponse>("accounts/660ca8b9cba91f0ee182605e", object :
+        APIService().doGet<AccountResponse>("accounts/660c3949ce424cd3aabf4384", object :
             APICallback<Any> {
             override fun onSuccess(data: Any) {
                 Log.d("API_SERVICE", "Data: $data")
@@ -263,7 +218,7 @@ class ProfileEdit : Fragment() {
                 val targetFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
                 val date = originalFormat.parse(data.profile.dob)
 
-                // Set text to each element\
+                // Set text to each element
                 username.setText(data.username)
                 fullName.setText(data.profile.fullName)
                 dob.setText(targetFormat.format(date!!))
@@ -272,7 +227,13 @@ class ProfileEdit : Fragment() {
                 Thread {
                     try {
                         activity?.runOnUiThread {
-                            Picasso.get().load(GlobalVariable.BASE_URL + "files/" + data.profile.avatar).into(avatar)
+                            val imageUrl =
+                                if (data.profile.avatar != null) GlobalVariable.BASE_URL + "files/" + data.profile.avatar else null
+                            if (imageUrl != null) {
+                                Picasso.get().load(imageUrl).into(avatar)
+                            } else {
+                                Picasso.get().load(R.drawable.avatar).into(avatar)
+                            }
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
