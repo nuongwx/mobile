@@ -48,6 +48,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    // Chart
+    implementation ("com.diogobernardino:williamchart:3.10.1")
     // Round image view
     implementation("de.hdodenhof:circleimageview:3.1.0")
     // Use retrofit for network calls
