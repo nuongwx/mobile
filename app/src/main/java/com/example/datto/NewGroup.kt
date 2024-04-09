@@ -7,27 +7,23 @@ import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.Toast
+import androidx.fragment.app.Fragment
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.Credential.CredentialService
 import com.example.datto.DataClass.BucketResponse
 import com.example.datto.DataClass.NewGroupRequest
 import com.example.datto.DataClass.NewGroupResponse
-import com.example.datto.DataClass.ProfileEditRequest
 import com.google.android.material.appbar.MaterialToolbar
 import com.squareup.picasso.Picasso
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import java.io.ByteArrayOutputStream
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -55,12 +51,13 @@ class NewGroup : Fragment() {
         menuItem.isEnabled = true
         menuItem.title = "Create"
         menuItem.setIcon(null)
-        menuItem.setOnMenuItemClickListener{
+        menuItem.setOnMenuItemClickListener {
             Thread {
                 try {
                     // Case 1: Create new group without thumbnail
                     if (!thumbnailChangeStatus) {
-                        val newGroupRequest = NewGroupRequest(CredentialService().get(), name.text.toString(), "")
+                        val newGroupRequest =
+                            NewGroupRequest(CredentialService().get(), name.text.toString(), "")
 
                         APIService().doPost<NewGroupResponse>("groups", newGroupRequest, object :
                             APICallback<Any> {
@@ -71,9 +68,11 @@ class NewGroup : Fragment() {
                                 data as NewGroupResponse
 
                                 // Move to NewGroupInviteCode fragment
-                                val newGroupInviteCode = NewGroupInviteCode(name.text.toString(), data.inviteCode)
+                                val newGroupInviteCode =
+                                    NewGroupInviteCode(name.text.toString(), data.inviteCode)
                                 requireActivity().supportFragmentManager.beginTransaction()
                                     .replace(R.id.app_fragment, newGroupInviteCode)
+                                    .addToBackStack("NewGroupInviteCode")
                                     .commit()
                             }
 
@@ -102,28 +101,38 @@ class NewGroup : Fragment() {
                                 data as BucketResponse
 
                                 // Create new group with thumbnail
-                                val newGroupRequest = NewGroupRequest(CredentialService().get(), name.text.toString(), data.id)
+                                val newGroupRequest = NewGroupRequest(
+                                    CredentialService().get(),
+                                    name.text.toString(),
+                                    data.id
+                                )
 
                                 // Call API to patch profile
-                                APIService().doPost<NewGroupResponse>("groups", newGroupRequest, object :
-                                    APICallback<Any> {
-                                    override fun onSuccess(data: Any) {
-                                        Log.d("API_SERVICE", "Data: $data")
+                                APIService().doPost<NewGroupResponse>(
+                                    "groups",
+                                    newGroupRequest,
+                                    object :
+                                        APICallback<Any> {
+                                        override fun onSuccess(data: Any) {
+                                            Log.d("API_SERVICE", "Data: $data")
 
-                                        // Cast data to NewGroupResponse
-                                        data as NewGroupResponse
+                                            // Cast data to NewGroupResponse
+                                            data as NewGroupResponse
 
-                                        // Move to NewGroupInviteCode fragment
-                                        val newGroupInviteCode = NewGroupInviteCode(name.text.toString(), data.inviteCode)
-                                        requireActivity().supportFragmentManager.beginTransaction()
-                                            .replace(R.id.app_fragment, newGroupInviteCode)
-                                            .commit()
-                                    }
+                                            // Move to NewGroupInviteCode fragment
+                                            val newGroupInviteCode = NewGroupInviteCode(
+                                                name.text.toString(),
+                                                data.inviteCode
+                                            )
+                                            requireActivity().supportFragmentManager.beginTransaction()
+                                                .replace(R.id.app_fragment, newGroupInviteCode)
+                                                .commit()
+                                        }
 
-                                    override fun onError(error: Throwable) {
-                                        Log.e("API_SERVICE", "Error: ${error.message}")
-                                    }
-                                })
+                                        override fun onError(error: Throwable) {
+                                            Log.e("API_SERVICE", "Error: ${error.message}")
+                                        }
+                                    })
 
                                 Log.d("API_SERVICE", "ProfileEditRequest: $data")
                             }
@@ -168,9 +177,17 @@ class NewGroup : Fragment() {
         }
     }
 
+    private var isFirstCall = true
     override fun onResume() {
         super.onResume()
         configTopAppBar()
+
+        if (isFirstCall) {
+            isFirstCall = false
+
+        } else {
+            requireActivity().supportFragmentManager.popBackStack()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

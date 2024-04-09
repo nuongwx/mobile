@@ -2,7 +2,6 @@ package com.example.datto
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.os.StrictMode
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -11,15 +10,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.widget.NestedScrollView
-import com.example.datto.API.APICallback
-import com.example.datto.API.APIService
-import com.example.datto.API.RetrofitInstance
-import com.example.datto.Credential.CredentialService
-import com.example.datto.DataClass.BaseResponse
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import retrofit2.Call
-import retrofit2.http.GET
 
 class MainActivity : AppCompatActivity() {
     // Handle back button to exit app
@@ -69,7 +61,8 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 is Profile -> {
-                    bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_profile).isChecked = true
+                    bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_profile).isChecked =
+                        true
                 }
             }
         }
@@ -102,8 +95,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.bottom_app_bar_menu_event -> {
                     Log.d("MainActivity", "Event clicked")
                     supportFragmentManager.beginTransaction()
-//                        .replace(R.id.app_fragment, Create())
-                        .replace(R.id.app_fragment, NewGroup())
+                        .replace(R.id.app_fragment, Create())
                         .addToBackStack(null)
                         .commit()
                     true
@@ -153,7 +145,7 @@ class MainActivity : AppCompatActivity() {
         scrollView.layoutParams = layoutParams
     }
 
-    private fun handleBackEvent(){
+    private fun handleBackEvent() {
         if (supportFragmentManager.backStackEntryCount > 1) {
             setDefaultLayout()
             supportFragmentManager.popBackStack()
