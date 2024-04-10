@@ -4,14 +4,18 @@ import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentManager
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.core.view.isVisible
+import androidx.recyclerview.widget.RecyclerView
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.Credential.CredentialService
+import com.example.datto.DataClass.AccountResponse
 import com.example.datto.DataClass.GroupResponse
 import com.example.datto.GlobalVariable.GlobalVariable
 import com.google.android.material.appbar.MaterialToolbar
@@ -29,20 +33,23 @@ private const val ARG_PARAM2 = "param2"
  */
 
 class GroupListAdapter(
-    private val groups: ArrayList<GroupResponse>, private val fragmentManager: FragmentManager
+    private val groups: ArrayList<GroupResponse>
 ) : androidx.recyclerview.widget.RecyclerView.Adapter<GroupListAdapter.GroupViewHolder>() {
 
     inner class GroupViewHolder(itemView: View) :
         androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
         val groupName = itemView.findViewById<android.widget.TextView>(R.id.groupNameTextView)
         val groupImage = itemView.findViewById<android.widget.ImageView>(R.id.groupImageView)
+        val ava1 = itemView.findViewById<ImageView>(R.id.ava1)
+        val ava2 = itemView.findViewById<ImageView>(R.id.ava2)
+        val ava3 = itemView.findViewById<ImageView>(R.id.ava3)
+        val avaText = itemView.findViewById<TextView>(R.id.avaText)
 
-        init {
-            itemView.setOnClickListener {
-                fragmentManager.beginTransaction().replace(R.id.app_fragment, GroupDetails())
-                    .addToBackStack("GroupDetails").commit()
-            }
-        }
+        init {}
+    }
+
+    fun getItem(position: Int): GroupResponse {
+        return groups[position]
     }
 
     override fun onCreateViewHolder(
@@ -70,6 +77,55 @@ class GroupListAdapter(
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
+        currentItem.members.forEachIndexed { index, member ->
+            APIService().doGet<AccountResponse>("accounts/${member}",
+                object : APICallback<Any> {
+                    override fun onSuccess(data: Any) {
+                        Log.d("API_SERVICE", "Data: $data")
+
+                        data as AccountResponse
+
+                        try {
+                            val imageUrl =
+                                if (data.profile.avatar != null) GlobalVariable.BASE_URL + "files/" + data.profile.avatar else null
+                            if (index == 0) {
+                                if (imageUrl != null) {
+                                    Picasso.get().load(imageUrl).into(holder.ava1)
+                                } else {
+                                    Picasso.get().load(R.drawable.avatar).into(holder.ava1)
+                                }
+                                holder.ava1.isVisible = true
+                            } else if (index == 1) {
+                                if (imageUrl != null) {
+                                    Picasso.get().load(imageUrl).into(holder.ava2)
+                                } else {
+                                    Picasso.get().load(R.drawable.avatar).into(holder.ava2)
+                                }
+                                holder.ava2.isVisible = true
+                            } else {
+                                if (currentItem.members.size < 4) {
+                                    if (imageUrl != null) {
+                                        Picasso.get().load(imageUrl).into(holder.ava3)
+                                    } else {
+                                        Picasso.get().load(R.drawable.avatar).into(holder.ava3)
+                                    }
+                                    holder.ava3.isVisible = true
+                                } else {
+                                    holder.avaText.text = "${currentItem.members.size-2}+"
+                                    holder.avaText.isVisible = true
+                                }
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+
+                    override fun onError(error: Throwable) {
+                        Log.e("API_SERVICE", "Error: ${error.message}")
+                    }
+                })
+        }
     }
 
     override fun getItemCount(): Int {
@@ -85,7 +141,7 @@ class GroupList : Fragment() {
     private fun configTopAppBar() {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
         val menuItem = appBar.menu.findItem(R.id.edit)
-        menuItem.isEnabled = true
+        menuItem.isVisible = true
         menuItem.title = "Join"
         menuItem.setIcon(null)
         menuItem.setOnMenuItemClickListener {
@@ -98,15 +154,9 @@ class GroupList : Fragment() {
         appBar.navigationIcon = null
     }
 
-    override fun onPause() {
-        super.onPause()
-
-        val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
-        appBar.navigationIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_back)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         arguments?.let {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
@@ -155,22 +205,44 @@ class GroupList : Fragment() {
                         androidx.recyclerview.widget.LinearLayoutManager(
                             view.context, androidx.recyclerview.widget.RecyclerView.VERTICAL, false
                         )
-                    groupRecyclerView.adapter = GroupListAdapter(groupList, parentFragmentManager)
+                    groupRecyclerView.adapter = GroupListAdapter(groupList)
                     groupRecyclerView.setHasFixedSize(true)
+                    groupRecyclerView.addOnItemTouchListener(object :
+                        RecyclerView.SimpleOnItemTouchListener() {
+                        override fun onInterceptTouchEvent(
+                            rv: RecyclerView,
+                            e: MotionEvent
+                        ): Boolean {
+                            val childView = groupRecyclerView.findChildViewUnder(e.x, e.y)
+                            if (childView != null) {
+                                val position = groupRecyclerView.getChildAdapterPosition(childView)
+                                val groupResponse =
+                                    (groupRecyclerView.adapter as GroupListAdapter).getItem(position)
+
+
+                                val groupDetailsFragment = GroupDetails()
+                                val bundle = Bundle()
+                                bundle.putString(
+                                    "groupId",
+                                    groupResponse.id
+                                )
+                                groupDetailsFragment.arguments = bundle
+                                parentFragmentManager.beginTransaction()
+                                    .replace(R.id.app_fragment, groupDetailsFragment)
+                                    .addToBackStack("GroupDetails").commit()
+
+                            }
+
+                            return super.onInterceptTouchEvent(rv, e)
+                        }
+                    })
+
                 }
 
                 override fun onError(error: Throwable) {
                     Log.e("API_SERVICE", "Error: ${error.message}")
                 }
             })
-
-//        val toGroupDetails: Button = view.findViewById(R.id.to_group_details)
-//        toGroupDetails.setOnClickListener {
-//            val transaction = parentFragmentManager.beginTransaction()
-//            transaction.replace(R.id.app_fragment, GroupDetails())
-//            transaction.addToBackStack(null)
-//            transaction.commit()
-//        }
     }
 
     companion object {

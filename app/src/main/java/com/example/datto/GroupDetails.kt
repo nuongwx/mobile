@@ -2,6 +2,7 @@ package com.example.datto
 
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,10 +10,16 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.db.williamchart.view.LineChartView
+import com.example.datto.API.APICallback
+import com.example.datto.API.APIService
+import com.example.datto.DataClass.GroupResponse
+import com.example.datto.GlobalVariable.GlobalVariable
 import com.google.android.material.appbar.MaterialToolbar
+import com.squareup.picasso.Picasso
 import java.net.URL
 
 
@@ -101,21 +108,44 @@ class GroupDetails : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val coverImage: ImageView = view.findViewById(R.id.imageView)
-        val thread = Thread {
-            try {
-                val bitmap = BitmapFactory.decodeStream(
-                    URL("https://www.gstatic.com/webp/gallery/1.jpg").openConnection()
-                        .getInputStream()
-                )
-                coverImage.post {
-                    coverImage.setImageBitmap(bitmap)
+        val groupId = arguments?.getString("groupId")
+        var group: GroupResponse? = null
+
+        APIService().doGet<GroupResponse>("groups/${groupId}",
+            object : APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    Log.d("API_SERVICE", "Data: $data")
+
+                    data as GroupResponse
+
+                    group = data
+
+                    configTopAppBar(data.name)
+
+                    val coverImage: ImageView = view.findViewById(R.id.imageView)
+                    val thread = Thread {
+                        try {
+                            activity?.runOnUiThread {
+                                val imageUrl =
+                                    if (data.thumbnail != null) GlobalVariable.BASE_URL + "files/" + data.thumbnail else null
+                                if (imageUrl != null) {
+                                    Picasso.get().load(imageUrl).into(coverImage)
+                                } else {
+                                    Picasso.get().load(R.drawable.avatar).into(coverImage)
+                                }
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                    thread.start()
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-        thread.start()
+
+                override fun onError(error: Throwable) {
+                    Log.e("API_SERVICE", "Error: ${error.message}")
+                }
+            })
+
 
         // create a thread to fetch the images
         val memories = arrayListOf<MemoryThumbnail>()
@@ -163,15 +193,14 @@ class GroupDetails : Fragment() {
             "Dec" to 6f
         )
         chart.show(entries)
-
-        configTopAppBar()
     }
 
-    private fun configTopAppBar() {
+    private fun configTopAppBar(title: String) {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
         val menuItem = appBar.menu.findItem(R.id.edit)
         menuItem.isVisible = false
-        appBar.title = "Group Name"
+        appBar.title = title
+        appBar.navigationIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_back)
     }
 
 
