@@ -20,7 +20,7 @@
         app:title="@string/sign_in_title" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/input_username"
+        android:id="@+id/input_username_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/username"
@@ -31,6 +31,7 @@
         app:layout_constraintTop_toBottomOf="@+id/materialToolbar">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@id/input_username"
             android:inputType="text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -42,7 +43,7 @@
 
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/input_password"
+        android:id="@+id/input_password_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/password"
@@ -51,9 +52,10 @@
         app:endIconMode="password_toggle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/input_username">
+        app:layout_constraintTop_toBottomOf="@+id/input_username_container">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@id/input_password"
             android:inputType="textPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -73,7 +75,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/input_password"
+        app:layout_constraintTop_toBottomOf="@+id/input_password_container"
         />
 
     <Button
