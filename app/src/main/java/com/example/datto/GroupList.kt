@@ -2,6 +2,7 @@ package com.example.datto
 
 import android.os.Bundle
 import android.util.Log
+import android.view.GestureDetector
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -79,52 +80,51 @@ class GroupListAdapter(
         }
 
         currentItem.members.forEachIndexed { index, member ->
-            APIService().doGet<AccountResponse>("accounts/${member}",
-                object : APICallback<Any> {
-                    override fun onSuccess(data: Any) {
-                        Log.d("API_SERVICE", "Data: $data")
+            APIService().doGet<AccountResponse>("accounts/${member}", object : APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    Log.d("API_SERVICE", "Data: $data")
 
-                        data as AccountResponse
+                    data as AccountResponse
 
-                        try {
-                            val imageUrl =
-                                if (data.profile.avatar != null) GlobalVariable.BASE_URL + "files/" + data.profile.avatar else null
-                            if (index == 0) {
-                                if (imageUrl != null) {
-                                    Picasso.get().load(imageUrl).into(holder.ava1)
-                                } else {
-                                    Picasso.get().load(R.drawable.avatar).into(holder.ava1)
-                                }
-                                holder.ava1.isVisible = true
-                            } else if (index == 1) {
-                                if (imageUrl != null) {
-                                    Picasso.get().load(imageUrl).into(holder.ava2)
-                                } else {
-                                    Picasso.get().load(R.drawable.avatar).into(holder.ava2)
-                                }
-                                holder.ava2.isVisible = true
+                    try {
+                        val imageUrl =
+                            if (data.profile.avatar != null) GlobalVariable.BASE_URL + "files/" + data.profile.avatar else null
+                        if (index == 0) {
+                            if (imageUrl != null) {
+                                Picasso.get().load(imageUrl).into(holder.ava1)
                             } else {
-                                if (currentItem.members.size < 4) {
-                                    if (imageUrl != null) {
-                                        Picasso.get().load(imageUrl).into(holder.ava3)
-                                    } else {
-                                        Picasso.get().load(R.drawable.avatar).into(holder.ava3)
-                                    }
-                                    holder.ava3.isVisible = true
-                                } else {
-                                    holder.avaText.text = "${currentItem.members.size-2}+"
-                                    holder.avaText.isVisible = true
-                                }
+                                Picasso.get().load(R.drawable.avatar).into(holder.ava1)
                             }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
+                            holder.ava1.isVisible = true
+                        } else if (index == 1) {
+                            if (imageUrl != null) {
+                                Picasso.get().load(imageUrl).into(holder.ava2)
+                            } else {
+                                Picasso.get().load(R.drawable.avatar).into(holder.ava2)
+                            }
+                            holder.ava2.isVisible = true
+                        } else {
+                            if (currentItem.members.size < 4) {
+                                if (imageUrl != null) {
+                                    Picasso.get().load(imageUrl).into(holder.ava3)
+                                } else {
+                                    Picasso.get().load(R.drawable.avatar).into(holder.ava3)
+                                }
+                                holder.ava3.isVisible = true
+                            } else {
+                                holder.avaText.text = "${currentItem.members.size - 2}+"
+                                holder.avaText.isVisible = true
+                            }
                         }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
+                }
 
-                    override fun onError(error: Throwable) {
-                        Log.e("API_SERVICE", "Error: ${error.message}")
-                    }
-                })
+                override fun onError(error: Throwable) {
+                    Log.e("API_SERVICE", "Error: ${error.message}")
+                }
+            })
         }
     }
 
@@ -188,7 +188,8 @@ class GroupList : Fragment() {
 
         val groupList = ArrayList<GroupResponse>()
 
-        APIService().doGet<List<GroupResponse>>("groups/accounts/${CredentialService().get()}",
+        APIService().doGet<List<GroupResponse>>(
+            "accounts/${CredentialService().get()}/groups",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")
@@ -207,36 +208,43 @@ class GroupList : Fragment() {
                         )
                     groupRecyclerView.adapter = GroupListAdapter(groupList)
                     groupRecyclerView.setHasFixedSize(true)
-                    groupRecyclerView.addOnItemTouchListener(object :
-                        RecyclerView.SimpleOnItemTouchListener() {
-                        override fun onInterceptTouchEvent(
-                            rv: RecyclerView,
-                            e: MotionEvent
-                        ): Boolean {
-                            val childView = groupRecyclerView.findChildViewUnder(e.x, e.y)
-                            if (childView != null) {
-                                val position = groupRecyclerView.getChildAdapterPosition(childView)
-                                val groupResponse =
-                                    (groupRecyclerView.adapter as GroupListAdapter).getItem(position)
 
+                    // Add click listener to each item
+                    val gestureDetector = GestureDetector(context,
+                        object : GestureDetector.SimpleOnGestureListener() {
+                            override fun onSingleTapUp(e: MotionEvent): Boolean {
+                                return true
+                            }
+                        })
+
+                    groupRecyclerView.addOnItemTouchListener(object :
+                        RecyclerView.OnItemTouchListener {
+                        override fun onInterceptTouchEvent(
+                            rv: RecyclerView, e: MotionEvent
+                        ): Boolean {
+                            val childView = rv.findChildViewUnder(e.x, e.y)
+                            if (childView != null && gestureDetector.onTouchEvent(e)) {
+                                val position = rv.getChildAdapterPosition(childView)
+                                val groupResponse =
+                                    (rv.adapter as GroupListAdapter).getItem(position)
 
                                 val groupDetailsFragment = GroupDetails()
                                 val bundle = Bundle()
-                                bundle.putString(
-                                    "groupId",
-                                    groupResponse.id
-                                )
+                                bundle.putString("groupId", groupResponse.id)
                                 groupDetailsFragment.arguments = bundle
                                 parentFragmentManager.beginTransaction()
                                     .replace(R.id.app_fragment, groupDetailsFragment)
                                     .addToBackStack("GroupDetails").commit()
 
+                                return true
                             }
-
-                            return super.onInterceptTouchEvent(rv, e)
+                            return false
                         }
-                    })
 
+                        override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
+
+                        override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
+                    })
                 }
 
                 override fun onError(error: Throwable) {
