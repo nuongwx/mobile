@@ -49,11 +49,6 @@ class GroupList : Fragment() {
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        configTopAppBar()
-    }
-
     override fun onResume() {
         super.onResume()
         configTopAppBar()
@@ -70,10 +65,20 @@ class GroupList : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        configTopAppBar()
+
         val toGroupDetails: Button = view.findViewById(R.id.to_group_details)
         toGroupDetails.setOnClickListener {
             val transaction = parentFragmentManager.beginTransaction()
             transaction.replace(R.id.app_fragment, GroupDetails())
+            transaction.addToBackStack(null)
+            transaction.commit()
+        }
+
+        val toW2M: Button = view.findViewById(R.id.to_w2m)
+        toW2M.setOnClickListener {
+            val transaction = parentFragmentManager.beginTransaction()
+            transaction.replace(R.id.app_fragment, W2M())
             transaction.addToBackStack(null)
             transaction.commit()
         }

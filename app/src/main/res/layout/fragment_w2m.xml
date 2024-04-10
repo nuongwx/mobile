@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".W2M">
+
+    <!-- TODO: Update blank fragment layout -->
+    <!--    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--        xmlns:app="http://schemas.android.com/apk/res-auto"-->
+    <!--        xmlns:tools="http://schemas.android.com/tools"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="match_parent"-->
+    <!--        android:background="#FFFFFF"-->
+    <!--        android:clickable="true"-->
+    <!--        android:focusable="true"-->
+    <!--        android:orientation="vertical"-->
+    <!--        tools:context=".view.Example4Fragment">-->
+
+    <!--    <com.google.android.material.appbar.AppBarLayout-->
+    <!--        android:id="@+id/exFourAppBarLayout"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:background="#FFFFFF"-->
+    <!--        android:theme="@style/AppTheme.AppBarOverlay">-->
+
+    <!--        <androidx.appcompat.widget.Toolbar-->
+    <!--            android:id="@+id/exFourToolbar"-->
+    <!--            android:layout_width="match_parent"-->
+    <!--            android:layout_height="?attr/actionBarSize"-->
+    <!--            app:popupTheme="@style/AppTheme.PopupOverlay"-->
+    <!--            app:theme="@style/Example4ToolbarTheme"-->
+    <!--            app:titleTextColor="#474747" />-->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="14dp"
+        android:paddingTop="2dp"
+        android:paddingEnd="14dp"
+        android:paddingBottom="10dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/exFourStartDateText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="30dp"
+            android:gravity="start|center_vertical"
+            android:minLines="2"
+            android:textColor="#474747"
+            android:textSize="26sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/exFourHeaderDivider"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Mon\n22 Apr" />
+
+        <View
+            android:id="@+id/exFourHeaderDivider"
+            android:layout_width="1.5dp"
+            android:layout_height="0dp"
+            android:background="#EAEAEA"
+            android:rotation="45"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <TextView
+            android:id="@+id/exFourEndDateText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:gravity="end|center_vertical"
+            android:minLines="2"
+            android:textColor="#474747"
+            android:textSize="26sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/exFourHeaderDivider"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Thu\n9 May" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!--    </com.google.android.material.appbar.AppBarLayout>-->
+
+    <Spinner
+        android:id="@+id/spinner"
+        android:layout_width="match_parent"
+        android:layout_height="48dp" />
+
+    <include
+        android:id="@+id/legendLayout"
+        layout="@layout/calendar_day_legend_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/frameLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.kizitonwose.calendar.view.CalendarView
+            android:id="@+id/overallCalendarView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="24dp"
+            app:cv_dayViewResource="@layout/w2m_calendar_day"
+            app:cv_monthHeaderResource="@layout/w2m_calendar_header"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        </com.kizitonwose.calendar.view.CalendarView>
+
+        <Spinner
+            android:id="@+id/spinner2"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/overallCalendarView" />
+
+        <com.kizitonwose.calendar.view.CalendarView
+            android:id="@+id/voteCalendarView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="96dp"
+            app:cv_dayViewResource="@layout/w2m_calendar_day"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/spinner2">
+
+        </com.kizitonwose.calendar.view.CalendarView>
+
+
+        <!--        <FrameLayout-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="76dp"-->
+        <!--            android:layout_gravity="bottom"-->
+        <!--            android:background="#FFFFFF"-->
+        <!--            android:elevation="10dp">-->
+
+        <!--            <Button-->
+        <!--                android:theme="@style/Example4ButtonTheme"-->
+        <!--                android:id="@+id/exFourSaveButton"-->
+        <!--                android:layout_width="match_parent"-->
+        <!--                android:layout_height="60dp"-->
+        <!--                android:layout_gravity="center"-->
+        <!--                android:layout_marginStart="16dp"-->
+        <!--                android:layout_marginEnd="16dp"-->
+        <!--                android:text="@string/save" />-->
+
+        <!--        </FrameLayout>-->
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!--    </LinearLayout>-->
+</LinearLayout>
