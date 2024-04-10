@@ -142,6 +142,7 @@ class GroupList : Fragment() {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
         val menuItem = appBar.menu.findItem(R.id.edit)
         menuItem.isVisible = true
+        menuItem.isEnabled = true
         menuItem.title = "Join"
         menuItem.setIcon(null)
         menuItem.setOnMenuItemClickListener {
@@ -179,6 +180,8 @@ class GroupList : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         configTopAppBar()
+
+
 
         val newGroupBtn: Button = view.findViewById(R.id.newGroupButton)
         newGroupBtn.setOnClickListener {

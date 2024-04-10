@@ -126,6 +126,7 @@ class NewGroup : Fragment() {
                                             )
                                             requireActivity().supportFragmentManager.beginTransaction()
                                                 .replace(R.id.app_fragment, newGroupInviteCode)
+                                                .addToBackStack("NewGroupInviteCode")
                                                 .commit()
                                         }
 
@@ -162,6 +163,8 @@ class NewGroup : Fragment() {
         }
     }
 
+    private var firstCall = true
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         configTopAppBar()
@@ -177,14 +180,12 @@ class NewGroup : Fragment() {
         }
     }
 
-    private var isFirstCall = true
     override fun onResume() {
         super.onResume()
         configTopAppBar()
 
-        if (isFirstCall) {
-            isFirstCall = false
-
+        if (firstCall) {
+            firstCall = false
         } else {
             requireActivity().supportFragmentManager.popBackStack()
         }
@@ -192,6 +193,8 @@ class NewGroup : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        firstCall = true
 
         if (requestCode == this.requestCode && resultCode == Activity.RESULT_OK && data != null) {
             Picasso.get().load(data.data).into(thumbnail)
