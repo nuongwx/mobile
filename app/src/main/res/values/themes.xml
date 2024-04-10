@@ -1,54 +1,50 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.Datto" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="myColorPrimaryDay">@color/my_light_primary</item> -->
-        <item name="colorPrimary">@color/myColorPrimaryDay</item>
-        <item name="colorOnPrimary">@color/myColorOnPrimaryDay</item>
-        <item name="colorError">@color/myColorErrorDay</item>
-        <item name="colorErrorContainer">@color/myColorErrorContainerDay</item>
-        <item name="colorOnSurfaceInverse">@color/myColorOnSurfaceInverseDay</item>
-        <item name="colorPrimaryInverse">@color/myColorPrimaryInverseDay</item>
-        <item name="colorSurfaceInverse">@color/myColorSurfaceInverseDay</item>
-        <item name="colorOnError">@color/myColorOnErrorDay</item>
-        <item name="colorOnErrorContainer">@color/myColorOnErrorContainerDay</item>
-        <item name="colorOnPrimaryContainer">@color/myColorOnPrimaryContainerDay</item>
-        <item name="colorOnPrimaryFixed">@color/myColorOnPrimaryFixedDay</item>
-        <item name="colorOnPrimaryFixedVariant">@color/myColorOnPrimaryFixedVariantDay</item>
-        <item name="colorOnSecondary">@color/myColorOnSecondaryDay</item>
-        <item name="colorOnSecondaryContainer">@color/myColorOnSecondaryContainerDay</item>
-        <item name="colorOnSecondaryFixed">@color/myColorOnSecondaryFixedDay</item>
-        <item name="colorOnSecondaryFixedVariant">@color/myColorOnSecondaryFixedVariantDay</item>
-        <item name="colorOnSurface">@color/myColorOnSurfaceDay</item>
-        <item name="colorOnSurfaceVariant">@color/myColorOnSurfaceVariantDay</item>
-        <item name="colorOnTertiary">@color/myColorOnTertiaryDay</item>
-        <item name="colorOnTertiaryContainer">@color/myColorOnTertiaryContainerDay</item>
-        <item name="colorOnTertiaryFixed">@color/myColorOnTertiaryFixedDay</item>
-        <item name="colorOnTertiaryFixedVariant">@color/myColorOnTertiaryFixedVariantDay</item>
-        <item name="colorOutline">@color/myColorOutlineDay</item>
-        <item name="colorOutlineVariant">@color/myColorOutlineVariantDay</item>
-        <item name="colorPrimaryContainer">@color/myColorPrimaryContainerDay</item>
-        <item name="colorPrimaryFixed">@color/myColorPrimaryFixedDay</item>
-        <item name="colorPrimaryFixedDim">@color/myColorPrimaryFixedDimDay</item>
-        <item name="colorSecondary">@color/myColorSecondaryDay</item>
-        <item name="colorSecondaryContainer">@color/myColorSecondaryContainerDay</item>
-        <item name="colorSecondaryFixed">@color/myColorSecondaryFixedDay</item>
-        <item name="colorSecondaryFixedDim">@color/myColorSecondaryFixedDimDay</item>
-        <item name="android:shadowColor">@color/myShadowColorDay</item>
-        <item name="scrimBackground">@color/myScrimBackgroundDay</item>
-        <item name="colorSurface">@color/myColorSurfaceDay</item>
-        <item name="colorSurfaceBright">@color/myColorSurfaceBrightDay</item>
-        <item name="colorSurfaceContainer">@color/myColorSurfaceContainerDay</item>
-        <item name="colorSurfaceContainerHigh">@color/myColorSurfaceContainerHighDay</item>
-        <item name="colorSurfaceContainerHighest">@color/myColorSurfaceContainerHighestDay</item>
-        <item name="colorSurfaceContainerLow">@color/myColorSurfaceContainerLowDay</item>
-        <item name="colorSurfaceContainerLowest">@color/myColorSurfaceContainerLowestDay</item>
-        <item name="colorSurfaceDim">@color/myColorSurfaceDimDay</item>
-        <item name="colorTertiary">@color/myColorTertiaryDay</item>
-        <item name="colorTertiaryContainer">@color/myColorTertiaryContainerDay</item>
-        <item name="colorTertiaryFixed">@color/myColorTertiaryFixedDay</item>
-        <item name="colorTertiaryFixedDim">@color/myColorTertiaryFixedDimDay</item>
+<resources>
+    <style name="AppTheme" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/md_theme_primary</item>
+        <item name="colorOnPrimary">@color/md_theme_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/md_theme_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/md_theme_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/md_theme_secondary</item>
+        <item name="colorOnSecondary">@color/md_theme_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/md_theme_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/md_theme_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/md_theme_tertiary</item>
+        <item name="colorOnTertiary">@color/md_theme_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/md_theme_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/md_theme_onTertiaryContainer</item>
+        <item name="colorError">@color/md_theme_error</item>
+        <item name="colorOnError">@color/md_theme_onError</item>
+        <item name="colorErrorContainer">@color/md_theme_errorContainer</item>
+        <item name="colorOnErrorContainer">@color/md_theme_onErrorContainer</item>
+        <item name="android:colorBackground">@color/md_theme_background</item>
+        <item name="colorOnBackground">@color/md_theme_onBackground</item>
+        <item name="colorSurface">@color/md_theme_surface</item>
+        <item name="colorOnSurface">@color/md_theme_onSurface</item>
+        <item name="colorSurfaceVariant">@color/md_theme_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/md_theme_onSurfaceVariant</item>
+        <item name="colorOutline">@color/md_theme_outline</item>
+        <item name="colorOutlineVariant">@color/md_theme_outlineVariant</item>
+        <item name="colorSurfaceInverse">@color/md_theme_inverseSurface</item>
+        <item name="colorOnSurfaceInverse">@color/md_theme_inverseOnSurface</item>
+        <item name="colorPrimaryInverse">@color/md_theme_inversePrimary</item>
+        <item name="colorPrimaryFixed">@color/md_theme_primaryFixed</item>
+        <item name="colorOnPrimaryFixed">@color/md_theme_onPrimaryFixed</item>
+        <item name="colorPrimaryFixedDim">@color/md_theme_primaryFixedDim</item>
+        <item name="colorOnPrimaryFixedVariant">@color/md_theme_onPrimaryFixedVariant</item>
+        <item name="colorSecondaryFixed">@color/md_theme_secondaryFixed</item>
+        <item name="colorOnSecondaryFixed">@color/md_theme_onSecondaryFixed</item>
+        <item name="colorSecondaryFixedDim">@color/md_theme_secondaryFixedDim</item>
+        <item name="colorOnSecondaryFixedVariant">@color/md_theme_onSecondaryFixedVariant</item>
+        <item name="colorTertiaryFixed">@color/md_theme_tertiaryFixed</item>
+        <item name="colorOnTertiaryFixed">@color/md_theme_onTertiaryFixed</item>
+        <item name="colorTertiaryFixedDim">@color/md_theme_tertiaryFixedDim</item>
+        <item name="colorOnTertiaryFixedVariant">@color/md_theme_onTertiaryFixedVariant</item>
+        <item name="colorSurfaceDim">@color/md_theme_surfaceDim</item>
+        <item name="colorSurfaceBright">@color/md_theme_surfaceBright</item>
+        <item name="colorSurfaceContainerLowest">@color/md_theme_surfaceContainerLowest</item>
+        <item name="colorSurfaceContainerLow">@color/md_theme_surfaceContainerLow</item>
+        <item name="colorSurfaceContainer">@color/md_theme_surfaceContainer</item>
+        <item name="colorSurfaceContainerHigh">@color/md_theme_surfaceContainerHigh</item>
+        <item name="colorSurfaceContainerHighest">@color/md_theme_surfaceContainerHighest</item>
     </style>
-
-    <style name="Theme.Datto" parent="Base.Theme.Datto" />
 </resources>
