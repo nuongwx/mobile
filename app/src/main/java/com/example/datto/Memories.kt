@@ -9,8 +9,10 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.datto.databinding.FragmentMemoriesBinding
+import com.google.android.material.appbar.MaterialToolbar
 
 /**
  * An example full-screen fragment that shows and hides the system UI (i.e.
@@ -65,6 +67,12 @@ class Memories : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
+    private fun configAppBar() {
+        val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
+        appBar.title = "Memories"
+        appBar.navigationIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_back)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -78,6 +86,8 @@ class Memories : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        configAppBar()
 
         visible = true
 
