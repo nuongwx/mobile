@@ -1,5 +1,6 @@
 package com.example.datto
 
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,6 +11,7 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import com.google.gson.JsonDeserializationContext
@@ -40,6 +42,7 @@ private const val ARG_PARAM2 = "param2"
  * Use the [W2M.newInstance] factory method to
  * create an instance of this fragment.
  */
+
 class W2M : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
@@ -102,9 +105,9 @@ class W2M : Fragment() {
         var event: Event? = schedules.first { true }
 
         val spinner: Spinner = view.findViewById(R.id.spinner)
-        val adapter = ArrayAdapter(
-            requireContext(), android.R.layout.simple_spinner_item, schedules.map { it.id }
-        )
+        val adapter = ArrayAdapter(requireContext(),
+                                   android.R.layout.simple_spinner_item,
+                                   schedules.map { it.id })
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = adapter
 
@@ -114,22 +117,42 @@ class W2M : Fragment() {
 
         val voteCalendarView = view.findViewById<CalendarView>(R.id.voteCalendarView)
 
+        val ctx = requireContext()
+        val rangeStartBackground =
+            AppCompatResources.getDrawable(ctx, R.drawable.w2m_continuous_selected_bg_start)
+                .also {
+                    if (it != null) {
+                        it.level = 5000
+                    }
+                }
+
+        val rangeEndBackground =
+            AppCompatResources.getDrawable(ctx, R.drawable.w2m_continuous_selected_bg_end)
+                .also {
+                    if (it != null) {
+                        it.level = 5000
+                    }
+                }
+        val rangeMiddleBackground =
+            AppCompatResources.getDrawable(ctx, R.drawable.w2m_continuous_selected_bg_middle)
+        val singleBackground =
+            AppCompatResources.getDrawable(ctx, R.drawable.w2m_single_selected_bg)
+        val todayBackground = AppCompatResources.getDrawable(ctx, R.drawable.w2m_today_bg)
+
+        val today = LocalDate.now()
+
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>?, view: View?, position: Int, id: Long
             ) {
-                Toast.makeText(
-                    requireContext(), "Selected: ${schedules[position].name}", Toast.LENGTH_SHORT
-                ).show()
+
                 val adapter = ArrayAdapter(requireContext(),
-                    android.R.layout.simple_spinner_item,
-                    schedules[position].availability.map { it.person })
+                                           android.R.layout.simple_spinner_item,
+                                           schedules[position].availability.map { it.person })
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 spinner2.adapter = adapter
 
                 spinner2.setSelection(0)
-
-                // eventId = schedules[position].id
 
                 event = schedules.find { it.id == spinner.selectedItem.toString().toInt() }!!
 
@@ -166,8 +189,8 @@ class W2M : Fragment() {
 
         class DayViewContainer(view: View) : ViewContainer(view) {
             val textView = view.findViewById<TextView>(R.id.dayText)
-            var selectedDate: LocalDate? = null
-
+            val roundBgView = view.findViewById<View>(R.id.roundBackgroundView)
+            val continuousBgView = view.findViewById<View>(R.id.continuousBackgroundView)
             lateinit var day: CalendarDay
             var onClickListener: ((LocalDate) -> Unit)? = null
 
@@ -181,13 +204,16 @@ class W2M : Fragment() {
         calendarView.dayBinder = object : MonthDayBinder<DayViewContainer> {
             override fun create(view: View): DayViewContainer {
                 return DayViewContainer(view).apply {
-                    textView.setOnClickListener {
-                        // val date = day.date
+                    textView.setOnClickListener { // val date = day.date
                         val availability = event?.availability?.find { it.person == userId }
-                        if (availability != null) {
-                            Log.d("W2M", "${event?.availability?.map { it.person }}")
+                        if (availability != null) { // list all the users that are available on that day
+                            val availableUsers = event?.availability?.filter {
+                                it.availability.contains(day.date)
+                            }?.map { it.person }
+                            Log.d("W2m", "Available users: $availableUsers")
                             Toast.makeText(
-                                requireContext(), event?.availability?.map { it.person }.toString(),
+                                requireContext(),
+                                "Available users: $availableUsers",
                                 Toast.LENGTH_SHORT
                             ).show()
                         } else {
@@ -210,14 +236,88 @@ class W2M : Fragment() {
                 }
                 val availability = event?.availability?.find { it.availability.contains(data.date) }
                 if (availability != null) {
-                    container.textView.setBackgroundResource(R.drawable.ic_launcher_background) // alpha is used to show the availability of the group, the more people are available the more opaque the background
-                    container.textView.alpha =
-                        event?.availability?.count { it.availability.contains(data.date) }
-                            ?.toFloat()!! / event?.availability?.size!!
-                        // availability.availability.count { it.availability.contains(day.date) }
-                        //     .toFloat() / availability.availability.size
+
+                    val maxAvailable = event?.availability?.size ?: 0
+                    val minAvailable = 0
+                    val current =
+                        event?.availability?.count { it.availability.contains(data.date) } ?: 0
+
+                    var red = Math.round(255 / 2.0)
+                    var green = Math.round(255 / 2.0)
+                    var blue = Math.round(255 / 2.0)
+
+                    if (maxAvailable != minAvailable) {
+                        red =
+                            Math.round(((204.0) * (maxAvailable - current) / (maxAvailable - minAvailable)) + 51.0)
+                        green =
+                            Math.round(((102.0) * (maxAvailable - current) / (maxAvailable - minAvailable)) + 153.0)
+                        blue =
+                            Math.round(((255.0) * (maxAvailable - current) / (maxAvailable - minAvailable)) + 0.0)
+                    }
+
+                    val singleColour = android.graphics.Color.argb(
+                        255, red.toInt(), green.toInt(), blue.toInt()
+                    )
+
+                    val middleBackgroundColour = android.graphics.Color.argb(
+                        255,
+                        Math.round(((204.0 * (maxAvailable - 1) / (maxAvailable - minAvailable)) + 51.0))
+                            .toInt(),
+                        Math.round(((102.0 * (maxAvailable - 1) / (maxAvailable - minAvailable)) + 153.0))
+                            .toInt(),
+                        Math.round(((255.0 * (maxAvailable - 1) / (maxAvailable - minAvailable)) + 0.0))
+                            .toInt()
+                    )
+
+                    // fuck me, eh?
+                    if (event?.availability?.find { it.availability.contains(data.date) } != null && event?.availability?.find {
+                            it.availability.contains(
+                                data.date.plusDays(1)
+                            )
+                        } != null && event?.availability?.find {
+                            it.availability.contains(
+                                data.date.minusDays(
+                                    1
+                                )
+                            )
+                        } != null) {
+                        container.continuousBgView.visibility = View.VISIBLE
+                        container.continuousBgView.setBackgroundResource(R.drawable.w2m_continuous_selected_bg_middle)
+                        container.continuousBgView.background.setTint(middleBackgroundColour)
+                    } else if (event?.availability?.find { it.availability.contains(data.date) } != null && event?.availability?.find {
+                            it.availability.contains(
+                                data.date.plusDays(1)
+                            )
+                        } != null) {
+                        container.continuousBgView.visibility = View.VISIBLE
+                        container.continuousBgView.background = (AppCompatResources.getDrawable(
+                            ctx, R.drawable.w2m_continuous_selected_bg_start
+                        )?.apply { level = 5000 })
+                        container.continuousBgView.background.setTint(middleBackgroundColour)
+                    } else if (event?.availability?.find { it.availability.contains(data.date) } != null && event?.availability?.find {
+                            it.availability.contains(
+                                data.date.minusDays(1)
+                            )
+                        } != null) {
+                        container.continuousBgView.visibility = View.VISIBLE
+                        container.continuousBgView.background = (AppCompatResources.getDrawable(
+                            ctx, R.drawable.w2m_continuous_selected_bg_end
+                        )?.apply { level = 5000 })
+                        container.continuousBgView.background.setTint(middleBackgroundColour)
+                    } else if (event?.availability?.find { it.availability.contains(data.date) } != null) {
+                        container.continuousBgView.visibility = View.INVISIBLE
+                    } else {
+                        container.roundBgView.visibility = View.INVISIBLE
+                        container.continuousBgView.visibility = View.INVISIBLE
+                    }
+
+                    container.roundBgView.visibility = View.VISIBLE
+                    container.roundBgView.setBackgroundResource(R.drawable.w2m_single_selected_bg)
+                    container.roundBgView.background.setTint(singleColour)
+
                 } else {
-                    container.textView.background = null
+                    container.continuousBgView.visibility = View.INVISIBLE
+                    container.roundBgView.visibility = View.INVISIBLE
                 }
             }
         }
@@ -234,66 +334,121 @@ class W2M : Fragment() {
             }
         }
 
-
         voteCalendarView.dayBinder = object : MonthDayBinder<DayViewContainer> {
             // Called only when a new container is needed.
             override fun create(view: View): DayViewContainer {
                 val d = DayViewContainer(view)
-                d.onClickListener =
-                    { date -> // Check the day position as we do not want to select in or out dates.
-                        if (d.day.position == DayPosition.MonthDate) { // Keep a reference to any previous selection
-                            // in case we overwrite it and need to reload it.
-                            if (selectedDate.containsKey(date)) { // If the user clicks the same date, clear selection.
-                                selectedDate.remove(date) // Reload this date so the dayBinder is called
-                                // and we can REMOVE the selection background.
-                                voteCalendarView.notifyDateChanged(date)
-                            } else {
-                                selectedDate[date] =
-                                    true // Reload the newly selected date so the dayBinder is
-                                // called and we can ADD the selection background.
-                                voteCalendarView.notifyDateChanged(d.day.date)
-                                if (selectedDate.size > 1) { // We need to also reload the previously selected
-                                    // date so we can REMOVE the selection background.
-                                    voteCalendarView.notifyDateChanged(selectedDate.keys.first { it != date })
-                                }
+                d.onClickListener = { date ->
+
+                    // Check the day position as we do not want to select in or out dates.
+                    if (d.day.position == DayPosition.MonthDate) { // Keep a reference to any previous selection
+                        // in case we overwrite it and need to reload it.
+                        if (selectedDate.containsKey(date)) { // If the user clicks the same date, clear selection.
+                            selectedDate.remove(date) // Reload this date so the dayBinder is called
+                            // and we can REMOVE the selection background.
+                            voteCalendarView.notifyDateChanged(date)
+                        } else {
+                            selectedDate[date] =
+                                true // Reload the newly selected date so the dayBinder is
+                            // called and we can ADD the selection background.
+                            voteCalendarView.notifyDateChanged(d.day.date)
+                            if (selectedDate.size > 1) { // We need to also reload the previously selected
+                                // date so we can REMOVE the selection background.
+                                voteCalendarView.notifyDateChanged(selectedDate.keys.first { it != date })
                             }
                         }
-
-                        // update the schedule availability
-                        val schedule = event
-                        val person = schedule?.availability?.find { it.person == userId }
-                        if (person != null) {
-                            person.availability = selectedDate.keys.toList()
-                        }
-                        calendarView.notifyCalendarChanged()
                     }
+
+                    // update the schedule availability
+                    val schedule = event
+                    val person = schedule?.availability?.find { it.person == userId }
+                    if (person != null) {
+                        person.availability = selectedDate.keys.toList()
+                    }
+                    calendarView.notifyCalendarChanged()
+                    voteCalendarView.notifyCalendarChanged()
+                }
                 return d
             }
 
             // Called every time we need to reuse a container.
             override fun bind(container: DayViewContainer, data: CalendarDay) {
+
+                container.continuousBgView.background?.setTintList(null)
+                container.roundBgView.background?.setTintList(null)
+
                 container.day = data
-                val textView = container.textView
-                textView.text = data.date.dayOfMonth.toString()
+                container.textView.text = data.date.dayOfMonth.toString()
                 if (data.position == DayPosition.MonthDate) { // Show the month dates. Remember that views are reused!
-                    textView.visibility = View.VISIBLE
-                    if (selectedDate.containsKey(data.date)) { // If this is the selected date, show a round background and change the text color.
-                        // textView.setTextColor(Color.WHITE)
-                        textView.setBackgroundResource(R.drawable.ic_launcher_background)
-                    } else { // If this is NOT the selected date, remove the background and reset the text color.
-                        // textView.setTextColor(Color.BLACK)
-                        textView.background = null
-                    }
+                    container.textView.visibility = View.VISIBLE
                 } else { // Hide in and out dates
-                    textView.visibility = View.INVISIBLE
+                    container.textView.visibility = View.INVISIBLE
                 }
+
+                if (selectedDate.containsKey(data.date) && selectedDate.containsKey(
+                        data.date.plusDays(
+                            1
+                        )
+                    ) && selectedDate.containsKey(data.date.minusDays(1))
+                ) {
+                    container.continuousBgView.visibility = View.VISIBLE
+                    if (rangeMiddleBackground != null) {
+                        container.continuousBgView.applyBackground(rangeMiddleBackground)
+                    }
+                    container.roundBgView.visibility = View.INVISIBLE
+
+                } else if (selectedDate.containsKey(data.date) && selectedDate.containsKey(
+                        data.date.plusDays(
+                            1
+                        )
+                    )
+                ) {
+                    container.continuousBgView.visibility = View.VISIBLE
+                    if (rangeStartBackground != null) {
+                        container.continuousBgView.applyBackground(rangeStartBackground)
+                    }
+                    container.roundBgView.visibility = View.VISIBLE
+                    if (singleBackground != null) {
+                        container.roundBgView.applyBackground(singleBackground)
+                    }
+
+                } else if (selectedDate.containsKey(data.date) && selectedDate.containsKey(
+                        data.date.minusDays(
+                            1
+                        )
+                    )
+                ) {
+                    container.continuousBgView.visibility = View.VISIBLE
+                    if (rangeEndBackground != null) {
+                        container.continuousBgView.applyBackground(rangeEndBackground)
+                    }
+                    container.roundBgView.visibility = View.VISIBLE
+                    if (singleBackground != null) {
+                        container.roundBgView.applyBackground(singleBackground)
+                    }
+
+                } else if (selectedDate.containsKey(data.date)) {
+                    container.roundBgView.visibility = View.VISIBLE
+                    if (singleBackground != null) {
+                        container.roundBgView.applyBackground(singleBackground)
+                    }
+                    container.continuousBgView.visibility = View.INVISIBLE
+                } else {
+                    container.roundBgView.visibility = View.INVISIBLE
+                    container.continuousBgView.visibility = View.INVISIBLE
+                }
+            }
+
+            private fun View.applyBackground(drawable: Drawable) {
+                visibility = View.VISIBLE
+                background = drawable
             }
 
         }
 
         val currentMonth = YearMonth.now()
-        val startMonth = currentMonth.minusMonths(12)  // Adjust as needed
-        val endMonth = currentMonth.plusMonths(12)  // Adjust as needed
+        val startMonth = currentMonth.minusMonths(12)
+        val endMonth = currentMonth.plusMonths(12)
         val daysOfWeek = daysOfWeek()
 
         val legendLayout = view.findViewById<ViewGroup>(R.id.legendLayout)
