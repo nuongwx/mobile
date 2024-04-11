@@ -1,19 +1,23 @@
 package com.example.datto
 
+import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
@@ -29,6 +33,7 @@ import com.kizitonwose.calendar.view.MonthDayBinder
 import com.kizitonwose.calendar.view.MonthHeaderFooterBinder
 import com.kizitonwose.calendar.view.ViewContainer
 import java.lang.reflect.Type
+import java.net.URL
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -47,6 +52,8 @@ class W2M : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
+
+    var voting = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,9 +112,10 @@ class W2M : Fragment() {
         var event: Event? = schedules.first { true }
 
         val spinner: Spinner = view.findViewById(R.id.spinner)
-        val adapter = ArrayAdapter(requireContext(),
-                                   android.R.layout.simple_spinner_item,
-                                   schedules.map { it.id })
+        val adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            schedules.map { it.id })
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = adapter
 
@@ -119,16 +127,14 @@ class W2M : Fragment() {
 
         val ctx = requireContext()
         val rangeStartBackground =
-            AppCompatResources.getDrawable(ctx, R.drawable.w2m_continuous_selected_bg_start)
-                .also {
+            AppCompatResources.getDrawable(ctx, R.drawable.w2m_continuous_selected_bg_start).also {
                     if (it != null) {
                         it.level = 5000
                     }
                 }
 
         val rangeEndBackground =
-            AppCompatResources.getDrawable(ctx, R.drawable.w2m_continuous_selected_bg_end)
-                .also {
+            AppCompatResources.getDrawable(ctx, R.drawable.w2m_continuous_selected_bg_end).also {
                     if (it != null) {
                         it.level = 5000
                     }
@@ -201,26 +207,92 @@ class W2M : Fragment() {
             }
         }
 
+        val availableRecyclerView = view.findViewById<RecyclerView>(R.id.availableW2MRecyclerView)
+        availableRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
+        availableRecyclerView.adapter = MemberListAdapter(ArrayList())
+        val unavailableRecyclerView = view.findViewById<RecyclerView>(R.id.unavailableW2MRecyclerView)
+        unavailableRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
+        unavailableRecyclerView.adapter = MemberListAdapter(ArrayList())
+
+        val scrollView = requireActivity().findViewById<View>(R.id.scrollView)
+
+
         calendarView.dayBinder = object : MonthDayBinder<DayViewContainer> {
             override fun create(view: View): DayViewContainer {
                 return DayViewContainer(view).apply {
                     textView.setOnClickListener { // val date = day.date
                         val availability = event?.availability?.find { it.person == userId }
                         if (availability != null) { // list all the users that are available on that day
-                            val availableUsers = event?.availability?.filter {
-                                it.availability.contains(day.date)
-                            }?.map { it.person }
-                            Log.d("W2m", "Available users: $availableUsers")
-                            Toast.makeText(
-                                requireContext(),
-                                "Available users: $availableUsers",
-                                Toast.LENGTH_SHORT
-                            ).show()
+
+                            class MemberItem(val name: String, val image: URL)
+                            class MemberListAdapter(private val members: ArrayList<MemberItem>) :
+                                RecyclerView.Adapter<MemberListAdapter.MemberViewHolder>() {
+
+                                inner class MemberViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+                                    val memberName: TextView = itemView.findViewById(R.id.memberNameTextView)
+                                    val memberImage: ImageView = itemView.findViewById(R.id.memberCoverImageView)
+                                    val removeButton: ImageButton = itemView.findViewById(R.id.memberRemoveButton)
+                                    init {
+                                        itemView.setOnClickListener {
+                                            Toast.makeText(itemView.context, itemView.toString(), Toast.LENGTH_SHORT).show()
+                                        }
+
+                                        removeButton.visibility = View.GONE
+                                    }
+                                }
+
+                                override fun onCreateViewHolder(
+                                    parent: ViewGroup, viewType: Int
+                                ): MemberListAdapter.MemberViewHolder {
+                                    val itemView =
+                                        LayoutInflater.from(parent.context).inflate(R.layout.group_details_members_list_items, parent, false)
+                                    return MemberViewHolder(itemView)
+                                }
+
+                                override fun onBindViewHolder(holder: MemberListAdapter.MemberViewHolder, position: Int) {
+                                    val currentItem = members[position]
+                                    holder.memberName.text = currentItem.name
+
+                                    val thread = Thread {
+                                        try {
+                                            val bitmap =
+                                                BitmapFactory.decodeStream(currentItem.image.openConnection().getInputStream())
+                                            holder.memberImage.post {
+                                                holder.memberImage.setImageBitmap(bitmap)
+                                            }
+                                        } catch (e: Exception) {
+                                            e.printStackTrace()
+                                        }
+                                    }
+                                    thread.start()
+                                }
+
+                                override fun getItemCount() = members.size
+                            }
+
+                            val availableUsers = ArrayList<MemberItem>()
+                            val unavailableUsers = ArrayList<MemberItem>()
+
+                            event?.availability?.forEach {
+                                if (it.availability.contains(day.date)) {
+                                    availableUsers.add(MemberItem("User ${it.person}", URL("https://via.assets.so/img.jpg?w=500&h=500&tc=&bg=#7f7f7f&t=Hello%20World")))
+                                } else {
+                                    unavailableUsers.add(MemberItem("User ${it.person}", URL("https://via.assets.so/img.jpg?w=500&h=500&tc=&bg=#7f7f7f&t=Hello%20World")))
+                                }
+                            }
+
+                            val availableAdapter = MemberListAdapter(availableUsers)
+                            val unavailableAdapter = MemberListAdapter(unavailableUsers)
+
+                            availableRecyclerView.adapter = availableAdapter
+                            unavailableRecyclerView.adapter = unavailableAdapter
+
+                            Toast.makeText(requireContext(), "Available: ${availableUsers.size}, Unavailable: ${unavailableUsers.size}", Toast.LENGTH_SHORT).show()
                         } else {
-                            Log.d("W2m", "No availability")
                             Toast.makeText(requireContext(), "No availability", Toast.LENGTH_SHORT)
                                 .show()
                         }
+                        scrollView.visibility = View.VISIBLE
                     }
                 }
             }
@@ -467,6 +539,39 @@ class W2M : Fragment() {
 
         calendarView.notifyCalendarChanged()
         voteCalendarView.notifyCalendarChanged()
+
+        configTopAppBar()
+
+    }
+
+    private fun configTopAppBar() {
+        val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
+        val menuItem = appBar.menu.findItem(R.id.edit)
+        val scrollView = requireActivity().findViewById<View>(R.id.scrollView)
+        val voteCalendarView = requireActivity().findViewById<CalendarView>(R.id.voteCalendarView)
+        menuItem.isEnabled = true
+        if (voting) {
+            menuItem.setIcon(null)
+            menuItem.title = "Save"
+            menuItem.setOnMenuItemClickListener { // save the availability
+                scrollView.visibility = View.GONE
+                voteCalendarView.visibility = View.GONE
+                voting = false
+                appBar.title = "VIEW"
+                configTopAppBar()
+                true
+            }
+        } else {
+            menuItem.setIcon(R.drawable.ic_edit)
+            menuItem.setOnMenuItemClickListener {
+                scrollView.visibility = View.GONE
+                voteCalendarView.visibility = View.VISIBLE
+                voting = true
+                appBar.title = "VOTE"
+                configTopAppBar()
+                true
+            }
+        }
     }
 
     companion object {

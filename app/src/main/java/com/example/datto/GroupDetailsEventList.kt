@@ -1,16 +1,13 @@
 package com.example.datto
 
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -88,7 +85,7 @@ class GroupDetailsEventList : Fragment() {
         eventList.add(EventItem("Event 3", Date()))
         eventList.add(EventItem("Event 4", Date()))
 
-        val eventRecyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
+        val eventRecyclerView = view.findViewById<RecyclerView>(R.id.eventListGroupDetailsRecyclerView)
         eventRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
         eventRecyclerView.adapter = EventListAdapter(eventList)
         eventRecyclerView.setHasFixedSize(true)

@@ -102,7 +102,7 @@ class GroupDetailsMemberList : Fragment() {
         memberList.add(MemberItem("Jane Doe", URL("https://via.assets.so/img.jpg?w=500&h=500&tc=&bg=#7f7f7f&t=Hello%20World")))
         memberList.add(MemberItem("John Smith", URL("https://via.assets.so/img.jpg?w=500&h=500&tc=&bg=#7f7f7f&t=Hello%20World")))
 
-        val memberRecyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
+        val memberRecyclerView = view.findViewById<RecyclerView>(R.id.memberListGroupDetailsRecyclerView)
         memberRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
         memberRecyclerView.adapter = MemberListAdapter(memberList)
         memberRecyclerView.setHasFixedSize(true)

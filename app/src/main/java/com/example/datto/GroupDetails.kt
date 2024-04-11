@@ -124,7 +124,7 @@ class GroupDetails : Fragment() {
         memories.add(MemoryThumbnail(URL("https://www.gstatic.com/webp/gallery/3.jpg")))
 
         val memoriesRecyclerView: RecyclerView =
-            view.findViewById(R.id.recyclerView) // scroll horizontally
+            view.findViewById(R.id.memoriesCoverGroupDetailsRecyclerView) // scroll horizontally
         memoriesRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(
             view.context, RecyclerView.HORIZONTAL, false
         )
