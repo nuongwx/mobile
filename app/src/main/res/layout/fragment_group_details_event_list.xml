@@ -15,7 +15,8 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:minHeight="600dp">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
@@ -23,6 +24,21 @@
                 android:layout_height="match_parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/noEventsTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="No events"
+                android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
+                android:textColor="@color/material_dynamic_neutral80"
+                android:textFontWeight="600"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 

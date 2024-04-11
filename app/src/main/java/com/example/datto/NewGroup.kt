@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
@@ -153,6 +154,7 @@ class NewGroup : Fragment() {
         }
 
         appBar.title = "New Group"
+        appBar.navigationIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_back)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

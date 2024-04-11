@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.Credential.CredentialService
@@ -41,6 +42,7 @@ class JoinGroup : Fragment() {
         menuItem.setOnMenuItemClickListener(null)
 
         appBar.title = "Join Group"
+        appBar.navigationIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_back)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

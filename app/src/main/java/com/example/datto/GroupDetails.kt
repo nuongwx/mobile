@@ -139,6 +139,33 @@ class GroupDetails : Fragment() {
                         }
                     }
                     thread.start()
+
+                    val toEventList: ConstraintLayout = view.findViewById(R.id.eventsListGroupDetailsLL)
+                    toEventList.setOnClickListener {
+                        val bundle = Bundle()
+                        bundle.putStringArrayList("eventIds", ArrayList(data.events))
+                        val GroupDetailsEventListFragment = GroupDetailsEventList()
+                        GroupDetailsEventListFragment.arguments = bundle
+
+                        val transaction = parentFragmentManager.beginTransaction()
+                        transaction.replace(R.id.app_fragment, GroupDetailsEventListFragment)
+                        transaction.addToBackStack(null)
+                        transaction.commit()
+                    }
+
+                    val toMemberList: ConstraintLayout = view.findViewById(R.id.membersListGroupDetailsLL)
+                    toMemberList.setOnClickListener {
+                        val bundle = Bundle()
+                        bundle.putStringArrayList("memberIds", ArrayList(data.members))
+                        bundle.putString("inviteCode", data.inviteCode)
+                        val GroupDetailsMemberList = GroupDetailsMemberList()
+                        GroupDetailsMemberList.arguments = bundle
+
+                        val transaction = parentFragmentManager.beginTransaction()
+                        transaction.replace(R.id.app_fragment, GroupDetailsMemberList)
+                        transaction.addToBackStack(null)
+                        transaction.commit()
+                    }
                 }
 
                 override fun onError(error: Throwable) {
@@ -160,22 +187,6 @@ class GroupDetails : Fragment() {
         )
         memoriesRecyclerView.adapter = MemoriesListAdapter(memories)
         memoriesRecyclerView.setHasFixedSize(true)
-
-        val toMemberList: ConstraintLayout = view.findViewById(R.id.membersListGroupDetailsLL)
-        toMemberList.setOnClickListener {
-            val transaction = parentFragmentManager.beginTransaction()
-            transaction.replace(R.id.app_fragment, GroupDetailsMemberList())
-            transaction.addToBackStack(null)
-            transaction.commit()
-        }
-
-        val toEventList: ConstraintLayout = view.findViewById(R.id.eventsListGroupDetailsLL)
-        toEventList.setOnClickListener {
-            val transaction = parentFragmentManager.beginTransaction()
-            transaction.replace(R.id.app_fragment, GroupDetailsEventList())
-            transaction.addToBackStack(null)
-            transaction.commit()
-        }
 
         val chart: LineChartView = view.findViewById(R.id.chart)
         val entries: List<Pair<String, Float>> = listOf(
