@@ -162,6 +162,8 @@ class GroupDetailsMemberList : Fragment() {
             val clipboardManager =
                 view.context.getSystemService(clipboard) as android.content.ClipboardManager
             clipboardManager.setPrimaryClip(clip)
+
+            Toast.makeText(view.context, "Invite code copied", Toast.LENGTH_SHORT).show()
         }
 
     }

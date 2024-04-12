@@ -2,7 +2,6 @@ package com.example.datto
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
@@ -75,7 +74,6 @@ class MainActivity : AppCompatActivity() {
 
             when (item.itemId) {
                 R.id.bottom_app_bar_menu_home -> {
-                    Log.d("MainActivity", "Home clicked")
                     supportFragmentManager.beginTransaction()
                         .replace(R.id.app_fragment, GroupList())
                         .addToBackStack(null)
@@ -84,7 +82,6 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 R.id.bottom_app_bar_menu_memory -> {
-                    Log.d("MainActivity", "Memory clicked")
                     setDefaultLayout(false)
                     supportFragmentManager.beginTransaction().replace(R.id.app_fragment, Memories())
                         .addToBackStack(null)
@@ -93,7 +90,6 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 R.id.bottom_app_bar_menu_event -> {
-                    Log.d("MainActivity", "Event clicked")
                     supportFragmentManager.beginTransaction()
                         .replace(R.id.app_fragment, Create())
                         .addToBackStack(null)
@@ -102,7 +98,6 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 R.id.bottom_app_bar_menu_notification -> {
-                    Log.d("MainActivity", "Notification clicked")
                     supportFragmentManager.beginTransaction()
                         .replace(R.id.app_fragment, Notification())
                         .addToBackStack(null)
@@ -111,7 +106,6 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 R.id.bottom_app_bar_menu_profile -> {
-                    Log.d("MainActivity", "Profile clicked")
                     supportFragmentManager.beginTransaction()
                         .replace(R.id.app_fragment, Profile())
                         .addToBackStack(null)
@@ -127,7 +121,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Set fragment
-        Log.d("MainActivity", "Setting default fragment")
         supportFragmentManager.beginTransaction().replace(R.id.app_fragment, GroupList())
             .addToBackStack(null)
             .commit()

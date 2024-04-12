@@ -1,9 +1,6 @@
 package com.example.datto
 
-import android.content.Intent
-import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.provider.MediaStore
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -18,13 +15,9 @@ import com.example.datto.Credential.CredentialService
 import com.example.datto.DataClass.AccountResponse
 import com.example.datto.GlobalVariable.GlobalVariable
 import com.google.android.material.appbar.MaterialToolbar
-import com.squareup.picasso.OkHttp3Downloader
 import java.text.SimpleDateFormat
 import java.util.Locale
 import com.squareup.picasso.Picasso
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import java.net.URL
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -52,6 +45,7 @@ class Profile : Fragment() {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
         val menuItem = appBar.menu.findItem(R.id.edit)
         menuItem.isEnabled = true
+        menuItem.isVisible = true
         menuItem.setIcon(R.drawable.ic_edit)
         menuItem.setOnMenuItemClickListener {
             parentFragmentManager.beginTransaction().replace(R.id.app_fragment, ProfileEdit())
@@ -91,26 +85,28 @@ class Profile : Fragment() {
         dob = requireView().findViewById(R.id.profile_profile_info_dob)
 
         // Get data
-        APIService().doGet<AccountResponse>("accounts/${CredentialService().get()}", object : APICallback<Any> {
-            override fun onSuccess(data: Any) {
-                Log.d("API_SERVICE", "Data: $data")
+        APIService().doGet<AccountResponse>(
+            "accounts/${CredentialService().get()}",
+            object : APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    Log.d("API_SERVICE", "Data: $data")
 
-                // Cast data to Account
-                data as AccountResponse
+                    // Cast data to Account
+                    data as AccountResponse
 
-                // Format date of birth
-                val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
-                val targetFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
-                val date = originalFormat.parse(data.profile.dob)
+                    // Format date of birth
+                    val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                    val targetFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
+                    val date = originalFormat.parse(data.profile.dob)
 
-                // Set text to each element
-                largeFullName.text = data.profile.fullName
-                username.text = data.username
-                email.text = data.email
-                fullName.text = data.profile.fullName
-                dob.text = targetFormat.format(date!!)
+                    // Set text to each element
+                    largeFullName.text = data.profile.fullName
+                    username.text = data.username
+                    email.text = data.email
+                    fullName.text = data.profile.fullName
+                    dob.text = targetFormat.format(date!!)
 
-                // Load image with Picasso and new thread
+                    // Load image with Picasso and new thread
                     Thread {
                         try {
                             activity?.runOnUiThread {
