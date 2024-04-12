@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.annotation.SuppressLint
-import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -35,10 +34,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        this.setContentView(R.layout.activity_main)
-
-        findViewById<Button>(R.id.button).setOnClickListener {
-            startActivity(Intent(this, SignInActivity::class.java))
         enableEdgeToEdge()
 
         // Disable dark mode
@@ -51,15 +46,18 @@ class MainActivity : AppCompatActivity() {
             val currentFragment = supportFragmentManager.findFragmentById(R.id.app_fragment)
             when (currentFragment) {
                 is GroupList -> {
-                    bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_home).isChecked = true
+                    bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_home).isChecked =
+                        true
                 }
 
                 is Memories -> {
-                    bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_memory).isChecked = true
+                    bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_memory).isChecked =
+                        true
                 }
 
                 is Create -> {
-                    bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_event).isChecked = true
+                    bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_event).isChecked =
+                        true
                 }
 
                 is Notification -> {
@@ -93,7 +91,8 @@ class MainActivity : AppCompatActivity() {
                 R.id.bottom_app_bar_menu_memory -> {
                     Log.d("MainActivity", "Memory clicked")
                     setDefaultLayout(false)
-                    supportFragmentManager.beginTransaction().replace(R.id.app_fragment, Memories())
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.app_fragment, Memories())
                         .addToBackStack(null)
                         .commit()
                     true
