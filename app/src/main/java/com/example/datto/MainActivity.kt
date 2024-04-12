@@ -2,6 +2,7 @@ package com.example.datto
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -103,8 +104,10 @@ class MainActivity : AppCompatActivity() {
 
                 R.id.bottom_app_bar_menu_notification -> {
                     Log.d("MainActivity", "Notification clicked")
+
                     supportFragmentManager.beginTransaction()
-                        .replace(R.id.app_fragment, Notification())
+//                        .replace(R.id.app_fragment, Notification())
+                        .replace(R.id.app_fragment, FundList())
                         .addToBackStack(null)
                         .commit()
                     true

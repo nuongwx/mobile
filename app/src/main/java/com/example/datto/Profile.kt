@@ -59,7 +59,9 @@ class Profile : Fragment() {
                 .commit()
             true
         }
+
         appBar.title = "Profile"
+        appBar.navigationIcon = null
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
