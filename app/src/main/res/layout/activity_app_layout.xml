@@ -30,13 +30,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:contentDescription="Scrollable for fragments"
         android:layout_marginBottom="80dp">
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/app_fragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            android:name="com.example.datto.GroupList"
+            tools:layout="@layout/fragment_group_list" />
 
     </androidx.core.widget.NestedScrollView>
 

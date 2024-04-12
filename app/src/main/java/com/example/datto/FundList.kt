@@ -1,17 +1,69 @@
 package com.example.datto
 
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.RecyclerView
+import com.example.datto.API.APICallback
+import com.example.datto.API.APIService
+import com.example.datto.DataClass.FundResponse
 import com.google.android.material.appbar.MaterialToolbar
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
+
+class FundItem(val description: String, val amount: Double, val user: String, val date: String)
+
+class FundListAdapter(private val funds: ArrayList<FundItem>) :
+    RecyclerView.Adapter<FundListAdapter.FundViewHolder>() {
+
+    inner class FundViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val fundDescription: TextView = itemView.findViewById(R.id.expense_card_description)
+        val fundAmount: TextView = itemView.findViewById(R.id.expense_card_value)
+        val fundUser: TextView = itemView.findViewById(R.id.expense_card_user)
+        val fundDate: TextView = itemView.findViewById(R.id.expense_card_date)
+        init {}
+    }
+
+    override fun onCreateViewHolder(
+        parent: ViewGroup, viewType: Int
+    ): FundListAdapter.FundViewHolder {
+        val itemView =
+            LayoutInflater.from(parent.context).inflate(R.layout.expense_card, parent, false)
+        return FundViewHolder(itemView)
+    }
+
+    @SuppressLint("SetTextI18n")
+    override fun onBindViewHolder(holder: FundListAdapter.FundViewHolder, position: Int) {
+        val currentItem = funds[position]
+        holder.fundDescription.text = currentItem.description
+
+        if (currentItem.amount < 0) {
+            holder.fundAmount.text = currentItem.amount.toString()
+            // Change color
+            holder.fundAmount.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.light_blue_600))
+        } else {
+            holder.fundAmount.text = "+" + currentItem.amount.toString()
+            holder.fundAmount.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.md_theme_primaryFixed_mediumContrast))
+        }
+
+        holder.fundUser.text = currentItem.user
+        holder.fundDate.text = currentItem.date
+    }
+
+    override fun getItemCount() = funds.size
+}
 
 /**
  * A simple [Fragment] subclass.
@@ -20,8 +72,10 @@ private const val ARG_PARAM2 = "param2"
  */
 class FundList : Fragment() {
     // TODO: Rename and change types of parameters
-    private var param1: String? = null
+    private var param1: String? = "6614a42b14e884a9d8eef02f"
     private var param2: String? = null
+
+    private lateinit var shareMoneyBtn: com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 
     private fun configTopAppBar() {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
@@ -59,6 +113,43 @@ class FundList : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         configTopAppBar()
+
+        // Assign id for each element
+        shareMoneyBtn = view.findViewById(R.id.fund_list_share_button)
+
+        shareMoneyBtn.setOnClickListener{
+            Toast.makeText(context, "Share Money", Toast.LENGTH_SHORT).show()
+        }
+
+        APIService().doGet<FundResponse>("events/$param1/funds",
+            object: APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    Log.d("API_SERVICE", "Data: $data")
+
+                    data as FundResponse
+
+                    val fundList = ArrayList<FundItem>()
+
+                    for (fund in data.funds) {
+                        // Format paidAt date
+                        val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                        val targetFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.US)
+                        val date = originalFormat.parse(fund.paidAt)
+
+                        fundList.add(FundItem(fund.info, fund.amount, fund.paidBy.profile.fullName, targetFormat.format(date!!)))
+                    }
+
+                    val recyclerView = view.findViewById<RecyclerView>(R.id.fund_list_list)
+                    recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+                    recyclerView.adapter = FundListAdapter(fundList)
+                    recyclerView.setHasFixedSize(true)
+                }
+
+                override fun onError(error: Throwable) {
+                    Log.e("API_SERVICE", "Error: $error")
+                }
+            }
+        )
     }
 
     override fun onResume() {
