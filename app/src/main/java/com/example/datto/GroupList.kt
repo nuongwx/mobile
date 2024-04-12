@@ -43,6 +43,7 @@ class GroupListAdapter(
     inner class GroupViewHolder(itemView: View) :
         androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
         val groupName = itemView.findViewById<android.widget.TextView>(R.id.groupNameTextView)
+        val groupDes = itemView.findViewById<android.widget.TextView>(R.id.groupDescriptionTextView)
         val groupImage = itemView.findViewById<android.widget.ImageView>(R.id.groupImageView)
         val ava1 = itemView.findViewById<ImageView>(R.id.ava1)
         val ava2 = itemView.findViewById<ImageView>(R.id.ava2)
@@ -68,6 +69,8 @@ class GroupListAdapter(
         val currentItem = groups[position]
 
         holder.groupName.text = currentItem.name
+        holder.groupDes.text =
+            "${currentItem.events.size} event${if (currentItem.events.size > 1) "s" else ""} together"
 
         // Load image with Picasso and new thread
         try {
@@ -76,7 +79,7 @@ class GroupListAdapter(
             if (imageUrl != null) {
                 Picasso.get().load(imageUrl).into(holder.groupImage)
             } else {
-                Picasso.get().load(R.drawable.avatar).into(holder.groupImage)
+                Picasso.get().load(R.drawable.cover).into(holder.groupImage)
             }
         } catch (e: Exception) {
             e.printStackTrace()
