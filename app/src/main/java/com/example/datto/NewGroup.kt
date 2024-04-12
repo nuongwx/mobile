@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
@@ -126,6 +127,7 @@ class NewGroup : Fragment() {
                                             )
                                             requireActivity().supportFragmentManager.beginTransaction()
                                                 .replace(R.id.app_fragment, newGroupInviteCode)
+                                                .addToBackStack("NewGroupInviteCode")
                                                 .commit()
                                         }
 
@@ -152,6 +154,7 @@ class NewGroup : Fragment() {
         }
 
         appBar.title = "New Group"
+        appBar.navigationIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_back)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -161,6 +164,8 @@ class NewGroup : Fragment() {
             param2 = it.getString(ARG_PARAM2)
         }
     }
+
+    private var firstCall = true
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -177,14 +182,12 @@ class NewGroup : Fragment() {
         }
     }
 
-    private var isFirstCall = true
     override fun onResume() {
         super.onResume()
         configTopAppBar()
 
-        if (isFirstCall) {
-            isFirstCall = false
-
+        if (firstCall) {
+            firstCall = false
         } else {
             requireActivity().supportFragmentManager.popBackStack()
         }
@@ -192,6 +195,8 @@ class NewGroup : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        firstCall = true
 
         if (requestCode == this.requestCode && resultCode == Activity.RESULT_OK && data != null) {
             Picasso.get().load(data.data).into(thumbnail)

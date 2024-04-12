@@ -1,70 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginVertical="8dp">
+    android:layout_marginBottom="16dp"
+    app:cardCornerRadius="4dp"
+    app:cardElevation="0dp">
 
-    <TextView
-        android:id="@+id/eventNameTextView"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/be_vietnam_medium"
-        android:text="EventName"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_margin="12dp">
 
-    <androidx.cardview.widget.CardView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:cardBackgroundColor="@color/md_theme_secondaryContainer"
-        app:cardCornerRadius="8dp"
-        app:contentPaddingBottom="6dp"
-        app:contentPaddingLeft="20dp"
-        app:contentPaddingRight="20dp"
-        app:contentPaddingTop="6dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0">
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="16dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/cardView2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+            <TextView
+                android:id="@+id/eventNameTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/be_vietnam_medium"
+                android:text="EventName"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/eventDescriptionTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Supporting or descriptive text for the card goes here."
+                android:textColor="@color/material_dynamic_neutral70" />
+
+        </LinearLayout>
+
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardView2"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="@color/md_theme_secondaryContainer"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="0dp"
+            app:contentPaddingBottom="6dp"
+            app:contentPaddingLeft="16dp"
+            app:contentPaddingRight="16dp"
+            app:contentPaddingTop="6dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/linearLayout"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:id="@+id/eventDateTextView"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/be_vietnam_medium"
-                android:gravity="center|center_horizontal|top|center_vertical"
-                android:text="21"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toTopOf="@+id/eventMonthTextView"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_chainStyle="packed" />
+                android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/eventMonthTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/be_vietnam_medium"
-                android:gravity="center|center_horizontal"
-                android:text="Mar"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@+id/eventDateTextView"
-                app:layout_constraintStart_toEndOf="@+id/eventDateTextView"
-                app:layout_constraintStart_toStartOf="@+id/eventDateTextView"
-                app:layout_constraintTop_toBottomOf="@+id/eventDateTextView" />
+                <TextView
+                    android:id="@+id/eventDateTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/be_vietnam_medium"
+                    android:gravity="center|center_horizontal|top|center_vertical"
+                    android:lineHeight="18dp"
+                    android:text="21"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                    android:textFontWeight="700"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toTopOf="@+id/eventMonthTextView"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                <TextView
+                    android:id="@+id/eventMonthTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/be_vietnam_medium"
+                    android:gravity="center|center_horizontal"
+                    android:text="Mar"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="@+id/eventDateTextView"
+                    app:layout_constraintStart_toEndOf="@+id/eventDateTextView"
+                    app:layout_constraintStart_toStartOf="@+id/eventDateTextView"
+                    app:layout_constraintTop_toBottomOf="@+id/eventDateTextView" />
 
-    </androidx.cardview.widget.CardView>
-</androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.cardview.widget.CardView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.cardview.widget.CardView>
