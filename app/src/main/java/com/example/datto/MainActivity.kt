@@ -39,7 +39,6 @@ class MainActivity : AppCompatActivity() {
 
         // Disable dark mode
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        CredentialService().erase()
 
         if (CredentialService().get() == "") {
             setContentView(R.layout.activity_main)

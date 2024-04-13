@@ -56,7 +56,7 @@ class SignInActivity : AppCompatActivity() {
                     password.text.toString()
                 )
                 APIService().doPost<NewAccountResponse>(
-                    "accounts/signin",
+                    "accounts/sign-in",
                     newAccount,
                     object :
                         APICallback<Any> {
