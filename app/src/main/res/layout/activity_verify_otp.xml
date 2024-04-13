@@ -11,9 +11,6 @@
         android:id="@+id/materialToolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         app:navigationIcon="@drawable/arrow_back"
@@ -151,10 +148,11 @@
                 android:layout_marginEnd="8dp" />
 
             <TextView
-                android:id="@+id/sign_up"
+                android:id="@+id/resend_otp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Resend OTP"
+                android:clickable="true"
                 android:textAllCaps="false"
                 android:textStyle="bold" />
         </LinearLayout>

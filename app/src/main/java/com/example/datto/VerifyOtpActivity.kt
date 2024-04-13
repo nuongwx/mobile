@@ -5,6 +5,7 @@ import android.graphics.Rect
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.Display
 import android.view.KeyEvent
 import android.view.View
@@ -14,10 +15,17 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.RelativeLayout
 import android.widget.ScrollView
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.datto.API.APICallback
+import com.example.datto.API.APIService
+import com.example.datto.DataClass.NewOtpRequest
+import com.example.datto.DataClass.OtpResponse
+import com.example.datto.DataClass.VerifyOtpRequest
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.textfield.TextInputEditText
 
@@ -100,6 +108,73 @@ class VerifyOtpActivity : AppCompatActivity() {
                 adjustLayoutOnKeyboardShown(keypadHeight)
             } else { // If the height difference is not significant, keyboard is hidden
                 adjustLayoutOnKeyboardHidden()
+            }
+        }
+
+        val email = intent.getStringExtra("email").toString()
+        var id = intent.getStringExtra("id").toString()
+        val key = intent.getStringExtra("key").toString()
+        val text_top = findViewById<TextView>(R.id.text_top)
+        "Please enter the verification code sent to $email".also { text_top.text = it }
+
+        findViewById<TextView>(R.id.resend_otp).setOnClickListener {
+            val otp = NewOtpRequest(key, email.toString())
+            APIService().doPost<OtpResponse>(
+                "otp",
+                otp,
+                object :
+                    APICallback<Any> {
+                    override fun onSuccess(data: Any) {
+                        Log.d("API_SERVICE", "Data: $data")
+                        data as OtpResponse
+                        id = data.id
+                    }
+
+                    override fun onError(error: Throwable) {
+                        Log.e("API_SERVICE", "Error: ${error.message}")
+                    }
+                })
+        }
+
+        findViewById<Button>(R.id.submit_button).setOnClickListener {
+            var code: String = ""
+
+            otpFields.forEachIndexed { index, editText ->
+                code += editText.text.toString()
+            }
+            if (code.length < 6) {
+                Toast.makeText(this@VerifyOtpActivity, "Invalid code. Please check your code and try again.", Toast.LENGTH_SHORT).show()
+            } else {
+                val verifyOtpRq = VerifyOtpRequest(id, code.toInt())
+                APIService().doPost<Any>(
+                    "otp/verification",
+                    verifyOtpRq,
+                    object :
+                        APICallback<Any> {
+                        override fun onSuccess(data: Any) {
+                            Log.d("API_SERVICE", "Verify OTP success")
+                            if (key == "Sign up") {
+                                val i: Intent =
+                                    Intent(applicationContext, SignUpInfoActivity::class.java)
+                                i.putExtra("email", email.toString())
+                                startActivity(i)
+                            } else {
+                                val i: Intent =
+                                    Intent(applicationContext, EnterNewPasswordActivity::class.java)
+                                i.putExtra("email", email.toString())
+                                startActivity(i)
+                            }
+                        }
+
+                        override fun onError(error: Throwable) {
+                            Log.e("API_SERVICE", "Error: ${error.message}")
+                            Toast.makeText(
+                                this@VerifyOtpActivity,
+                                error.message,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    })
             }
         }
     }
