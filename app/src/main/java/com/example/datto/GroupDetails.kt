@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -40,9 +39,11 @@ class MemoriesListAdapter(private val memories: ArrayList<MemoryThumbnail>) :
         val memoryThumbnail: ImageView = itemView.findViewById(R.id.memoryThumbnail)
         val imageButton: ImageButton = itemView.findViewById(R.id.floatingActionButton)
 
+        var setOnClickListener: (() -> Unit)? = null
+
         init {
             itemView.setOnClickListener {
-                Toast.makeText(itemView.context, itemView.toString(), Toast.LENGTH_SHORT).show()
+                setOnClickListener?.invoke()
             }
         }
     }
@@ -59,22 +60,47 @@ class MemoriesListAdapter(private val memories: ArrayList<MemoryThumbnail>) :
     override fun onBindViewHolder(holder: MemoriesListAdapter.MemoriesViewHolder, position: Int) {
         val currentItem = memories[position]
 
-        if (position == 0) return
-        else { // hide button
-            holder.imageButton.visibility = View.GONE
-        } // create a thread to fetch the image
-        val thread = Thread {
-            try {
-                val bitmap =
-                    BitmapFactory.decodeStream(currentItem.imgUrl.openConnection().getInputStream())
-                holder.memoryThumbnail.post {
-                    holder.memoryThumbnail.setImageBitmap(bitmap)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
+        if (position == 0) {
+            // set unique button for the first item
+            holder.imageButton.visibility = View.VISIBLE
+            holder.setOnClickListener = {
+                val newMemoryFragment = NewMemory()
+                val transaction =
+                    (holder.itemView.context as MainActivity).supportFragmentManager.beginTransaction()
+                transaction.replace(R.id.app_fragment, newMemoryFragment)
+                transaction.addToBackStack(null)
+                transaction.commit()
             }
         }
-        thread.start()
+        else { // hide button
+            holder.imageButton.visibility = View.GONE
+            val thread = Thread {
+                try {
+                    val bitmap = BitmapFactory.decodeStream(
+                        currentItem.imgUrl.openConnection().getInputStream()
+                    )
+                    holder.memoryThumbnail.post {
+                        holder.memoryThumbnail.setImageBitmap(bitmap)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+            thread.start()
+
+            holder.setOnClickListener = {
+                val imgUrl = currentItem.imgUrl
+                val MemoryViewFragment = MemoryView()
+                val transaction =
+                    (holder.itemView.context as MainActivity).supportFragmentManager.beginTransaction()
+                val bundle = Bundle()
+                bundle.putString("imgUrl", imgUrl.toString())
+                MemoryViewFragment.arguments = bundle
+                transaction.replace(R.id.app_fragment, MemoryViewFragment)
+                transaction.addToBackStack(null)
+                transaction.commit()
+            }
+        }
     }
 
     override fun getItemCount(): Int {
