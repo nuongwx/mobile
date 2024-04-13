@@ -47,6 +47,7 @@ class Profile : Fragment() {
     private lateinit var email: TextView
     private lateinit var fullName: TextView
     private lateinit var dob: TextView
+    private lateinit var logoutBtn: Button
 
     private fun configTopAppBar() {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
@@ -89,6 +90,7 @@ class Profile : Fragment() {
         email = requireView().findViewById(R.id.profile_account_info_email)
         fullName = requireView().findViewById(R.id.profile_profile_info_fullName)
         dob = requireView().findViewById(R.id.profile_profile_info_dob)
+        logoutBtn = requireView().findViewById(R.id.profile_log_out)
 
         // Get data
         APIService().doGet<AccountResponse>("accounts/${CredentialService().get()}", object : APICallback<Any> {
@@ -132,6 +134,18 @@ class Profile : Fragment() {
                     Log.e("API_SERVICE", "Error: ${error.message}")
                 }
             })
+
+        // Set on click listener for log out button
+        logoutBtn.setOnClickListener {
+            // Erase credential
+            CredentialService().erase()
+
+            // Empty all fragment
+            parentFragmentManager.popBackStack(null, parentFragmentManager.backStackEntryCount)
+
+            // Move back to main activity
+            startActivity(Intent(requireContext(), MainActivity::class.java))
+        }
     }
 
     override fun onResume() {

@@ -95,6 +95,7 @@ class ProfileEdit : Fragment() {
 
                             override fun onError(error: Throwable) {
                                 Log.e("API_SERVICE", "Error: ${error.message}")
+                                Toast.makeText(requireContext(), "Error: ${error.message}", Toast.LENGTH_SHORT).show()
                             }
                         })
                     } else {
@@ -146,6 +147,7 @@ class ProfileEdit : Fragment() {
 
                                     override fun onError(error: Throwable) {
                                         Log.e("API_SERVICE", "Error: ${error.message}")
+                                        Toast.makeText(requireContext(), "Error: ${error.message}", Toast.LENGTH_SHORT).show()
                                     }
                                 })
 
@@ -154,6 +156,7 @@ class ProfileEdit : Fragment() {
 
                             override fun onError(error: Throwable) {
                                 Log.e("API_SERVICE", "Error: ${error.message}")
+                                Toast.makeText(requireContext(), "Error: ${error.message}", Toast.LENGTH_SHORT).show()
                             }
                         })
                     }
