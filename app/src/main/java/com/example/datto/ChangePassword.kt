@@ -12,8 +12,6 @@ import com.example.datto.API.APIService
 import com.example.datto.Credential.CredentialService
 import com.example.datto.DataClass.ChangePasswordRequest
 import com.google.android.material.appbar.MaterialToolbar
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
