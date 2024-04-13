@@ -1,7 +1,6 @@
 package com.example.datto
 
 import NumberTextWatcher
-import android.accounts.Account
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -116,6 +115,12 @@ class NewFund (
                 val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
                 val menuItem = appBar.menu.findItem(R.id.edit)
                 menuItem.setOnMenuItemClickListener {
+                    // Check all fields are filled
+                    if (paidBy.text.toString() == "" || amount.text.toString() == "" || description.text.toString() == "" || paidAt.text.toString() == "") {
+                        Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                        return@setOnMenuItemClickListener true
+                    }
+
                     // Reformat paidAt from dd/MM/yyyy HH:mm to yyyy-MM-ddTHH:mm
                     val originalFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.US)
                     val targetFormat =

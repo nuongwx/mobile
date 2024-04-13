@@ -9,11 +9,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.DataClass.FundResponse
+import com.example.datto.DataClassRecyclerView.FundItem
 import com.google.android.material.appbar.MaterialToolbar
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -22,8 +24,6 @@ import java.util.Locale
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
-
-class FundItem(val description: String, val amount: Double, val user: String, val date: String)
 
 class FundListAdapter(private val funds: ArrayList<FundItem>) :
     RecyclerView.Adapter<FundListAdapter.FundViewHolder>() {
@@ -60,6 +60,15 @@ class FundListAdapter(private val funds: ArrayList<FundItem>) :
 
         holder.fundUser.text = currentItem.user
         holder.fundDate.text = currentItem.date
+
+        // Holder click listener
+        holder.itemView.setOnClickListener{
+            // Move to FundEdit
+             (it.context as AppCompatActivity).supportFragmentManager.beginTransaction()
+                .replace(R.id.app_fragment, FundEdit(currentItem.id))
+                .addToBackStack("FundList")
+                .commit()
+}
     }
 
     override fun getItemCount() = funds.size
@@ -136,7 +145,7 @@ class FundList : Fragment() {
                         val targetFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.US)
                         val date = originalFormat.parse(fund.paidAt)
 
-                        fundList.add(FundItem(fund.info, fund.amount, fund.paidBy.profile.fullName, targetFormat.format(date!!)))
+                        fundList.add(FundItem(fund.id, fund.info, fund.amount, fund.paidBy.profile.fullName, targetFormat.format(date!!)))
                     }
 
                     val recyclerView = view.findViewById<RecyclerView>(R.id.fund_list_list)

@@ -1,7 +1,6 @@
 package com.example.datto.DataClass
 
 import com.google.gson.annotations.SerializedName
-import java.util.Date
 
 data class FundResponseUnit (
     @SerializedName("_id")
@@ -14,4 +13,11 @@ data class FundResponseUnit (
 
 data class FundResponse (
     var funds: List<FundResponseUnit>
+)
+
+data class FundRequest(
+    val paidBy: String,
+    val amount: Double,
+    val info: String,
+    val paidAt: String,
 )
