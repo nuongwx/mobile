@@ -1,8 +1,9 @@
 package com.example.datto
 
-import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
-import android.util.DisplayMetrics
+import android.widget.Button
+import android.annotation.SuppressLint
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +14,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.widget.NestedScrollView
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.example.datto.Credential.CredentialService
 
 class MainActivity : AppCompatActivity() {
     // Handle back button to exit app
@@ -38,104 +40,112 @@ class MainActivity : AppCompatActivity() {
         // Disable dark mode
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
-        // Set default layout
-        setContentView(R.layout.activity_app_layout)
+        if (CredentialService().get() == "") {
+            setContentView(R.layout.activity_main)
+            findViewById<Button>(R.id.sign_in_button).setOnClickListener{
+                startActivity(Intent(this, SignInActivity::class.java))
+            }
+            findViewById<Button>(R.id.sign_up_button).setOnClickListener{
+                startActivity(Intent(this, SignUpActivity::class.java))
+            }
+        } else {
+            // Set default layout
+            setContentView(R.layout.activity_app_layout)
 
-        supportFragmentManager.addOnBackStackChangedListener {
-            val currentFragment = supportFragmentManager.findFragmentById(R.id.app_fragment)
-            when (currentFragment) {
-                is GroupList -> {
-                    bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_home).isChecked = true
-                }
+            supportFragmentManager.addOnBackStackChangedListener {
+                val currentFragment = supportFragmentManager.findFragmentById(R.id.app_fragment)
+                when (currentFragment) {
+                    is GroupList -> {
+                        bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_home).isChecked = true
+                    }
 
-                is Memories -> {
-                    bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_memory).isChecked = true
-                }
+                    is Memories -> {
+                        bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_memory).isChecked = true
+                    }
 
-                is Create -> {
-                    bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_event).isChecked = true
-                }
+                    is Create -> {
+                        bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_event).isChecked = true
+                    }
 
-                is Notification -> {
-                    bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_notification).isChecked =
-                        true
-                }
+                    is Notification -> {
+                        bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_notification).isChecked =
+                            true
+                    }
 
-                is Profile -> {
-                    bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_profile).isChecked =
-                        true
+                    is Profile -> {
+                        bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_profile).isChecked =
+                            true
+                    }
                 }
             }
-        }
 
-        appBar.setNavigationOnClickListener {
-            handleBackEvent()
-        }
+            appBar.setNavigationOnClickListener {
+                handleBackEvent()
+            }
 
-        bottomNavigation.setOnItemSelectedListener { item ->
+            bottomNavigation.setOnItemSelectedListener { item ->
 
-            when (item.itemId) {
-                R.id.bottom_app_bar_menu_home -> {
-                    Log.d("MainActivity", "Home clicked")
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.app_fragment, GroupList())
-                        .addToBackStack(null)
-                        .commit()
-                    true
-                }
+                when (item.itemId) {
+                    R.id.bottom_app_bar_menu_home -> {
+                        Log.d("MainActivity", "Home clicked")
+                        supportFragmentManager.beginTransaction()
+                            .replace(R.id.app_fragment, GroupList())
+                            .addToBackStack(null)
+                            .commit()
+                        true
+                    }
 
-                R.id.bottom_app_bar_menu_memory -> {
-                    Log.d("MainActivity", "Memory clicked")
-                    setDefaultLayout(false)
-                    supportFragmentManager.beginTransaction().replace(R.id.app_fragment, Memories())
-                        .addToBackStack(null)
-                        .commit()
-                    true
-                }
+                    R.id.bottom_app_bar_menu_memory -> {
+                        Log.d("MainActivity", "Memory clicked")
+                        setDefaultLayout(false)
+                        supportFragmentManager.beginTransaction().replace(R.id.app_fragment, Memories())
+                            .addToBackStack(null)
+                            .commit()
+                        true
+                    }
 
-                R.id.bottom_app_bar_menu_event -> {
-                    Log.d("MainActivity", "Event clicked")
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.app_fragment, Create())
-                        .addToBackStack(null)
-                        .commit()
-                    true
-                }
+                    R.id.bottom_app_bar_menu_event -> {
+                        Log.d("MainActivity", "Event clicked")
+                        supportFragmentManager.beginTransaction()
+                            .replace(R.id.app_fragment, Create())
+                            .addToBackStack(null)
+                            .commit()
+                        true
+                    }
 
-                R.id.bottom_app_bar_menu_notification -> {
-                    Log.d("MainActivity", "Notification clicked")
+                    R.id.bottom_app_bar_menu_notification -> {
+                        Log.d("MainActivity", "Notification clicked")
+                        supportFragmentManager.beginTransaction()
+                            .replace(R.id.app_fragment, Notification())
+                            .addToBackStack(null)
+                            .commit()
+                        true
+                    }
 
-                    supportFragmentManager.beginTransaction()
-//                        .replace(R.id.app_fragment, Notification())
-                        .replace(R.id.app_fragment, FundList())
-                        .addToBackStack(null)
-                        .commit()
-                    true
-                }
+                    R.id.bottom_app_bar_menu_profile -> {
+                        Log.d("MainActivity", "Profile clicked")
+                        supportFragmentManager.beginTransaction()
+                            .replace(R.id.app_fragment, Profile())
+                            .addToBackStack(null)
+                            .commit()
+                        true
+                    }
 
-                R.id.bottom_app_bar_menu_profile -> {
-                    Log.d("MainActivity", "Profile clicked")
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.app_fragment, Profile())
-                        .addToBackStack(null)
-                        .commit()
-                    true
-                }
-
-                else -> {
-                    setDefaultLayout()
-                    true
+                    else -> {
+                        setDefaultLayout()
+                        true
+                    }
                 }
             }
-        }
 
-        // Set fragment
-        Log.d("MainActivity", "Setting default fragment")
-        supportFragmentManager.beginTransaction().replace(R.id.app_fragment, GroupList())
-            .addToBackStack(null)
-            .commit()
+            // Set fragment
+            Log.d("MainActivity", "Setting default fragment")
+            supportFragmentManager.beginTransaction().replace(R.id.app_fragment, GroupList())
+                .addToBackStack(null)
+                .commit()
+        }
     }
-
+    
     private fun setDefaultLayout(viewBottomNav: Boolean = true) {
         bottomNavigation.visibility = if (viewBottomNav) View.VISIBLE else View.GONE
         val layoutParams = scrollView.layoutParams as ViewGroup.MarginLayoutParams

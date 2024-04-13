@@ -17,10 +17,13 @@ import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.Credential.CredentialService
 import com.example.datto.DataClass.AccountResponse
+import com.example.datto.DataClass.EventResponse
 import com.example.datto.DataClass.GroupResponse
 import com.example.datto.GlobalVariable.GlobalVariable
 import com.google.android.material.appbar.MaterialToolbar
 import com.squareup.picasso.Picasso
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -40,6 +43,7 @@ class GroupListAdapter(
     inner class GroupViewHolder(itemView: View) :
         androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
         val groupName = itemView.findViewById<android.widget.TextView>(R.id.groupNameTextView)
+        val groupDes = itemView.findViewById<android.widget.TextView>(R.id.groupDescriptionTextView)
         val groupImage = itemView.findViewById<android.widget.ImageView>(R.id.groupImageView)
         val ava1 = itemView.findViewById<ImageView>(R.id.ava1)
         val ava2 = itemView.findViewById<ImageView>(R.id.ava2)
@@ -65,6 +69,8 @@ class GroupListAdapter(
         val currentItem = groups[position]
 
         holder.groupName.text = currentItem.name
+        holder.groupDes.text =
+            "${currentItem.events.size} event${if (currentItem.events.size > 1) "s" else ""} together"
 
         // Load image with Picasso and new thread
         try {
@@ -73,7 +79,7 @@ class GroupListAdapter(
             if (imageUrl != null) {
                 Picasso.get().load(imageUrl).into(holder.groupImage)
             } else {
-                Picasso.get().load(R.drawable.avatar).into(holder.groupImage)
+                Picasso.get().load(R.drawable.cover).into(holder.groupImage)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -133,6 +139,78 @@ class GroupListAdapter(
     }
 }
 
+data class Event(
+    val groupName: String,
+    val id: String
+)
+
+class CurrentEventAdapter(
+    private val events: ArrayList<Event>
+) : androidx.recyclerview.widget.RecyclerView.Adapter<CurrentEventAdapter.EventViewHolder>() {
+
+    inner class EventViewHolder(itemView: View) :
+        androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
+        val eventGroupName = itemView.findViewById<android.widget.TextView>(R.id.eventGroupName)
+        val eventName = itemView.findViewById<android.widget.TextView>(R.id.eventTitle)
+        val eventDate = itemView.findViewById<android.widget.TextView>(R.id.eventDate)
+
+        init {}
+    }
+
+    fun getItem(position: Int): Event {
+        return events[position]
+    }
+
+    override fun onCreateViewHolder(
+        parent: ViewGroup, viewType: Int
+    ): CurrentEventAdapter.EventViewHolder {
+        val itemView =
+            LayoutInflater.from(parent.context).inflate(R.layout.events_list_items, parent, false)
+        return EventViewHolder(itemView)
+    }
+
+    override fun onBindViewHolder(holder: CurrentEventAdapter.EventViewHolder, position: Int) {
+        val currentItem = events[position]
+
+        holder.eventGroupName.text = currentItem.groupName
+
+        APIService().doGet<EventResponse>("events/${currentItem.id}", object : APICallback<Any> {
+            override fun onSuccess(data: Any) {
+                Log.d("API_SERVICE", "Data: $data")
+
+                data as EventResponse
+
+                holder.eventName.text = data.name
+
+                val inputFormat =
+                    SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault())
+                val outputFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
+                val outputFormatWithYear = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                val date = inputFormat.parse(data.time.start)
+                holder.eventDate.text = if (date != null) {
+                    "${outputFormat.format(date)} - ${
+                        outputFormatWithYear.format(
+                            inputFormat.parse(
+                                data.time.end
+                            )
+                        )
+                    }"
+                } else {
+                    ""
+                }
+            }
+
+            override fun onError(error: Throwable) {
+                Log.e("API_SERVICE", "Error: ${error.message}")
+            }
+        })
+    }
+
+    override fun getItemCount(): Int {
+        return events.size
+    }
+}
+
 class GroupList : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
@@ -142,6 +220,7 @@ class GroupList : Fragment() {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
         val menuItem = appBar.menu.findItem(R.id.edit)
         menuItem.isVisible = true
+        menuItem.isEnabled = true
         menuItem.title = "Join"
         menuItem.setIcon(null)
         menuItem.setOnMenuItemClickListener {
@@ -187,6 +266,7 @@ class GroupList : Fragment() {
         }
 
         val groupList = ArrayList<GroupResponse>()
+        val currentEvents = ArrayList<Event>()
 
         APIService().doGet<List<GroupResponse>>(
             "accounts/${CredentialService().get()}/groups",
@@ -198,6 +278,10 @@ class GroupList : Fragment() {
 
                     data.forEach {
                         groupList.add(it)
+
+                        it.events.forEach { event ->
+                            currentEvents.add(Event(it.name, event))
+                        }
                     }
 
                     val groupRecyclerView =
@@ -245,6 +329,15 @@ class GroupList : Fragment() {
 
                         override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
                     })
+
+                    val eventRecyclerView =
+                        view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.currentEventsRecyclerView)
+                    eventRecyclerView.layoutManager =
+                        androidx.recyclerview.widget.LinearLayoutManager(
+                            view.context, androidx.recyclerview.widget.RecyclerView.VERTICAL, false
+                        )
+                    eventRecyclerView.adapter = CurrentEventAdapter(currentEvents)
+                    eventRecyclerView.setHasFixedSize(true)
                 }
 
                 override fun onError(error: Throwable) {

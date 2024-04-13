@@ -1,5 +1,6 @@
 package com.example.datto
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -40,11 +41,13 @@ class Profile : Fragment() {
     private lateinit var email: TextView
     private lateinit var fullName: TextView
     private lateinit var dob: TextView
+    private lateinit var logoutBtn: Button
 
     private fun configTopAppBar() {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
         val menuItem = appBar.menu.findItem(R.id.edit)
         menuItem.isEnabled = true
+        menuItem.isVisible = true
         menuItem.setIcon(R.drawable.ic_edit)
         menuItem.setOnMenuItemClickListener {
             parentFragmentManager.beginTransaction().replace(R.id.app_fragment, ProfileEdit())
@@ -84,28 +87,31 @@ class Profile : Fragment() {
         email = requireView().findViewById(R.id.profile_account_info_email)
         fullName = requireView().findViewById(R.id.profile_profile_info_fullName)
         dob = requireView().findViewById(R.id.profile_profile_info_dob)
+        logoutBtn = requireView().findViewById(R.id.profile_log_out)
 
         // Get data
-        APIService().doGet<AccountResponse>("accounts/${CredentialService().get()}", object : APICallback<Any> {
-            override fun onSuccess(data: Any) {
-                Log.d("API_SERVICE", "Data: $data")
+        APIService().doGet<AccountResponse>(
+            "accounts/${CredentialService().get()}",
+            object : APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    Log.d("API_SERVICE", "Data: $data")
 
-                // Cast data to Account
-                data as AccountResponse
+                    // Cast data to Account
+                    data as AccountResponse
 
-                // Format date of birth
-                val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
-                val targetFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
-                val date = originalFormat.parse(data.profile.dob)
+                    // Format date of birth
+                    val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                    val targetFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
+                    val date = originalFormat.parse(data.profile.dob)
 
-                // Set text to each element
-                largeFullName.text = data.profile.fullName
-                username.text = data.username
-                email.text = data.email
-                fullName.text = data.profile.fullName
-                dob.text = targetFormat.format(date!!)
+                    // Set text to each element
+                    largeFullName.text = data.profile.fullName
+                    username.text = data.username
+                    email.text = data.email
+                    fullName.text = data.profile.fullName
+                    dob.text = targetFormat.format(date!!)
 
-                // Load image with Picasso and new thread
+                    // Load image with Picasso and new thread
                     Thread {
                         try {
                             activity?.runOnUiThread {
@@ -127,6 +133,18 @@ class Profile : Fragment() {
                     Log.e("API_SERVICE", "Error: ${error.message}")
                 }
             })
+
+        // Set on click listener for log out button
+        logoutBtn.setOnClickListener {
+            // Erase credential
+            CredentialService().erase()
+
+            // Empty all fragment
+            parentFragmentManager.popBackStack(null, parentFragmentManager.backStackEntryCount)
+
+            // Move back to main activity
+            startActivity(Intent(requireContext(), MainActivity::class.java))
+        }
     }
 
     override fun onResume() {

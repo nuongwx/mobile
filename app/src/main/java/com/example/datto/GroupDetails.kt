@@ -23,10 +23,7 @@ import com.squareup.picasso.Picasso
 import java.net.URL
 
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+private const val ARG_PARAM1 = "groupId"
 
 /**
  * A simple [Fragment] subclass.
@@ -88,14 +85,12 @@ class MemoriesListAdapter(private val memories: ArrayList<MemoryThumbnail>) :
 
 class GroupDetails : Fragment() {
     // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private var groupId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+            groupId = it.getString(ARG_PARAM1)
         }
     }
 
@@ -108,7 +103,7 @@ class GroupDetails : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val groupId = arguments?.getString("groupId")
+        groupId = arguments?.getString("groupId")
         var group: GroupResponse? = null
 
         APIService().doGet<GroupResponse>("groups/${groupId}",
@@ -120,7 +115,7 @@ class GroupDetails : Fragment() {
 
                     group = data
 
-                    configTopAppBar(data.name)
+                    configTopAppBar(data.name, if (data.thumbnail != null) data.thumbnail else "")
 
                     val coverImage: ImageView = view.findViewById(R.id.imageView)
                     val thread = Thread {
@@ -131,7 +126,7 @@ class GroupDetails : Fragment() {
                                 if (imageUrl != null) {
                                     Picasso.get().load(imageUrl).into(coverImage)
                                 } else {
-                                    Picasso.get().load(R.drawable.avatar).into(coverImage)
+                                    Picasso.get().load(R.drawable.cover).into(coverImage)
                                 }
                             }
                         } catch (e: Exception) {
@@ -139,6 +134,35 @@ class GroupDetails : Fragment() {
                         }
                     }
                     thread.start()
+
+                    val toEventList: ConstraintLayout =
+                        view.findViewById(R.id.eventsListGroupDetailsLL)
+                    toEventList.setOnClickListener {
+                        val bundle = Bundle()
+                        bundle.putStringArrayList("eventIds", ArrayList(data.events))
+                        val GroupDetailsEventListFragment = GroupDetailsEventList()
+                        GroupDetailsEventListFragment.arguments = bundle
+
+                        val transaction = parentFragmentManager.beginTransaction()
+                        transaction.replace(R.id.app_fragment, GroupDetailsEventListFragment)
+                        transaction.addToBackStack(null)
+                        transaction.commit()
+                    }
+
+                    val toMemberList: ConstraintLayout =
+                        view.findViewById(R.id.membersListGroupDetailsLL)
+                    toMemberList.setOnClickListener {
+                        val bundle = Bundle()
+                        bundle.putStringArrayList("memberIds", ArrayList(data.members))
+                        bundle.putString("inviteCode", data.inviteCode)
+                        val GroupDetailsMemberList = GroupDetailsMemberList()
+                        GroupDetailsMemberList.arguments = bundle
+
+                        val transaction = parentFragmentManager.beginTransaction()
+                        transaction.replace(R.id.app_fragment, GroupDetailsMemberList)
+                        transaction.addToBackStack(null)
+                        transaction.commit()
+                    }
                 }
 
                 override fun onError(error: Throwable) {
@@ -161,22 +185,6 @@ class GroupDetails : Fragment() {
         memoriesRecyclerView.adapter = MemoriesListAdapter(memories)
         memoriesRecyclerView.setHasFixedSize(true)
 
-        val toMemberList: ConstraintLayout = view.findViewById(R.id.membersListGroupDetailsLL)
-        toMemberList.setOnClickListener {
-            val transaction = parentFragmentManager.beginTransaction()
-            transaction.replace(R.id.app_fragment, GroupDetailsMemberList())
-            transaction.addToBackStack(null)
-            transaction.commit()
-        }
-
-        val toEventList: ConstraintLayout = view.findViewById(R.id.eventsListGroupDetailsLL)
-        toEventList.setOnClickListener {
-            val transaction = parentFragmentManager.beginTransaction()
-            transaction.replace(R.id.app_fragment, GroupDetailsEventList())
-            transaction.addToBackStack(null)
-            transaction.commit()
-        }
-
         val chart: LineChartView = view.findViewById(R.id.chart)
         val entries: List<Pair<String, Float>> = listOf(
             "Jan" to 4f,
@@ -195,11 +203,26 @@ class GroupDetails : Fragment() {
         chart.show(entries)
     }
 
-    private fun configTopAppBar(title: String) {
+    private fun configTopAppBar(name: String, thumbnail: String) {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
         val menuItem = appBar.menu.findItem(R.id.edit)
-        menuItem.isVisible = false
-        appBar.title = title
+        menuItem.isEnabled = true
+        menuItem.isVisible = true
+        menuItem.title = null
+        menuItem.setIcon(R.drawable.ic_edit)
+        menuItem.setOnMenuItemClickListener {
+            val groupEditFragment = GroupEdit()
+            val bundle = Bundle()
+            bundle.putString("groupId", groupId)
+            bundle.putString("groupName", name)
+            bundle.putString("thumbnail", thumbnail)
+            groupEditFragment.arguments = bundle
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.app_fragment, groupEditFragment)
+                .addToBackStack("GroupEdit").commit()
+            true
+        }
+        appBar.title = name
         appBar.navigationIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_back)
     }
 
@@ -217,7 +240,6 @@ class GroupDetails : Fragment() {
         fun newInstance(param1: String, param2: String) = GroupDetails().apply {
             arguments = Bundle().apply {
                 putString(ARG_PARAM1, param1)
-                putString(ARG_PARAM2, param2)
             }
         }
     }

@@ -15,16 +15,16 @@
             android:id="@+id/materialTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Current Events"
-            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+            android:text="Latest events"
+            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+            android:textFontWeight="600"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
+            android:id="@+id/currentEventsRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             app:layout_constraintBottom_toTopOf="@id/materialTextView2"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/materialTextView" />
@@ -33,11 +33,13 @@
             android:id="@+id/materialTextView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:text="Your groups"
-            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+            android:textFontWeight="600"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/recyclerView" />
-        />
+            app:layout_constraintTop_toBottomOf="@+id/currentEventsRecyclerView" />
+
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView2"
