@@ -20,9 +20,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
+private const val ARG_PARAM1 = "groupId"
 private const val ARG_PARAM2 = "param2"
 
 /**
@@ -39,7 +37,7 @@ data class EventRequest(
 
 class Create : Fragment() {
     // TODO: Rename and change types of parameters
-    private var param1: String? = null
+    private var groupId: String? = null
     private var param2: String? = null
 
     private lateinit var groups: Map<String, String>
@@ -80,6 +78,11 @@ class Create : Fragment() {
                 data,
                 object : APICallback<Any> {
                     override fun onSuccess(data: Any) {
+                        if (groupId != null) {
+                            requireActivity().supportFragmentManager.popBackStack()
+                            return
+                        }
+
                         requireActivity().supportFragmentManager.beginTransaction()
                             .replace(R.id.app_fragment, GroupList()).addToBackStack("GroupList")
                             .commit()
@@ -98,7 +101,7 @@ class Create : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
+            groupId = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
     }
@@ -132,6 +135,16 @@ class Create : Fragment() {
                         view.findViewById<MaterialAutoCompleteTextView>(R.id.create_group_dropdown)
                     groups = groupList.associate { it.id to it.name }
                     groupSelect.setSimpleItems(groups.values.toTypedArray())
+
+                    // If groupId is defined, select the corresponding group and disable groupSelect
+                    groupId?.let {
+                        val groupName = groups[it]
+                        groupName?.let { name ->
+                            val index = groups.values.indexOf(name)
+                            groupSelect.setText(name, false)
+                            groupSelect.isEnabled = false
+                        }
+                    }
                 }
 
                 override fun onError(error: Throwable) {
