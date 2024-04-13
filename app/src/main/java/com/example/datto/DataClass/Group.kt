@@ -2,6 +2,11 @@ package com.example.datto.DataClass
 
 import com.google.gson.annotations.SerializedName
 
+data class GroupEditRequest(
+    var name: String,
+    var thumbnail: String
+)
+
 data class GroupResponse(
     @SerializedName("_id")
     var id: String,

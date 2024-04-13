@@ -145,6 +145,7 @@ class MainActivity : AppCompatActivity() {
                 .commit()
         }
     }
+    
     private fun setDefaultLayout(viewBottomNav: Boolean = true) {
         bottomNavigation.visibility = if (viewBottomNav) View.VISIBLE else View.GONE
         val layoutParams = scrollView.layoutParams as ViewGroup.MarginLayoutParams

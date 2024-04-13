@@ -9,3 +9,10 @@ data class ProfileResponse(
     var dob: String,
     var avatar: String,
 )
+
+data class ProfileEditRequest(
+    var username: String,
+    var fullName: String,
+    var dob: String,
+    var avatar: String,
+)
