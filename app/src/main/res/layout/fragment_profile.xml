@@ -25,6 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="28dp"
             android:layout_marginTop="16dp"
+            android:fontFamily="@font/be_vietnam_bold"
             android:textSize="22sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -48,6 +49,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="16dp"
                 android:layout_margin="12dp"
+                android:fontFamily="@font/be_vietnam_medium"
                 android:text="Account Information"
                 android:textColor="@color/material_dynamic_neutral70"
                 android:textSize="12dp"
@@ -68,6 +70,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:fontFamily="@font/be_vietnam_medium"
                     android:text="Username"
                     android:textColor="@color/md_theme_onPrimaryContainer"
                     android:textStyle="bold" />
@@ -77,6 +80,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:fontFamily="@font/be_vietnam_medium"
                     android:gravity="right"
                     android:textColor="@color/material_dynamic_neutral30" />
             </LinearLayout>
@@ -96,6 +100,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:fontFamily="@font/be_vietnam_medium"
                     android:text="Email"
                     android:textColor="@color/md_theme_onPrimaryContainer"
                     android:textStyle="bold" />
@@ -105,6 +110,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:fontFamily="@font/be_vietnam_medium"
                     android:gravity="right"
                     android:textColor="@color/material_dynamic_neutral30" />
             </LinearLayout>
@@ -125,9 +131,10 @@
 
             <TextView
                 android:id="@+id/profile_profile_info_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_height="16dp"
                 android:layout_margin="12dp"
+                android:fontFamily="@font/be_vietnam_medium"
                 android:text="Profile Information"
                 android:textColor="@color/material_dynamic_neutral70"
                 android:textSize="12dp"
@@ -148,6 +155,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:fontFamily="@font/be_vietnam_medium"
                     android:text="Full Name"
                     android:textColor="@color/md_theme_onPrimaryContainer"
                     android:textStyle="bold" />
@@ -157,6 +165,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:fontFamily="@font/be_vietnam_medium"
                     android:gravity="right"
                     android:textColor="@color/material_dynamic_neutral30" />
 
@@ -177,6 +186,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:fontFamily="@font/be_vietnam_medium"
                     android:text="Date of Birth"
                     android:textColor="@color/md_theme_onPrimaryContainer"
                     android:textStyle="bold" />
@@ -186,6 +196,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:fontFamily="@font/be_vietnam_medium"
                     android:gravity="right"
                     android:textColor="@color/material_dynamic_neutral30" />
             </LinearLayout>
@@ -199,6 +210,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
+            android:fontFamily="@font/be_vietnam_medium"
             android:text="Log out"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -210,6 +222,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:fontFamily="@font/be_vietnam_medium"
             android:text="Change Password"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             app:layout_constraintEnd_toEndOf="parent"
