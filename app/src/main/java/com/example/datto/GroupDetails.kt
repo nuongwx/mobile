@@ -140,7 +140,7 @@ class GroupDetails : Fragment() {
                         view.findViewById(R.id.eventsListGroupDetailsLL)
                     toEventList.setOnClickListener {
                         val bundle = Bundle()
-                        bundle.putStringArrayList("eventIds", ArrayList(data.events))
+                        bundle.putString("groupId", data.id)
                         val GroupDetailsEventListFragment = GroupDetailsEventList()
                         GroupDetailsEventListFragment.arguments = bundle
 
