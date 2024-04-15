@@ -214,7 +214,7 @@ class EventDetails : Fragment() {
 
         expenseDetailsButton.setOnClickListener {
             requireActivity().supportFragmentManager.beginTransaction().apply {
-                replace(R.id.app_fragment, FundList())
+                replace(R.id.app_fragment, FundList(arguments?.getString("eventId")!!))
                 addToBackStack(null)
                 commit()
             }

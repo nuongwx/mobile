@@ -17,6 +17,7 @@ import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.DataClass.FundResponse
 import com.example.datto.DataClass.SplitFundResponse
+import com.example.datto.GlobalVariable.GlobalVariable
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.squareup.picasso.Picasso
@@ -125,8 +126,18 @@ class SplitFundAdapter(private val splitFunds: ArrayList<DialogSplitFundItem>) :
         holder.splitFundAmount.text = format.format(currentItem.amount)
         holder.splitFundName.text = currentItem.user
 
-        // Set default avatar
-        Picasso.get().load(R.drawable.avatar).into(holder.splitFundAvatar)
+
+        try {
+            if (currentItem.avatar == "") {
+                // No avatar -> load default avatar
+                Picasso.get().load(R.drawable.avatar).into(holder.splitFundAvatar)
+            } else {
+                // Load avatar
+                Picasso.get().load(GlobalVariable.BASE_URL + "files/" + currentItem.avatar).into(holder.splitFundAvatar)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     override fun getItemCount() = splitFunds.size
@@ -137,9 +148,11 @@ class SplitFundAdapter(private val splitFunds: ArrayList<DialogSplitFundItem>) :
  * Use the [FundList.newInstance] factory method to
  * create an instance of this fragment.
  */
-class FundList : Fragment() {
+class FundList (
+    eventId: String
+) : Fragment() {
     // TODO: Rename and change types of parameters
-    private var param1: String? = "6614a42b14e884a9d8eef02f"
+    private var param1: String? = eventId
     private var param2: String? = null
 
     private lateinit var shareMoneyBtn: com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
@@ -152,7 +165,7 @@ class FundList : Fragment() {
         menuItem.setIcon(R.drawable.ic_create_black)
         menuItem.setOnMenuItemClickListener{
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.app_fragment, NewFund("6614a42b14e884a9d8eef02f")).addToBackStack("FundList").commit()
+                .replace(R.id.app_fragment, NewFund(param1!!)).addToBackStack("FundList").commit()
 
             true
         }
@@ -219,8 +232,6 @@ class FundList : Fragment() {
                             splitFundList.add(DialogSplitFundItem(splitFund.account.id, splitFund.amount, splitFund.account.profile.fullName, splitFund.account.profile.avatar ?: ""))
                         }
 
-                        Log.d("API_SERVICE", "Split fund list: $splitFundList")
-
                         val dialogRecyclerView = dialogView.findViewById<RecyclerView>(R.id.dialog_split_funds_list)
                         dialogRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
                         dialogRecyclerView.adapter = SplitFundAdapter(splitFundList)
@@ -284,7 +295,7 @@ class FundList : Fragment() {
         // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
-            FundList().apply {
+            FundList(param1).apply {
                 arguments = Bundle().apply {
                     putString(ARG_PARAM1, param1)
                     putString(ARG_PARAM2, param2)
