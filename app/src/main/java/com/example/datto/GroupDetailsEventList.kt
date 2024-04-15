@@ -36,7 +36,7 @@ class EventListAdapter(private val events: ArrayList<EventResponse>) :
 
         init {
             itemView.setOnClickListener {
-                setItemClickListener?.invoke(it)
+                setOnClickListener?.invoke(it)
             }
         }
     }
