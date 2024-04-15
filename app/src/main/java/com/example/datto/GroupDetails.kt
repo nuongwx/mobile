@@ -1,7 +1,6 @@
 package com.example.datto
 
 import android.graphics.BitmapFactory
-import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -104,7 +103,6 @@ class GroupDetails : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        groupId = arguments?.getString("groupId")
         var group: GroupResponse? = null
 
         APIService().doGet<GroupResponse>("groups/${groupId}",
