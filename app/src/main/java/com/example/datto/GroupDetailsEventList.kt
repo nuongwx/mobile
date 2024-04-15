@@ -2,13 +2,12 @@ package com.example.datto
 
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
@@ -35,9 +34,12 @@ class EventListAdapter(private val events: ArrayList<EventResponse>) :
         val eventDes: TextView = itemView.findViewById(R.id.eventDescriptionTextView)
         val date: TextView = itemView.findViewById(R.id.eventDateTextView)
         val month: TextView = itemView.findViewById(R.id.eventMonthTextView)
+
+        var setOnClickListener: (View) -> Unit = {}
+
         init {
             itemView.setOnClickListener {
-                Toast.makeText(itemView.context, itemView.toString(), Toast.LENGTH_SHORT).show()
+                setOnClickListener(itemView)
             }
         }
     }
@@ -63,6 +65,18 @@ class EventListAdapter(private val events: ArrayList<EventResponse>) :
 
         holder.date.text = SimpleDateFormat("dd", java.util.Locale.getDefault()).format(date)
         holder.month.text = SimpleDateFormat("MMM", java.util.Locale.getDefault()).format(date)
+
+        holder.setOnClickListener = {
+            // switch to event details fragment
+            val bundle = Bundle()
+            bundle.putString("eventId", currentItem.id)
+            val eventDetails = EventDetails()
+            eventDetails.arguments = bundle
+            val transaction = (it.context as MainActivity).supportFragmentManager.beginTransaction()
+            transaction.replace(R.id.app_fragment, eventDetails)
+            transaction.addToBackStack(null)
+            transaction.commit()
+        }
     }
 
     override fun getItemCount() = events.size

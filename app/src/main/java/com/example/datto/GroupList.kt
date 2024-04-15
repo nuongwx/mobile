@@ -3,7 +3,6 @@ package com.example.datto
 import android.os.Bundle
 import android.util.Log
 import android.view.GestureDetector
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -12,6 +11,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
@@ -69,8 +69,7 @@ class GroupListAdapter(
         val currentItem = groups[position]
 
         holder.groupName.text = currentItem.name
-        holder.groupDes.text =
-            "${currentItem.events.size} event${if (currentItem.events.size > 1) "s" else ""} together"
+        "${currentItem.events.size} event${if (currentItem.events.size > 1) "s" else ""} together".also { holder.groupDes.text = it }
 
         // Load image with Picasso and new thread
         try {
@@ -154,7 +153,20 @@ class CurrentEventAdapter(
         val eventName = itemView.findViewById<android.widget.TextView>(R.id.eventTitle)
         val eventDate = itemView.findViewById<android.widget.TextView>(R.id.eventDate)
 
-        init {}
+        init {
+            itemView.setOnClickListener {
+                val position = adapterPosition
+                val event = events[position]
+                val eventDetailsFragment = EventDetails()
+                val bundle = Bundle()
+                bundle.putString("eventId", event.id)
+                eventDetailsFragment.arguments = bundle
+                val transaction = (it.context as MainActivity).supportFragmentManager.beginTransaction()
+                transaction.replace(R.id.app_fragment, eventDetailsFragment)
+                transaction.addToBackStack(null)
+                transaction.commit()
+            }
+        }
     }
 
     fun getItem(position: Int): Event {
