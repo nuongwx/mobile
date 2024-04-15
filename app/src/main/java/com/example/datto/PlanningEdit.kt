@@ -6,6 +6,19 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat
+import java.text.SimpleDateFormat
+import java.time.Duration
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Date
+import java.util.Locale
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -40,8 +53,83 @@ class PlanningEdit : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val data: Planning? =
+            Planning("Planning 1", "Description 1", Date(), Duration.ofMinutes(30))
+
+
         val textView: TextView = view.findViewById(R.id.totallyUniqueTextView)
         textView.text = arguments?.getString("id") ?: "No ID"
+
+        val planningName: TextInputEditText = view.findViewById(R.id.planningNameEditText)
+        val planningDescription: TextInputEditText =
+            view.findViewById(R.id.planningDescriptionEditText)
+        val planningStartTime: TextInputEditText = view.findViewById(R.id.planningStartTimeEditText)
+        val planningEndTime: TextInputEditText = view.findViewById(R.id.planningEndTimeEditText)
+
+        val startTime: Date
+        val endTime: Date
+
+        if (data != null) {
+            planningName.setText(data.name)
+            planningDescription.setText(data.description)
+            startTime = data.start
+            endTime = Date(data.start.time + data.duration.toMillis())
+
+            // val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+            // val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+            val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+
+            planningStartTime.setText(formatter.format(startTime))
+            planningEndTime.setText(formatter.format(endTime))
+        }
+
+        planningStartTime.setOnClickListener {
+            val datePicker =
+                MaterialDatePicker.Builder.datePicker().setTitleText("Start Date").build()
+            datePicker.addOnPositiveButtonClickListener { dateLong ->
+                // Time Picker
+                val timePicker = MaterialTimePicker.Builder()
+                    .setTimeFormat(TimeFormat.CLOCK_24H)
+                    .build()
+                timePicker.addOnPositiveButtonClickListener {
+                    val date =
+                        Instant.ofEpochMilli(dateLong).atZone(ZoneId.systemDefault()).toLocalDate()
+                    val time = LocalTime.of(timePicker.hour, timePicker.minute)
+                    val dateTime = LocalDateTime.of(date, time)
+                    val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+                    planningStartTime.setText(dateTime.format(formatter))
+
+                    if (planningEndTime.text?.isEmpty() == true) {
+                        planningEndTime.callOnClick()
+                    }
+
+                }
+                timePicker.show(parentFragmentManager, null)
+            }
+            datePicker.show(parentFragmentManager, null)
+        }
+
+        planningEndTime.setOnClickListener {
+            val datePicker =
+                MaterialDatePicker.Builder.datePicker().setTitleText("End Date").build()
+            datePicker.addOnPositiveButtonClickListener { dateLong ->
+                // Time Picker
+                val timePicker = MaterialTimePicker.Builder()
+                    .setTimeFormat(TimeFormat.CLOCK_24H)
+                    .build()
+                timePicker.addOnPositiveButtonClickListener {
+                    val date =
+                        Instant.ofEpochMilli(dateLong).atZone(ZoneId.systemDefault()).toLocalDate()
+                    val time = LocalTime.of(timePicker.hour, timePicker.minute)
+                    val dateTime = LocalDateTime.of(date, time)
+                    val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+                    planningEndTime.setText(dateTime.format(formatter))
+                }
+                timePicker.show(parentFragmentManager, null)
+            }
+            datePicker.show(parentFragmentManager, null)
+        }
+
     }
 
     companion object {

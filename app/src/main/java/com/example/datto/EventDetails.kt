@@ -189,15 +189,15 @@ class EventDetails : Fragment() {
         if (plannings.isEmpty()) {
             startToPlanButton.visibility = View.VISIBLE
             viewPlanButton.visibility = View.GONE
-            planningRecyclerView.setPadding(0, 0, 0, 0)
+            planningRecyclerView.visibility = View.GONE
         } else {
             startToPlanButton.visibility = View.GONE
             viewPlanButton.visibility = View.VISIBLE
-            planningRecyclerView.setPadding(0, 0, 0, 100)
+            planningRecyclerView.visibility = View.VISIBLE
         }
 
         planningRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
-        val adapter = PlanningListAdapter(plannings)
+        val adapter = FunkyDatedPlanningAdapter(plannings.filter { it.start.after(Date()) })
         planningRecyclerView.adapter = adapter
         planningRecyclerView.setHasFixedSize(true)
 

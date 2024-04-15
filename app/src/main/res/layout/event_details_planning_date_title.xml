@@ -7,9 +7,9 @@
         android:id="@+id/eventDetailsPlanningDateTitleDayOfWeekTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="5"
+        android:layout_weight="7.5"
         android:fontFamily="@font/be_vietnam_medium"
-        android:text="Saturday"
+        android:text="Wednesday"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
         android:textSize="16sp" />
 

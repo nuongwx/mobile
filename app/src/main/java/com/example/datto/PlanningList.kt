@@ -4,9 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.appbar.MaterialToolbar
 import java.time.Duration
 import java.util.Date
 
@@ -56,6 +58,26 @@ class PlanningList : Fragment() {
         recyclerView.adapter = FunkyDatedPlanningAdapter(plannings)
         recyclerView.setHasFixedSize(true)
 
+        configTopAppBar()
+    }
+
+    fun configTopAppBar() {
+        val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
+        val menuItem = appBar.menu.findItem(R.id.edit)
+        menuItem.isEnabled = true
+        menuItem.title = "New"
+        menuItem.setIcon(null)
+        menuItem.setOnMenuItemClickListener {
+            val fragment = PlanningEdit()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.app_fragment, fragment)
+                .addToBackStack(null)
+                .commit()
+            true
+        }
+
+        appBar.title = "Plannings"
+        appBar.navigationIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_back)
     }
 
     companion object {
