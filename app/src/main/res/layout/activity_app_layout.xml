@@ -32,7 +32,7 @@
         android:fillViewport="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:contentDescription="Scrollable for fragments"
-        android:layout_marginBottom="96dp">
+        android:layout_marginBottom="80dp">
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/app_fragment"

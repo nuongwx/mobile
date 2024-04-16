@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.DataClass.FundResponse
-import com.example.datto.DataClassRecyclerView.FundItem
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.time.Duration
@@ -215,7 +214,7 @@ class EventDetails : Fragment() {
 
         expenseDetailsButton.setOnClickListener {
             requireActivity().supportFragmentManager.beginTransaction().apply {
-                replace(R.id.app_fragment, FundList())
+                replace(R.id.app_fragment, FundList(arguments?.getString("eventId")!!))
                 addToBackStack(null)
                 commit()
             }

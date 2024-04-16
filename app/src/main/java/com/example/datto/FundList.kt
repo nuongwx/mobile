@@ -3,27 +3,49 @@ package com.example.datto
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.DataClass.FundResponse
-import com.example.datto.DataClassRecyclerView.FundItem
+import com.example.datto.DataClass.SplitFundResponse
+import com.example.datto.GlobalVariable.GlobalVariable
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.squareup.picasso.Picasso
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
+import java.util.Currency
 import java.util.Locale
+
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
+
+data class FundItem (
+    val id: String,
+    val description: String,
+    val amount: Double,
+    val user: String,
+    val date: String
+)
+
+data class DialogSplitFundItem (
+    val id: String,
+    val amount: Double,
+    val user: String,
+    val avatar: String
+)
 
 class FundListAdapter(private val funds: ArrayList<FundItem>) :
     RecyclerView.Adapter<FundListAdapter.FundViewHolder>() {
@@ -33,6 +55,7 @@ class FundListAdapter(private val funds: ArrayList<FundItem>) :
         val fundAmount: TextView = itemView.findViewById(R.id.expense_card_value)
         val fundUser: TextView = itemView.findViewById(R.id.expense_card_user)
         val fundDate: TextView = itemView.findViewById(R.id.expense_card_date)
+
         init {}
     }
 
@@ -52,26 +75,83 @@ class FundListAdapter(private val funds: ArrayList<FundItem>) :
         if (currentItem.amount < 0) {
             holder.fundAmount.text = currentItem.amount.toString()
             // Change color
-            holder.fundAmount.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.light_blue_600))
+            holder.fundAmount.setTextColor(
+                ContextCompat.getColor(
+                    holder.itemView.context,
+                    R.color.light_blue_600
+                )
+            )
         } else {
             holder.fundAmount.text = "+" + currentItem.amount.toString()
-            holder.fundAmount.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.md_theme_primaryFixed_mediumContrast))
+            holder.fundAmount.setTextColor(
+                ContextCompat.getColor(
+                    holder.itemView.context,
+                    R.color.md_theme_primaryFixed_mediumContrast
+                )
+            )
         }
 
         holder.fundUser.text = currentItem.user
         holder.fundDate.text = currentItem.date
 
         // Holder click listener
-        holder.itemView.setOnClickListener{
+        holder.itemView.setOnClickListener {
             // Move to FundEdit
-             (it.context as AppCompatActivity).supportFragmentManager.beginTransaction()
+            (it.context as AppCompatActivity).supportFragmentManager.beginTransaction()
                 .replace(R.id.app_fragment, FundEdit(currentItem.id))
                 .addToBackStack("FundList")
                 .commit()
-}
+        }
     }
 
     override fun getItemCount() = funds.size
+}
+
+class SplitFundAdapter(private val splitFunds: ArrayList<DialogSplitFundItem>) :
+    RecyclerView.Adapter<SplitFundAdapter.SplitFundViewHolder>() {
+
+    inner class SplitFundViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val splitFundAvatar: ImageView = itemView.findViewById(R.id.split_fund_item_avatar)
+        val splitFundName: TextView = itemView.findViewById(R.id.split_fund_item_name)
+        val splitFundAmount: TextView = itemView.findViewById(R.id.split_fund_item_amount)
+        init {}
+    }
+
+    override fun onCreateViewHolder(
+        parent: ViewGroup, viewType: Int
+    ): SplitFundAdapter.SplitFundViewHolder {
+        val itemView =
+            LayoutInflater.from(parent.context).inflate(R.layout.split_fund_item, parent, false)
+        return SplitFundViewHolder(itemView)
+    }
+
+    @SuppressLint("SetTextI18n")
+    override fun onBindViewHolder(holder: SplitFundAdapter.SplitFundViewHolder, position: Int) {
+        val currentItem = splitFunds[position]
+
+        // Format currency
+        val format: NumberFormat = NumberFormat.getCurrencyInstance()
+        format.setMaximumFractionDigits(0)
+        format.currency = Currency.getInstance("VND")
+
+        holder.splitFundAmount.text = format.format(currentItem.amount)
+        holder.splitFundName.text = currentItem.user
+
+
+        try {
+            if (currentItem.avatar == "") {
+                // No avatar -> load default avatar
+                Picasso.get().load(R.drawable.avatar).into(holder.splitFundAvatar)
+            } else {
+                // Load avatar
+                Picasso.get().load(GlobalVariable.BASE_URL + "files/" + currentItem.avatar).into(holder.splitFundAvatar)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun getItemCount() = splitFunds.size
 }
 
 /**
@@ -79,9 +159,11 @@ class FundListAdapter(private val funds: ArrayList<FundItem>) :
  * Use the [FundList.newInstance] factory method to
  * create an instance of this fragment.
  */
-class FundList : Fragment() {
+class FundList (
+    eventId: String
+) : Fragment() {
     // TODO: Rename and change types of parameters
-    private var param1: String? = "6614a42b14e884a9d8eef02f"
+    private var param1: String? = eventId
     private var param2: String? = null
 
     private lateinit var shareMoneyBtn: com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
@@ -90,11 +172,12 @@ class FundList : Fragment() {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
         val menuItem = appBar.menu.findItem(R.id.edit)
         menuItem.isEnabled = true
-        menuItem.title = null
-        menuItem.setIcon(R.drawable.ic_create_black)
-        menuItem.setOnMenuItemClickListener{
+        menuItem.isVisible = true
+        menuItem.title = "Add expense"
+        menuItem.setIcon(null)
+        menuItem.setOnMenuItemClickListener {
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.app_fragment, NewFund("6614a42b14e884a9d8eef02f")).addToBackStack("FundList").commit()
+                .replace(R.id.app_fragment, NewFund(param1!!)).addToBackStack("FundList").commit()
 
             true
         }
@@ -127,11 +210,57 @@ class FundList : Fragment() {
         shareMoneyBtn = view.findViewById(R.id.fund_list_share_button)
 
         shareMoneyBtn.setOnClickListener{
-            Toast.makeText(context, "Share Money", Toast.LENGTH_SHORT).show()
+            APIService().doGet<SplitFundResponse>("events/$param1/split-funds",
+                object: APICallback<Any> {
+                    override fun onSuccess(data: Any) {
+                        Log.d("API_SERVICE", "Data: $data")
+
+                        data as SplitFundResponse
+
+                        // Set up dialog
+                        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_split_funds, null)
+
+                        // Format currency
+                        val format: NumberFormat = NumberFormat.getCurrencyInstance()
+                        format.setMaximumFractionDigits(0)
+                        format.currency = Currency.getInstance("VND")
+
+                        // Change description
+                        dialogView.findViewById<TextView>(R.id.dialog_split_funds_description).text = "Remaining funds: ${format.format(data.remainingFunds)}"
+
+                        val dialog = MaterialAlertDialogBuilder(context!!)
+                            .setView(dialogView)
+                            .show()
+
+                        // Set up button
+                        dialogView.findViewById<Button>(R.id.dialog_split_funds_cancel_button).setOnClickListener {
+                            dialog.dismiss()
+                        }
+
+                        // Set recycler view for dialog
+                        val splitFundList = ArrayList<DialogSplitFundItem>()
+
+                        for (splitFund in data.data) {
+                            splitFundList.add(DialogSplitFundItem(splitFund.account.id, splitFund.amount, splitFund.account.profile.fullName, splitFund.account.profile.avatar ?: ""))
+                        }
+
+                        val dialogRecyclerView = dialogView.findViewById<RecyclerView>(R.id.dialog_split_funds_list)
+                        dialogRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+                        dialogRecyclerView.adapter = SplitFundAdapter(splitFundList)
+                        dialogRecyclerView.setHasFixedSize(true)
+
+                        Log.d("API_SERVICE", "Data: ${data}")
+                    }
+
+                    override fun onError(error: Throwable) {
+                        Log.e("API_SERVICE", "Error: $error")
+                    }
+                }
+            )
         }
 
         APIService().doGet<FundResponse>("events/$param1/funds",
-            object: APICallback<Any> {
+            object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")
 
@@ -141,15 +270,25 @@ class FundList : Fragment() {
 
                     for (fund in data.funds) {
                         // Format paidAt date
-                        val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                        val originalFormat =
+                            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
                         val targetFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.US)
                         val date = originalFormat.parse(fund.paidAt)
 
-                        fundList.add(FundItem(fund.id, fund.info, fund.amount, fund.paidBy.profile.fullName, targetFormat.format(date!!)))
+                        fundList.add(
+                            FundItem(
+                                fund.id,
+                                fund.info,
+                                fund.amount,
+                                fund.paidBy.profile.fullName,
+                                targetFormat.format(date!!)
+                            )
+                        )
                     }
 
                     val recyclerView = view.findViewById<RecyclerView>(R.id.fund_list_list)
-                    recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+                    recyclerView.layoutManager =
+                        androidx.recyclerview.widget.LinearLayoutManager(context)
                     recyclerView.adapter = FundListAdapter(fundList)
                     recyclerView.setHasFixedSize(true)
                 }
@@ -178,7 +317,7 @@ class FundList : Fragment() {
         // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
-            FundList().apply {
+            FundList(param1).apply {
                 arguments = Bundle().apply {
                     putString(ARG_PARAM1, param1)
                     putString(ARG_PARAM2, param2)
