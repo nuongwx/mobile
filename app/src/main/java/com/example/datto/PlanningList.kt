@@ -4,15 +4,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import java.time.Duration
-import java.util.Date
+import com.example.datto.API.APICallback
+import com.example.datto.API.APIService
+import com.example.datto.DataClass.Planning
+import com.google.android.material.appbar.MaterialToolbar
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
+private const val ARG_PARAM1 = "eventId"
 private const val ARG_PARAM2 = "param2"
 
 /**
@@ -24,18 +27,20 @@ private const val ARG_PARAM2 = "param2"
 
 class PlanningList : Fragment() {
     // TODO: Rename and change types of parameters
-    private var param1: String? = null
+    private var eventId: String? = null
     private var param2: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
+            eventId = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_planning_list, container, false)
     }
@@ -45,17 +50,45 @@ class PlanningList : Fragment() {
 
         val plannings = ArrayList<Planning>()
 
-        plannings.addAll(arrayListOf(
-                Planning("Planning 1", "Description 1", Date(), Duration.ofMinutes(30)),
-                Planning("Planning 2", "Description 2", Date(Date().time + 61 * 60 * 1000), Duration.ofMinutes(40)),
-                Planning("Planning 3", "Description 3", Date(Date().time + 60 * 60 * 1000), Duration.ofMinutes(121)),
-                Planning("Planning TMR", "Description 3", Date(Date().time + 10 * 24 * 60 * 60 * 1000), Duration.ofMinutes(121))))
+        APIService().doGet<List<Planning>>("events/${eventId}/timeline", object : APICallback<Any> {
+            override fun onSuccess(data: Any) {
+                plannings.clear()
+                plannings.addAll(data as List<Planning>)
+                plannings.sortBy { it.start }
 
-        val recyclerView = view.findViewById<RecyclerView>(R.id.eventDetailsPlanningListRecyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(view.context)
-        recyclerView.adapter = FunkyDatedPlanningAdapter(plannings)
-        recyclerView.setHasFixedSize(true)
+                val recyclerView =
+                    view.findViewById<RecyclerView>(R.id.eventDetailsPlanningListRecyclerView)
+                recyclerView.layoutManager = LinearLayoutManager(view.context)
+                recyclerView.adapter = FunkyDatedPlanningAdapter(plannings)
+                recyclerView.setHasFixedSize(true)
+            }
 
+            override fun onError(error: Throwable) {
+                println(error.message)
+            }
+        })
+
+        configTopAppBar()
+    }
+
+    fun configTopAppBar() {
+        val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
+        val menuItem = appBar.menu.findItem(R.id.edit)
+        menuItem.isEnabled = true
+        menuItem.title = "New"
+        menuItem.setIcon(null)
+        menuItem.setOnMenuItemClickListener {
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.app_fragment, PlanningEdit().apply {
+                    arguments = Bundle().apply {
+                        putString("eventId", eventId)
+                    }
+                }).addToBackStack(null).commit()
+            true
+        }
+
+        appBar.title = "Plannings"
+        appBar.navigationIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_back)
     }
 
     companion object {

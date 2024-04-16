@@ -3,10 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginHorizontal="16dp"
     tools:context=".PlanningList">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/eventDetailsPlanningListRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        tools:listitem="@layout/event_details_planning_daily_items" />
 </FrameLayout>
