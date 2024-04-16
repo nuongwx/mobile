@@ -133,9 +133,7 @@ class EventDetails : Fragment() {
 
     private val eventID: String? = null
 
-    init {
 
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
