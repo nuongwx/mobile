@@ -2,6 +2,8 @@ package com.example.datto
 
 import NumberTextWatcher
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -18,6 +20,7 @@ import com.example.datto.DataClass.FundResponseUnit
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
+import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import java.text.SimpleDateFormat
@@ -99,15 +102,6 @@ class FundEdit(
         val typeItems = arrayOf("Add fund", "Expense")
         type.setSimpleItems(typeItems)
 
-//        type.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
-//            if (type.text.toString() == typeItems[0]) {
-//                paidBy.isEnabled = true
-//            } else {
-//                paidBy.setText("", false)
-//                paidBy.isEnabled = false
-//            }
-//        }
-
         APIService().doGet<FundResponseUnit>("funds/$id",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
@@ -124,10 +118,6 @@ class FundEdit(
 
                                 // Set data in inner scope
                                 description.setText(outerData.info)
-                                type.setText(
-                                    if (outerData.amount > 0) typeItems[0] else typeItems[1],
-                                    false
-                                )
                                 amount.setText(outerData.amount.absoluteValue.toString())
 
                                 // Parse the date string into a Date object
@@ -146,8 +136,44 @@ class FundEdit(
                                     data.members.associate { it.id to it.profile.fullName }
                                 paidBy.setSimpleItems(paidByItems.values.toTypedArray())
 
+                                // Set default value for paidBy to "Budget" when type is "Expense"
+                                type.addTextChangedListener(object: TextWatcher {
+                                    override fun afterTextChanged(s: Editable?) {
+                                        if (s.toString() == typeItems[0]) {
+                                            // Enable paidBy_title dropdown
+                                            requireActivity().findViewById<TextInputLayout>(R.id.fund_edit_paid_by_title).isEnabled = true
+
+                                            // Set paidBy to default value
+                                            paidBy.setSimpleItems(paidByItems.values.toTypedArray())
+
+                                            // Clear paidBy text
+                                            paidBy.setText("")
+                                        } else {
+                                            // Disable paidBy_title dropdown
+                                            requireActivity().findViewById<TextInputLayout>(R.id.fund_edit_paid_by_title).isEnabled = false
+
+                                            // Set paidBy to "Budget" text
+                                            paidBy.setText("Budget")
+                                        }
+                                    }
+
+                                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                                        // Do nothing
+                                    }
+
+                                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                                        // Do nothing
+                                    }
+                                })
+
+                                type.setText(
+                                    if (outerData.amount > 0) typeItems[0] else typeItems[1],
+                                    false
+                                )
+
                                 // Set value for paidBy dropdown
-                                paidBy.setText(paidByItems[outerData.paidBy.id], false)
+                                if (paidBy.text.toString() != "Budget")
+                                    paidBy.setText(paidByItems[outerData.paidBy.id], false)
 
                                 // Set onClickListener for the top bar button
                                 val appBar =
@@ -174,7 +200,8 @@ class FundEdit(
                                     val formattedPaidAt = targetFormatMongo.format(tempFormatted)
 
                                     val fundRequest = FundRequest(
-                                        paidBy = paidByItems.filterValues { it == paidBy.text.toString() }.keys.first(),
+                                        paidBy = if (paidBy.text.toString() == "Budget") "" else
+                                            paidByItems.filterValues { it == paidBy.text.toString() }.keys.first(),
                                         amount = if (type.text.toString() == typeItems[0]) {
                                             amount.text.toString().replace(",", "").toDouble()
                                         } else {
