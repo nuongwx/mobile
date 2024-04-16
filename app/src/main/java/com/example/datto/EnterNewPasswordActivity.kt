@@ -52,7 +52,7 @@ class EnterNewPasswordActivity : AppCompatActivity() {
                     password.text.toString()
                 )
                 APIService().doPost<NewPasswordRequest>(
-                    "accounts/resetpassword",
+                    "accounts/reset-password",
                     newPassword,
                     object :
                         APICallback<Any> {

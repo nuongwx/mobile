@@ -2,11 +2,14 @@ package com.example.datto
 
 import NumberTextWatcher
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.example.datto.API.APICallback
@@ -16,6 +19,7 @@ import com.example.datto.DataClass.FundRequest
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
+import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import java.text.SimpleDateFormat
@@ -107,9 +111,43 @@ class NewFund (
                 val members = data.members.toTypedArray().toMutableList()
 
                 // Set value for paidBy dropdown
-                // key = id, value = fullName
                 val paidByItems = members.associate { it.id to it.profile.fullName }
                 paidBy.setSimpleItems(paidByItems.values.toTypedArray())
+
+                // Set default value for paidBy to "Budget" when type is "Expense"
+                type.addTextChangedListener(object: TextWatcher {
+                    override fun afterTextChanged(s: Editable?) {
+                        if (s.toString() == typeItems[0]) {
+                            // Enable paidBy_title dropdown
+                            requireActivity().findViewById<TextInputLayout>(R.id.new_fund_paid_by_title).isEnabled = true
+
+                            // Set paidBy to default value
+                            paidBy.setSimpleItems(paidByItems.values.toTypedArray())
+
+                            // Clear paidBy text
+                            paidBy.setText("")
+                        } else {
+                            // Disable paidBy_title dropdown
+                            requireActivity().findViewById<TextInputLayout>(R.id.new_fund_paid_by_title).isEnabled = false
+
+                            // Set paidBy to "Budget" text
+                            paidBy.setText("Budget")
+                        }
+                    }
+
+                    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                        // Do nothing
+                    }
+
+                    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                        // Do nothing
+                    }
+                })
+
+                // Set paidAt to current date and time
+                val current = LocalDateTime.now()
+                val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+                paidAt.setText(current.format(formatter))
 
                 // Override add button
                 val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
@@ -130,7 +168,8 @@ class NewFund (
                     val formattedPaidAt = targetFormat.format(tempFormatted)
 
                     val fundRequest = FundRequest(
-                        paidBy = paidByItems.filterValues { it == paidBy.text.toString() }.keys.first(),
+                        paidBy = if (paidBy.text.toString() == "Budget") "" else
+                            paidByItems.filterValues { it == paidBy.text.toString() }.keys.first(),
                         amount = if (type.text.toString() == typeItems[0]) {
                             amount.text.toString().replace(",", "").toDouble()
                         } else {

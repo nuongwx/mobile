@@ -103,7 +103,6 @@ class GroupDetails : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        groupId = arguments?.getString("groupId")
         var group: GroupResponse? = null
 
         APIService().doGet<GroupResponse>("groups/${groupId}",
@@ -155,6 +154,7 @@ class GroupDetails : Fragment() {
                         val bundle = Bundle()
                         bundle.putStringArrayList("memberIds", ArrayList(data.members))
                         bundle.putString("inviteCode", data.inviteCode)
+                        bundle.putString("groupId", data.id)
                         val GroupDetailsMemberList = GroupDetailsMemberList()
                         GroupDetailsMemberList.arguments = bundle
 
@@ -201,6 +201,10 @@ class GroupDetails : Fragment() {
             "Dec" to 6f
         )
         chart.show(entries)
+
+        chart.setOnClickListener{
+            Toast.makeText(context, "Chart clicked", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun configTopAppBar(name: String, thumbnail: String) {

@@ -17,6 +17,7 @@ import com.example.datto.API.APIService
 import com.example.datto.Credential.CredentialService
 import com.example.datto.DataClass.AccountResponse
 import com.example.datto.DataClass.EventResponse
+import com.example.datto.DataClass.InviteCodeResponse
 import com.example.datto.GlobalVariable.GlobalVariable
 import com.squareup.picasso.Picasso
 import java.net.URL
@@ -27,6 +28,7 @@ import java.util.Locale
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
+private const val ARG_PARAM3 = "param3"
 
 /**
  * A simple [Fragment] subclass.
@@ -116,6 +118,7 @@ class GroupDetailsMemberList : Fragment() {
 
         val memberIds = arguments?.getStringArrayList("memberIds")
         val inviteCode = arguments?.getString("inviteCode")
+        val groupId = arguments?.getString("groupId")
 
         val inviteCodeTextView = view.findViewById<TextView>(R.id.inviteCodeTextView)
         inviteCodeTextView.text = inviteCode
@@ -153,12 +156,25 @@ class GroupDetailsMemberList : Fragment() {
         val regenButton: ImageButton = view.findViewById(R.id.regenInviteCodeImageButton)
         regenButton.setOnClickListener {
             Toast.makeText(view.context, "Regenerating invite code", Toast.LENGTH_SHORT).show()
+            APIService().doGet<InviteCodeResponse>("groups/${groupId}/code-generation", object : APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    Log.d("API_SERVICE", "Data: $data")
+
+                    data as InviteCodeResponse
+
+                    inviteCodeTextView.text = data.inviteCode
+                }
+
+                override fun onError(error: Throwable) {
+                    Log.e("API_SERVICE", "Error: ${error.message}")
+                }
+            })
         }
 
         val copyButton: ImageButton = view.findViewById(R.id.copyInviteCodeImageButton)
         copyButton.setOnClickListener {
             val clipboard = android.content.Context.CLIPBOARD_SERVICE
-            val clip = android.content.ClipData.newPlainText("invite code", inviteCode)
+            val clip = android.content.ClipData.newPlainText("invite code", inviteCodeTextView.text)
             val clipboardManager =
                 view.context.getSystemService(clipboard) as android.content.ClipboardManager
             clipboardManager.setPrimaryClip(clip)
@@ -178,10 +194,11 @@ class GroupDetailsMemberList : Fragment() {
          * @return A new instance of fragment GroupDetailsMemberList.
          */ // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: String, param2: String) = GroupDetailsMemberList().apply {
+        fun newInstance(param1: String, param2: String, param3: String) = GroupDetailsMemberList().apply {
             arguments = Bundle().apply {
                 putString(ARG_PARAM1, param1)
                 putString(ARG_PARAM2, param2)
+                putString(ARG_PARAM3, param3)
             }
         }
     }
