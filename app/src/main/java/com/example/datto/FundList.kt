@@ -55,6 +55,7 @@ class FundListAdapter(private val funds: ArrayList<FundItem>) :
         val fundAmount: TextView = itemView.findViewById(R.id.expense_card_value)
         val fundUser: TextView = itemView.findViewById(R.id.expense_card_user)
         val fundDate: TextView = itemView.findViewById(R.id.expense_card_date)
+
         init {}
     }
 
@@ -74,19 +75,29 @@ class FundListAdapter(private val funds: ArrayList<FundItem>) :
         if (currentItem.amount < 0) {
             holder.fundAmount.text = currentItem.amount.toString()
             // Change color
-            holder.fundAmount.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.light_blue_600))
+            holder.fundAmount.setTextColor(
+                ContextCompat.getColor(
+                    holder.itemView.context,
+                    R.color.light_blue_600
+                )
+            )
         } else {
             holder.fundAmount.text = "+" + currentItem.amount.toString()
-            holder.fundAmount.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.md_theme_primaryFixed_mediumContrast))
+            holder.fundAmount.setTextColor(
+                ContextCompat.getColor(
+                    holder.itemView.context,
+                    R.color.md_theme_primaryFixed_mediumContrast
+                )
+            )
         }
 
         holder.fundUser.text = currentItem.user
         holder.fundDate.text = currentItem.date
 
         // Holder click listener
-        holder.itemView.setOnClickListener{
+        holder.itemView.setOnClickListener {
             // Move to FundEdit
-             (it.context as AppCompatActivity).supportFragmentManager.beginTransaction()
+            (it.context as AppCompatActivity).supportFragmentManager.beginTransaction()
                 .replace(R.id.app_fragment, FundEdit(currentItem.id))
                 .addToBackStack("FundList")
                 .commit()
@@ -161,9 +172,10 @@ class FundList (
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
         val menuItem = appBar.menu.findItem(R.id.edit)
         menuItem.isEnabled = true
-        menuItem.title = null
-        menuItem.setIcon(R.drawable.ic_create_black)
-        menuItem.setOnMenuItemClickListener{
+        menuItem.isVisible = true
+        menuItem.title = "Add expense"
+        menuItem.setIcon(null)
+        menuItem.setOnMenuItemClickListener {
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.app_fragment, NewFund(param1!!)).addToBackStack("FundList").commit()
 
@@ -248,7 +260,7 @@ class FundList (
         }
 
         APIService().doGet<FundResponse>("events/$param1/funds",
-            object: APICallback<Any> {
+            object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")
 
@@ -258,15 +270,25 @@ class FundList (
 
                     for (fund in data.funds) {
                         // Format paidAt date
-                        val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                        val originalFormat =
+                            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
                         val targetFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.US)
                         val date = originalFormat.parse(fund.paidAt)
 
-                        fundList.add(FundItem(fund.id, fund.info, fund.amount, fund.paidBy.profile.fullName, targetFormat.format(date!!)))
+                        fundList.add(
+                            FundItem(
+                                fund.id,
+                                fund.info,
+                                fund.amount,
+                                fund.paidBy.profile.fullName,
+                                targetFormat.format(date!!)
+                            )
+                        )
                     }
 
                     val recyclerView = view.findViewById<RecyclerView>(R.id.fund_list_list)
-                    recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+                    recyclerView.layoutManager =
+                        androidx.recyclerview.widget.LinearLayoutManager(context)
                     recyclerView.adapter = FundListAdapter(fundList)
                     recyclerView.setHasFixedSize(true)
                 }
