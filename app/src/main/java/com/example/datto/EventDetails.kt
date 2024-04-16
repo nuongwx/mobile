@@ -10,7 +10,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.cardview.widget.CardView
-import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,8 +19,6 @@ import com.example.datto.API.APIService
 import com.example.datto.DataClass.EventResponse
 import com.example.datto.DataClass.FundResponse
 import com.example.datto.DataClass.Planning
-import com.example.datto.DataClassRecyclerView.FundItem
-import com.google.android.material.appbar.MaterialToolbar
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.time.Duration
@@ -161,20 +158,6 @@ class FunkyDatedPlanningAdapter(private val plans: List<Planning>) :
 }
 
 class EventDetails : Fragment() {
-    private var eventID: String? = null
-
-//     private fun configTopAppBar(name: String) {
-//         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
-//         val menuItem = appBar.menu.findItem(R.id.edit)
-//         menuItem.isEnabled = true
-//         menuItem.isVisible = true
-//         menuItem.title = null
-//         menuItem.setIcon(R.drawable.ic_edit)
-//         menuItem.setOnMenuItemClickListener(null)
-
-//         appBar.title = name
-//         appBar.navigationIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_back)
-//     }
 
     // TODO: Rename and change types of parameters
     private var eventId: String? = null
@@ -183,7 +166,6 @@ class EventDetails : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            eventID = it.getString(ARG_PARAM1)
             eventId = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
@@ -201,7 +183,7 @@ class EventDetails : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        configTopAppBar("Event Name")
+        // configTopAppBar("Event Name")
 
         val eventName: TextView = view.findViewById(R.id.eventDetailsEventNameTextView)
         val w2mButton: Button = view.findViewById(R.id.eventDetailsW2MButton)
@@ -384,8 +366,14 @@ class EventDetails : Fragment() {
         val appBar =
             requireActivity().findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.app_top_app_bar)
         val menuItem = appBar.menu.findItem(R.id.edit)
-        menuItem.isEnabled = false
-        menuItem.isVisible = false
+        menuItem.isEnabled = true
+        menuItem.isVisible = true
+        menuItem.title = null
+        menuItem.setIcon(R.drawable.ic_edit)
+        menuItem.setOnMenuItemClickListener {
+            Toast.makeText(requireContext(), "Edit event: $eventId", Toast.LENGTH_SHORT).show()
+            true
+        }
         appBar.title = "Events"
 
         appBar.navigationIcon = AppCompatResources.getDrawable(requireContext(), R.drawable.ic_back)
