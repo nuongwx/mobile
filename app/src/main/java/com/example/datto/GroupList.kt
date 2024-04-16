@@ -18,12 +18,10 @@ import com.example.datto.API.APIService
 import com.example.datto.Credential.CredentialService
 import com.example.datto.DataClass.AccountResponse
 import com.example.datto.DataClass.EventResponse
-import com.example.datto.DataClass.GroupResponse
 import com.example.datto.GlobalVariable.GlobalVariable
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.gson.annotations.SerializedName
 import com.squareup.picasso.Picasso
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -36,8 +34,19 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 
+data class CustomGroupResponse(
+    @SerializedName("_id")
+    var id: String,
+    var members: List<String>,
+    var events: List<EventResponse>,
+    var memories: List<String>,
+    var name: String,
+    var inviteCode: String,
+    val thumbnail: String,
+)
+
 class GroupListAdapter(
-    private val groups: ArrayList<GroupResponse>
+    private val groups: ArrayList<CustomGroupResponse>
 ) : androidx.recyclerview.widget.RecyclerView.Adapter<GroupListAdapter.GroupViewHolder>() {
 
     inner class GroupViewHolder(itemView: View) :
@@ -53,7 +62,7 @@ class GroupListAdapter(
         init {}
     }
 
-    fun getItem(position: Int): GroupResponse {
+    fun getItem(position: Int): CustomGroupResponse {
         return groups[position]
     }
 
@@ -138,91 +147,6 @@ class GroupListAdapter(
     }
 }
 
-data class Event(
-    val groupName: String,
-    val id: String
-)
-
-class CurrentEventAdapter(
-    private val events: ArrayList<Event>
-) : androidx.recyclerview.widget.RecyclerView.Adapter<CurrentEventAdapter.EventViewHolder>() {
-
-    inner class EventViewHolder(itemView: View) :
-        androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
-        val eventGroupName = itemView.findViewById<android.widget.TextView>(R.id.eventGroupName)
-        val eventName = itemView.findViewById<android.widget.TextView>(R.id.eventTitle)
-        val eventDate = itemView.findViewById<android.widget.TextView>(R.id.eventDate)
-
-        init {
-            itemView.setOnClickListener {
-                val position = adapterPosition
-                val event = events[position]
-                val eventDetailsFragment = EventDetails()
-                val bundle = Bundle()
-                bundle.putString("eventId", event.id)
-                eventDetailsFragment.arguments = bundle
-                val transaction = (it.context as MainActivity).supportFragmentManager.beginTransaction()
-                transaction.replace(R.id.app_fragment, eventDetailsFragment)
-                transaction.addToBackStack(null)
-                transaction.commit()
-            }
-        }
-    }
-
-    fun getItem(position: Int): Event {
-        return events[position]
-    }
-
-    override fun onCreateViewHolder(
-        parent: ViewGroup, viewType: Int
-    ): CurrentEventAdapter.EventViewHolder {
-        val itemView =
-            LayoutInflater.from(parent.context).inflate(R.layout.events_list_items, parent, false)
-        return EventViewHolder(itemView)
-    }
-
-    override fun onBindViewHolder(holder: CurrentEventAdapter.EventViewHolder, position: Int) {
-        val currentItem = events[position]
-
-        holder.eventGroupName.text = currentItem.groupName
-
-        APIService().doGet<EventResponse>("events/${currentItem.id}", object : APICallback<Any> {
-            override fun onSuccess(data: Any) {
-                Log.d("API_SERVICE", "Data: $data")
-
-                data as EventResponse
-
-                holder.eventName.text = data.name
-
-                val inputFormat =
-                    SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault())
-                val outputFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
-                val outputFormatWithYear = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-                val date = inputFormat.parse(data.time.start)
-                holder.eventDate.text = if (date != null) {
-                    "${outputFormat.format(date)} - ${
-                        outputFormatWithYear.format(
-                            inputFormat.parse(
-                                data.time.end
-                            )
-                        )
-                    }"
-                } else {
-                    ""
-                }
-            }
-
-            override fun onError(error: Throwable) {
-                Log.e("API_SERVICE", "Error: ${error.message}")
-            }
-        })
-    }
-
-    override fun getItemCount(): Int {
-        return events.size
-    }
-}
-
 class GroupList : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
@@ -277,22 +201,22 @@ class GroupList : Fragment() {
                 .replace(R.id.app_fragment, NewGroup()).addToBackStack("NewGroup").commit()
         }
 
-        val groupList = ArrayList<GroupResponse>()
-        val currentEvents = ArrayList<Event>()
+        val groupList = ArrayList<CustomGroupResponse>()
+        val accountEvents = ArrayList<Event>()
 
-        APIService().doGet<List<GroupResponse>>(
+        APIService().doGet<List<CustomGroupResponse>>(
             "accounts/${CredentialService().get()}/groups",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")
 
-                    data as List<GroupResponse>
+                    data as List<CustomGroupResponse>
 
                     data.forEach {
                         groupList.add(it)
 
                         it.events.forEach { event ->
-                            currentEvents.add(Event(it.name, event))
+                            accountEvents.add(Event(it.name, event))
                         }
                     }
 
@@ -342,13 +266,15 @@ class GroupList : Fragment() {
                         override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
                     })
 
+                    val latestEvents = accountEvents.sortedByDescending { it.event.time.start }.takeLast(3) as ArrayList<Event>
+
                     val eventRecyclerView =
                         view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.currentEventsRecyclerView)
                     eventRecyclerView.layoutManager =
                         androidx.recyclerview.widget.LinearLayoutManager(
                             view.context, androidx.recyclerview.widget.RecyclerView.VERTICAL, false
                         )
-                    eventRecyclerView.adapter = CurrentEventAdapter(currentEvents)
+                    eventRecyclerView.adapter = EventAdapter(latestEvents)
                     eventRecyclerView.setHasFixedSize(true)
                 }
 

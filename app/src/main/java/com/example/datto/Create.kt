@@ -118,14 +118,14 @@ class Create : Fragment() {
 
         configTopAppBar()
 
-        val groupList = ArrayList<GroupResponse>()
+        val groupList = ArrayList<CustomGroupResponse>()
 
-        APIService().doGet<List<GroupResponse>>("accounts/${CredentialService().get()}/groups",
+        APIService().doGet<List<CustomGroupResponse>>("accounts/${CredentialService().get()}/groups",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")
 
-                    data as List<GroupResponse>
+                    data as List<CustomGroupResponse>
 
                     data.forEach {
                         groupList.add(it)
