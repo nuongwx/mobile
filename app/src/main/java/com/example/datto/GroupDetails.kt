@@ -140,6 +140,7 @@ class GroupDetails : Fragment() {
                     toEventList.setOnClickListener {
                         val bundle = Bundle()
                         bundle.putString("groupId", data.id)
+                        bundle.putString("groupName", data.name)
                         val GroupDetailsEventListFragment = GroupDetailsEventList()
                         GroupDetailsEventListFragment.arguments = bundle
 

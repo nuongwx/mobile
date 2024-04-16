@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,6 +17,7 @@ import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.DataClass.FundResponse
 import com.example.datto.DataClassRecyclerView.FundItem
+import com.google.android.material.appbar.MaterialToolbar
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.time.Duration
@@ -23,10 +25,7 @@ import java.util.Currency
 import java.util.Date
 import java.util.Locale
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+private const val ARG_PARAM1 = "eventId"
 
 /**
  * A simple [Fragment] subclass.
@@ -128,21 +127,25 @@ class FunkyDatedPlanningAdapter(private val plans: List<Planning>) : RecyclerVie
 }
 
 class EventDetails : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private var eventID: String? = null
 
-    private val eventID: String? = null
+    private fun configTopAppBar(name: String) {
+        val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
+        val menuItem = appBar.menu.findItem(R.id.edit)
+        menuItem.isEnabled = true
+        menuItem.isVisible = true
+        menuItem.title = null
+        menuItem.setIcon(R.drawable.ic_edit)
+        menuItem.setOnMenuItemClickListener(null)
 
-    init {
-
+        appBar.title = name
+        appBar.navigationIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_back)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+            eventID = it.getString(ARG_PARAM1)
         }
     }
 
@@ -153,6 +156,8 @@ class EventDetails : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        configTopAppBar("Event Name")
 
         val eventName: TextView = view.findViewById(R.id.eventDetailsEventNameTextView)
         val w2mButton: Button = view.findViewById(R.id.eventDetailsW2MButton)
@@ -167,8 +172,6 @@ class EventDetails : Fragment() {
         val expenseOutTextView: TextView = view.findViewById(R.id.eventDetailsExpenseOutTextView)
 
         val newMemoryButton: Button = view.findViewById(R.id.eventDetailsNewMemoryButton)
-
-        eventName.text = arguments?.getString("eventId")
 
         w2mButton.setOnClickListener {
             Toast.makeText(view.context, "W2M", Toast.LENGTH_SHORT).show()
@@ -293,12 +296,10 @@ class EventDetails : Fragment() {
          * @param param2 Parameter 2.
          * @return A new instance of fragment EventDetails.
          */
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: String, param2: String) = EventDetails().apply {
+        fun newInstance(param1: String) = EventDetails().apply {
             arguments = Bundle().apply {
                 putString(ARG_PARAM1, param1)
-                putString(ARG_PARAM2, param2)
             }
         }
     }
