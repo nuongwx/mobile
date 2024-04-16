@@ -73,13 +73,14 @@ class GroupDetailsEventList : Fragment() {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")
 
+
                     data as List<EventResponse>
 
                     if (data.isEmpty()) {
                         val textView = view.findViewById<TextView>(R.id.noEventsTextView)
                         textView.isVisible = true
                     } else {
-
+                      
                         data.forEach {
                             eventList.add(
                                 Event(

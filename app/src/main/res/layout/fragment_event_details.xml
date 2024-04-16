@@ -44,8 +44,9 @@
 
                     <TextView
                         android:id="@+id/eventDetailsEventNameTextView"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:fontFamily="@font/be_vietnam_medium"
                         android:text="Plan"
                         android:textSize="16sp" />
@@ -75,11 +76,28 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/eventDetailsPlanningRecyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fadingEdge="vertical"
+                        android:fadingEdgeLength="96dp"
+                        android:maxHeight="256dp"
+                        android:paddingBottom="64dp"
+                        android:requiresFadingEdge="vertical"
+                        android:visibility="gone"
+                        app:layout_constraintHeight_max="256dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:listitem="@layout/event_details_planning_daily_items">
+
+                    </androidx.recyclerview.widget.RecyclerView>
+
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/eventDetailsStartPlaningButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_margin="48dp"
+                        android:layout_margin="32dp"
                         android:elegantTextHeight="true"
                         android:fontFamily="@font/be_vietnam_medium"
                         android:text="Start to plan"
@@ -95,51 +113,24 @@
                         app:strokeColor="@color/md_theme_primary"
                         app:strokeWidth="1dp" />
 
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/eventDetailsPlanningRecyclerView"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:fadingEdge="horizontal|vertical"
-                        android:fadingEdgeLength="10dp"
-                        android:requiresFadingEdge="horizontal|vertical"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent">
-
-                    </androidx.recyclerview.widget.RecyclerView>
-
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/eventDetailsPlanningCutoffCardView"
-                        android:layout_width="match_parent"
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/eventDetailsViewPlanButton"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="#431212"
-                        app:cardBackgroundColor="#80FFFFFF"
-                        app:cardElevation="0dp"
+                        android:elegantTextHeight="true"
+                        android:fontFamily="@font/be_vietnam_medium"
+                        android:text="More"
+                        android:textColor="@color/md_theme_primary"
+                        android:textSize="14sp"
+                        android:visibility="gone"
+                        app:backgroundTint="#00FFFFFF"
+                        app:iconTint="@color/md_theme_primary"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent">
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:strokeColor="@color/md_theme_primary"
+                        app:strokeWidth="1dp" />
 
-                        <androidx.constraintlayout.widget.ConstraintLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent">
-
-                            <com.google.android.material.button.MaterialButton
-                                android:id="@+id/eventDetailsViewPlanButton"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:elegantTextHeight="true"
-                                android:fontFamily="@font/be_vietnam_medium"
-                                android:text="More"
-                                android:textColor="@color/md_theme_primary"
-                                android:textSize="14sp"
-                                app:backgroundTint="#00FFFFFF"
-                                app:iconTint="@color/md_theme_primary"
-                                app:layout_constraintBottom_toBottomOf="parent"
-                                app:layout_constraintEnd_toEndOf="parent"
-                                app:layout_constraintStart_toStartOf="parent"
-                                app:strokeColor="@color/md_theme_primary"
-                                app:strokeWidth="1dp" />
-                        </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    </androidx.cardview.widget.CardView>
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </LinearLayout>
@@ -183,6 +174,7 @@
                         android:text="View Details"
                         android:textColor="@color/md_theme_primary"
                         android:textSize="12sp"
+                        android:visibility="invisible"
                         app:backgroundTint="#00FFFFFF" />
 
                 </LinearLayout>
@@ -195,6 +187,7 @@
                         android:id="@+id/eventDetailsNewExpenseButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_margin="32dp"
                         android:elegantTextHeight="true"
                         android:fontFamily="@font/be_vietnam_medium"
                         android:text="New Expense"
@@ -215,13 +208,16 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
+                        android:visibility="gone"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/eventDetailsExpenseOverViewCardView" />
+                        app:layout_constraintTop_toBottomOf="@+id/eventDetailsExpenseOverViewCardView"
+                        tools:visibility="gone" />
 
                     <androidx.cardview.widget.CardView
                         android:id="@+id/eventDetailsExpenseOverViewCardView"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:visibility="gone"
                         app:cardBackgroundColor="@color/md_theme_secondaryContainer"
                         app:cardCornerRadius="8dp"
                         app:cardElevation="0dp"
@@ -343,6 +339,7 @@
                         android:id="@+id/eventDetailsNewMemoryButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_margin="32dp"
                         android:elegantTextHeight="true"
                         android:fontFamily="@font/be_vietnam_medium"
                         android:text="New Memory"
@@ -363,8 +360,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
+                        android:visibility="gone"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:visibility="gone" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </LinearLayout>
