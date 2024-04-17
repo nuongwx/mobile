@@ -266,7 +266,7 @@ class GroupList : Fragment() {
                         override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
                     })
 
-                    val latestEvents = accountEvents.sortedByDescending { it.event.time.start }.takeLast(3) as ArrayList<Event>
+                    val latestEvents = accountEvents.sortedByDescending { it.event.time.start }.takeLast(3)
 
                     val eventRecyclerView =
                         view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.currentEventsRecyclerView)
