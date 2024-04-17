@@ -3,20 +3,23 @@ package com.example.datto
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
+import com.example.datto.API.APICallback
+import com.example.datto.API.APIService
+import com.example.datto.Credential.CredentialService
+import com.example.datto.DataClass.AccountResponse
+import com.example.datto.GlobalVariable.GlobalVariable
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
@@ -36,10 +39,12 @@ import java.lang.reflect.Type
 import java.net.URL
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.ZoneId
+import java.util.Date
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
+private const val ARG_PARAM1 = "eventId"
 private const val ARG_PARAM2 = "param2"
 
 /**
@@ -48,19 +53,97 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 
+data class Availability(
+    val person: String,
+    var availability: List<LocalDate> // my condolences to the poor naming scheme
+)
+
+data class Event(
+    val id: String, val availability: List<Availability>
+)
+
+class LocalDateDeserializer : JsonDeserializer<LocalDate> {
+    override fun deserialize(
+        json: JsonElement, typeOfT: Type?, context: JsonDeserializationContext
+    ): LocalDate {
+        return LocalDate.parse(json.asString)
+    }
+}
+
+class LocalDateSerializer : JsonSerializer<LocalDate> {
+    override fun serialize(
+        src: LocalDate?, typeOfSrc: Type?, context: JsonSerializationContext?
+    ): JsonElement {
+        return JsonPrimitive(src.toString())
+    }
+}
+
+val schedules = ArrayList<Event>()
+var event: Event? = null
+
+data class AvailabilityResponse(
+    val createdBy: String,
+    val time: List<Date>,
+)
+
 class W2M : Fragment() {
     // TODO: Rename and change types of parameters
-    private var param1: String? = null
+    private var eventId: String? = null
     private var param2: String? = null
+
+    val userId = CredentialService().get()
+
+    var selectedDate = HashMap<LocalDate, Boolean>()
+
+    val calendarView: CalendarView by lazy { requireActivity().findViewById<CalendarView>(R.id.overallCalendarView) }
+
+    val voteCalendarView: CalendarView by lazy { requireActivity().findViewById<CalendarView>(R.id.voteCalendarView) }
 
     var voting = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
+            eventId = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
+
+        APIService().doGet<Array<AvailabilityResponse>>("events/${eventId}/calendars",
+            object : APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    val availability = data as Array<AvailabilityResponse>
+                    if (availability.find { it.createdBy == userId } == null) {
+                        val responseObject = AvailabilityResponse(userId, ArrayList())
+                        APIService().doPost<AvailabilityResponse>("events/${eventId}/calendars",
+                            responseObject,
+                            object : APICallback<Any> {
+                                override fun onSuccess(data: Any) {
+                                    Toast.makeText(
+                                        requireContext(), "Availability updated", Toast.LENGTH_SHORT
+                                    ).show()
+                                    updateSchedules()
+                                }
+
+                                override fun onError(error: Throwable) {
+                                    Toast.makeText(
+                                        requireContext(),
+                                        "Error: ${error.message}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            })
+                    } else {
+                        updateSchedules()
+                    }
+
+                }
+
+                override fun onError(error: Throwable) {
+                    Toast.makeText(
+                        requireContext(), "Error: ${error.message}", Toast.LENGTH_SHORT
+                    ).show()
+                }
+            })
     }
 
     override fun onCreateView(
@@ -71,74 +154,21 @@ class W2M : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        data class Availability(
-            val person: Int,
-            var availability: List<LocalDate> // my condolences to the poor naming scheme
-        )
-
-        data class Event(
-            val id: Int, val name: String, val availability: List<Availability>
-        )
-
-        var selectedDate = HashMap<LocalDate, Boolean>()
-
-        class LocalDateDeserializer : JsonDeserializer<LocalDate> {
-            override fun deserialize(
-                json: JsonElement, typeOfT: Type?, context: JsonDeserializationContext
-            ): LocalDate {
-                return LocalDate.parse(json.asString)
-            }
-        }
-
-        class LocalDateSerializer : JsonSerializer<LocalDate> {
-            override fun serialize(
-                src: LocalDate?, typeOfSrc: Type?, context: JsonSerializationContext?
-            ): JsonElement {
-                return JsonPrimitive(src.toString())
-            }
-        }
-
-        val json =
-            "[{\"availability\":[{\"availability\":[\"2024-04-10\",\"2024-04-11\"],\"person\":1},{\"availability\":[\"2024-04-12\"],\"person\":2}],\"id\":1,\"name\":\"Event A\"},{\"availability\":[{\"availability\":[\"2024-04-12\",\"2024-04-13\"],\"person\":2},{\"availability\":[\"2024-04-14\",\"2024-04-19\"],\"person\":3}],\"id\":2,\"name\":\"Event B\"}]\n"
-
-        val schedules = json.let {
-            com.google.gson.GsonBuilder()
-                .registerTypeAdapter(LocalDate::class.java, LocalDateDeserializer()).create()
-                .fromJson(it, Array<Event>::class.java)
-        }.toMutableList()
-
-        var userId = 1
-
-        var event: Event? = schedules.first { true }
-
-        val spinner: Spinner = view.findViewById(R.id.spinner)
-        val adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_spinner_item,
-            schedules.map { it.id })
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner.adapter = adapter
-
-        val spinner2: Spinner = view.findViewById(R.id.spinner2)
-
-        val calendarView = view.findViewById<CalendarView>(R.id.overallCalendarView)
-
-        val voteCalendarView = view.findViewById<CalendarView>(R.id.voteCalendarView)
 
         val ctx = requireContext()
         val rangeStartBackground =
             AppCompatResources.getDrawable(ctx, R.drawable.w2m_continuous_selected_bg_start).also {
-                    if (it != null) {
-                        it.level = 5000
-                    }
+                if (it != null) {
+                    it.level = 5000
                 }
+            }
 
         val rangeEndBackground =
             AppCompatResources.getDrawable(ctx, R.drawable.w2m_continuous_selected_bg_end).also {
-                    if (it != null) {
-                        it.level = 5000
-                    }
+                if (it != null) {
+                    it.level = 5000
                 }
+            }
         val rangeMiddleBackground =
             AppCompatResources.getDrawable(ctx, R.drawable.w2m_continuous_selected_bg_middle)
         val singleBackground =
@@ -146,52 +176,6 @@ class W2M : Fragment() {
         val todayBackground = AppCompatResources.getDrawable(ctx, R.drawable.w2m_today_bg)
 
         val today = LocalDate.now()
-
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?, view: View?, position: Int, id: Long
-            ) {
-
-                val adapter = ArrayAdapter(requireContext(),
-                                           android.R.layout.simple_spinner_item,
-                                           schedules[position].availability.map { it.person })
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                spinner2.adapter = adapter
-
-                spinner2.setSelection(0)
-
-                event = schedules.find { it.id == spinner.selectedItem.toString().toInt() }!!
-
-                calendarView.notifyCalendarChanged()
-                voteCalendarView.notifyCalendarChanged()
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-            }
-        }
-
-        spinner2.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?, view: View?, position: Int, id: Long
-            ) { // get current person availability
-                // val event = schedules.find { it.id == spinner.selectedItem.toString().toInt() }
-                selectedDate = HashMap()
-                val availability = event?.availability?.find {
-                    it.person == spinner2.selectedItem.toString().toInt()
-                }
-                availability?.availability?.forEach {
-                    selectedDate[it] = true
-                }
-
-                userId = spinner2.selectedItem.toString().toInt()
-
-                calendarView.notifyCalendarChanged()
-                voteCalendarView.notifyCalendarChanged()
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-            }
-        }
 
         class DayViewContainer(view: View) : ViewContainer(view) {
             val textView = view.findViewById<TextView>(R.id.dayText)
@@ -208,10 +192,13 @@ class W2M : Fragment() {
         }
 
         val availableRecyclerView = view.findViewById<RecyclerView>(R.id.availableW2MRecyclerView)
-        availableRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
+        availableRecyclerView.layoutManager =
+            androidx.recyclerview.widget.LinearLayoutManager(view.context)
         availableRecyclerView.adapter = MemberListAdapter(ArrayList())
-        val unavailableRecyclerView = view.findViewById<RecyclerView>(R.id.unavailableW2MRecyclerView)
-        unavailableRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
+        val unavailableRecyclerView =
+            view.findViewById<RecyclerView>(R.id.unavailableW2MRecyclerView)
+        unavailableRecyclerView.layoutManager =
+            androidx.recyclerview.widget.LinearLayoutManager(view.context)
         unavailableRecyclerView.adapter = MemberListAdapter(ArrayList())
 
         val scrollView = requireActivity().findViewById<View>(R.id.scrollView)
@@ -228,13 +215,22 @@ class W2M : Fragment() {
                             class MemberListAdapter(private val members: ArrayList<MemberItem>) :
                                 RecyclerView.Adapter<MemberListAdapter.MemberViewHolder>() {
 
-                                inner class MemberViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-                                    val memberName: TextView = itemView.findViewById(R.id.memberNameTextView)
-                                    val memberImage: ImageView = itemView.findViewById(R.id.memberCoverImageView)
-                                    val removeButton: ImageButton = itemView.findViewById(R.id.memberRemoveButton)
+                                inner class MemberViewHolder(itemView: View) :
+                                    RecyclerView.ViewHolder(itemView) {
+                                    val memberName: TextView =
+                                        itemView.findViewById(R.id.memberNameTextView)
+                                    val memberImage: ImageView =
+                                        itemView.findViewById(R.id.memberCoverImageView)
+                                    val removeButton: ImageButton =
+                                        itemView.findViewById(R.id.memberRemoveButton)
+
                                     init {
                                         itemView.setOnClickListener {
-                                            Toast.makeText(itemView.context, itemView.toString(), Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(
+                                                itemView.context,
+                                                itemView.toString(),
+                                                Toast.LENGTH_SHORT
+                                            ).show()
                                         }
 
                                         removeButton.visibility = View.GONE
@@ -244,19 +240,23 @@ class W2M : Fragment() {
                                 override fun onCreateViewHolder(
                                     parent: ViewGroup, viewType: Int
                                 ): MemberListAdapter.MemberViewHolder {
-                                    val itemView =
-                                        LayoutInflater.from(parent.context).inflate(R.layout.group_details_members_list_items, parent, false)
+                                    val itemView = LayoutInflater.from(parent.context).inflate(
+                                        R.layout.group_details_members_list_items, parent, false
+                                    )
                                     return MemberViewHolder(itemView)
                                 }
 
-                                override fun onBindViewHolder(holder: MemberListAdapter.MemberViewHolder, position: Int) {
+                                override fun onBindViewHolder(
+                                    holder: MemberListAdapter.MemberViewHolder, position: Int
+                                ) {
                                     val currentItem = members[position]
                                     holder.memberName.text = currentItem.name
 
                                     val thread = Thread {
                                         try {
-                                            val bitmap =
-                                                BitmapFactory.decodeStream(currentItem.image.openConnection().getInputStream())
+                                            val bitmap = BitmapFactory.decodeStream(
+                                                currentItem.image.openConnection().getInputStream()
+                                            )
                                             holder.memberImage.post {
                                                 holder.memberImage.setImageBitmap(bitmap)
                                             }
@@ -273,21 +273,48 @@ class W2M : Fragment() {
                             val availableUsers = ArrayList<MemberItem>()
                             val unavailableUsers = ArrayList<MemberItem>()
 
-                            event?.availability?.forEach {
-                                if (it.availability.contains(day.date)) {
-                                    availableUsers.add(MemberItem("User ${it.person}", URL("https://via.assets.so/img.jpg?w=500&h=500&tc=&bg=#7f7f7f&t=Hello%20World")))
-                                } else {
-                                    unavailableUsers.add(MemberItem("User ${it.person}", URL("https://via.assets.so/img.jpg?w=500&h=500&tc=&bg=#7f7f7f&t=Hello%20World")))
-                                }
-                            }
-
                             val availableAdapter = MemberListAdapter(availableUsers)
                             val unavailableAdapter = MemberListAdapter(unavailableUsers)
 
                             availableRecyclerView.adapter = availableAdapter
                             unavailableRecyclerView.adapter = unavailableAdapter
 
-                            Toast.makeText(requireContext(), "Available: ${availableUsers.size}, Unavailable: ${unavailableUsers.size}", Toast.LENGTH_SHORT).show()
+                            event?.availability?.forEach {
+                                APIService().doGet<AccountResponse>("accounts/${it.person}",
+                                    object : APICallback<Any> {
+                                        override fun onSuccess(data: Any) {
+                                            val account = data as AccountResponse
+                                            if (it.availability.contains(day.date)) {
+                                                availableUsers.add(
+                                                    MemberItem(
+                                                        account.profile.fullName,
+                                                        URL(GlobalVariable.BASE_URL + "files/" + account.profile.avatar)
+                                                    )
+                                                )
+                                            } else if (it.availability.contains(day.date) == false && it.availability.isEmpty() == false) {
+                                                unavailableUsers.add(
+                                                    MemberItem(
+                                                        account.profile.fullName,
+                                                        URL(GlobalVariable.BASE_URL + "files/" + account.profile.avatar)
+                                                    )
+                                                )
+                                            }
+
+                                            availableAdapter.notifyDataSetChanged()
+                                            unavailableAdapter.notifyDataSetChanged()
+                                        }
+
+                                        override fun onError(error: Throwable) {
+                                            Toast.makeText(
+                                                requireContext(),
+                                                "Error: ${error.message}",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    })
+                            }
+
+
                         } else {
                             Toast.makeText(requireContext(), "No availability", Toast.LENGTH_SHORT)
                                 .show()
@@ -309,7 +336,8 @@ class W2M : Fragment() {
                 val availability = event?.availability?.find { it.availability.contains(data.date) }
                 if (availability != null) {
 
-                    val maxAvailable = event?.availability?.size ?: 0
+                    val maxAvailable =
+                        event?.availability?.count { it.availability.isNotEmpty() } ?: 0
                     val minAvailable = 0
                     val current =
                         event?.availability?.count { it.availability.contains(data.date) } ?: 0
@@ -536,33 +564,98 @@ class W2M : Fragment() {
         voteCalendarView.setup(startMonth, endMonth, daysOfWeek.first())
         voteCalendarView.scrollToMonth(currentMonth)
 
-
-        calendarView.notifyCalendarChanged()
-        voteCalendarView.notifyCalendarChanged()
+        updateSchedules()
 
         configTopAppBar()
 
+
+    }
+
+    fun updateSchedules() {
+        APIService().doGet<Array<AvailabilityResponse>>("events/${eventId}/calendars",
+            object : APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    val availability = data as Array<AvailabilityResponse>
+                    schedules.clear()
+
+                    schedules.add(Event(eventId!!, availability.map {
+                        Availability(it.createdBy, it.time.map {
+                            it.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+                        })
+                    }))
+
+                    Log.d("W2M", "Schedules: $schedules")
+                    println(schedules)
+
+                    event = schedules.find { it.id == eventId }!!
+                    selectedDate = HashMap()
+                    val a = event?.availability?.find { it.person == userId }
+                    a?.availability?.forEach {
+                        selectedDate[it] = true
+                    }
+
+                    calendarView.notifyCalendarChanged()
+                    voteCalendarView.notifyCalendarChanged()
+                }
+
+                override fun onError(error: Throwable) {
+                    Toast.makeText(
+                        requireContext(), "Error: ${error.message}", Toast.LENGTH_SHORT
+                    ).show()
+                }
+            })
+    }
+
+    fun save() {
+        val responseObject = AvailabilityResponse(userId, selectedDate.keys.map {
+            Date.from(
+                it.atStartOfDay().atZone(
+                    ZoneId.systemDefault()
+                ).toInstant()
+            )
+        })
+
+        APIService().doPost<AvailabilityResponse>("events/${eventId}/calendars",
+            responseObject,
+            object : APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    Toast.makeText(
+                        requireContext(), "Availability updated", Toast.LENGTH_SHORT
+                    ).show()
+                    updateSchedules()
+                }
+
+                override fun onError(error: Throwable) {
+                    Toast.makeText(
+                        requireContext(), "Error: ${error.message}", Toast.LENGTH_SHORT
+                    ).show()
+                }
+            })
     }
 
     private fun configTopAppBar() {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
         val menuItem = appBar.menu.findItem(R.id.edit)
         val scrollView = requireActivity().findViewById<View>(R.id.scrollView)
+        val overallCalendarView =
+            requireActivity().findViewById<CalendarView>(R.id.overallCalendarView)
         val voteCalendarView = requireActivity().findViewById<CalendarView>(R.id.voteCalendarView)
         menuItem.isEnabled = true
         if (voting) {
             menuItem.setIcon(null)
-            menuItem.title = "Save"
+            menuItem.title = "Finish"
             menuItem.setOnMenuItemClickListener { // save the availability
                 scrollView.visibility = View.GONE
                 voteCalendarView.visibility = View.GONE
                 voting = false
                 appBar.title = "VIEW"
                 configTopAppBar()
+                save()
                 true
             }
         } else {
             menuItem.setIcon(R.drawable.ic_edit)
+            menuItem.title = "Edit"
             menuItem.setOnMenuItemClickListener {
                 scrollView.visibility = View.GONE
                 voteCalendarView.visibility = View.VISIBLE
