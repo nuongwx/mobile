@@ -119,7 +119,7 @@ class VerifyOtpActivity : AppCompatActivity() {
 
         findViewById<TextView>(R.id.resend_otp).setOnClickListener {
             val otp = NewOtpRequest(key, email.toString())
-            APIService().doPost<OtpResponse>(
+            APIService(this).doPost<OtpResponse>(
                 "otp",
                 otp,
                 object :
@@ -146,7 +146,7 @@ class VerifyOtpActivity : AppCompatActivity() {
                 Toast.makeText(this@VerifyOtpActivity, "Invalid code. Please check your code and try again.", Toast.LENGTH_SHORT).show()
             } else {
                 val verifyOtpRq = VerifyOtpRequest(id, code.toInt())
-                APIService().doPost<Any>(
+                APIService(this).doPost<Any>(
                     "otp/verification",
                     verifyOtpRq,
                     object :

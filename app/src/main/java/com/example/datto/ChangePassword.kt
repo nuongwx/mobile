@@ -43,7 +43,7 @@ class ChangePassword : Fragment() {
             val body = ChangePasswordRequest(currentPassword.text.toString(), newPassword.text.toString(), confirmPassword.text.toString())
 
             // Set onClickListener to the button
-            APIService().doPatch<ChangePasswordRequest>("accounts/${CredentialService().get()}/password", body, object : APICallback<Any> {
+            APIService(requireContext()).doPatch<ChangePasswordRequest>("accounts/${CredentialService().get()}/password", body, object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Toast.makeText(requireContext(), "Password changed successfully", Toast.LENGTH_SHORT).show()
                     Log.d("API_SERVICE", "Data: $data")

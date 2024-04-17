@@ -67,7 +67,7 @@ class GroupDetailsEventList : Fragment() {
         configTopAppBar()
 
         val eventList = ArrayList<Event>()
-        APIService().doGet<List<EventResponse>>(
+        APIService(requireContext()).doGet<List<EventResponse>>(
             "groups/${groupId}/events",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {

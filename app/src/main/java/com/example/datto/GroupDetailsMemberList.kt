@@ -1,5 +1,6 @@
 package com.example.datto
 
+import android.content.Context
 import android.graphics.BitmapFactory
 import android.opengl.Visibility
 import android.os.Bundle
@@ -12,6 +13,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
@@ -41,7 +43,8 @@ private const val ARG_PARAM3 = "param3"
 
 class MemberListAdapter(
     private val members: ArrayList<AccountResponse>,
-    private val groupId: String
+    private val groupId: String,
+    private val context: Context
 ) : RecyclerView.Adapter<MemberListAdapter.MemberViewHolder>() {
 
     inner class MemberViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -55,7 +58,7 @@ class MemberListAdapter(
             }
 
             removeButton.setOnClickListener {
-                APIService().doDelete<Any>("groups/${groupId}/members/${members[absoluteAdapterPosition].id}", object : APICallback<Any> {
+                APIService(context).doDelete<Any>("groups/${groupId}/members/${members[absoluteAdapterPosition].id}", object : APICallback<Any> {
                     override fun onSuccess(data: Any) {
                         Log.d("API_SERVICE", "Data: $data")
 
@@ -150,7 +153,7 @@ class GroupDetailsMemberList : Fragment() {
         val memberList = ArrayList<AccountResponse>()
         var completedRequests = 0
         for (memberId in memberIds!!) {
-            APIService().doGet<AccountResponse>("accounts/${memberId}", object : APICallback<Any> {
+            APIService(requireContext()).doGet<AccountResponse>("accounts/${memberId}", object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")
 
@@ -177,7 +180,7 @@ class GroupDetailsMemberList : Fragment() {
                             view.findViewById<RecyclerView>(R.id.memberRecyclerView)
                         memberRecyclerView.layoutManager =
                             androidx.recyclerview.widget.LinearLayoutManager(view.context)
-                        memberRecyclerView.adapter = MemberListAdapter(sortedMemberList, arguments?.getString("groupId")!!)
+                        memberRecyclerView.adapter = MemberListAdapter(sortedMemberList, arguments?.getString("groupId")!!, requireContext())
                         memberRecyclerView.setHasFixedSize(true)
                     }
                 }
@@ -191,7 +194,7 @@ class GroupDetailsMemberList : Fragment() {
         val regenButton: ImageButton = view.findViewById(R.id.regenInviteCodeImageButton)
         regenButton.setOnClickListener {
             Toast.makeText(view.context, "Regenerating invite code", Toast.LENGTH_SHORT).show()
-            APIService().doGet<InviteCodeResponse>("groups/${groupId}/code-generation", object : APICallback<Any> {
+            APIService(requireContext()).doGet<InviteCodeResponse>("groups/${groupId}/code-generation", object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")
 

@@ -105,7 +105,7 @@ class GroupDetails : Fragment() {
 
         var group: GroupResponse? = null
 
-        APIService().doGet<GroupResponse>("groups/${groupId}",
+        APIService(requireContext()).doGet<GroupResponse>("groups/${groupId}",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")

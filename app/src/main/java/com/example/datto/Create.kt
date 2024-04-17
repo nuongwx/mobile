@@ -73,7 +73,7 @@ class Create : Fragment() {
                 "name" to name, "start" to formattedStart, "end" to formattedEnd
             )
 
-            APIService().doPost<EventRequest>(
+            APIService(requireContext()).doPost<EventRequest>(
                 "groups/${group}/events",
                 data,
                 object : APICallback<Any> {
@@ -120,7 +120,7 @@ class Create : Fragment() {
 
         val groupList = ArrayList<CustomGroupResponse>()
 
-        APIService().doGet<List<CustomGroupResponse>>("accounts/${CredentialService().get()}/groups",
+        APIService(requireContext()).doGet<List<CustomGroupResponse>>("accounts/${CredentialService().get()}/groups",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")

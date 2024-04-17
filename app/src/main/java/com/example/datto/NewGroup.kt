@@ -60,7 +60,7 @@ class NewGroup : Fragment() {
                         val newGroupRequest =
                             NewGroupRequest(CredentialService().get(), name.text.toString(), "")
 
-                        APIService().doPost<NewGroupResponse>("groups", newGroupRequest, object :
+                        APIService(requireContext()).doPost<NewGroupResponse>("groups", newGroupRequest, object :
                             APICallback<Any> {
                             override fun onSuccess(data: Any) {
                                 Log.d("API_SERVICE", "Data: $data")
@@ -95,7 +95,7 @@ class NewGroup : Fragment() {
                         val multipartBody =
                             MultipartBody.Part.createFormData("file", "thumbnail.jpg", requestBody)
 
-                        APIService().doPutMultipart<BucketResponse>("files", multipartBody, object :
+                        APIService(requireContext()).doPutMultipart<BucketResponse>("files", multipartBody, object :
                             APICallback<Any> {
                             override fun onSuccess(data: Any) {
                                 // Cast data to BucketResponse
@@ -109,7 +109,7 @@ class NewGroup : Fragment() {
                                 )
 
                                 // Call API to patch profile
-                                APIService().doPost<NewGroupResponse>(
+                                APIService(requireContext()).doPost<NewGroupResponse>(
                                     "groups",
                                     newGroupRequest,
                                     object :

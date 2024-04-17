@@ -58,7 +58,7 @@ class SignUpInfoActivity : AppCompatActivity() {
                     email.toString(),
                     password.text.toString()
                 )
-                APIService().doPost<NewAccountResponse>(
+                APIService(this).doPost<NewAccountResponse>(
                     "accounts",
                     newAccount,
                     object :

@@ -90,7 +90,7 @@ class Profile : Fragment() {
         logoutBtn = requireView().findViewById(R.id.profile_log_out)
 
         // Get data
-        APIService().doGet<AccountResponse>(
+        APIService(requireContext()).doGet<AccountResponse>(
             "accounts/${CredentialService().get()}",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {

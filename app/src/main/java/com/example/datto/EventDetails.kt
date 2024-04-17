@@ -206,7 +206,7 @@ class EventDetails : Fragment() {
 
         val plannings = ArrayList<Planning>()
 
-        APIService().doGet<EventResponse>(
+        APIService(requireContext()).doGet<EventResponse>(
             "events/${eventId}",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
@@ -224,7 +224,7 @@ class EventDetails : Fragment() {
                 }
             })
 
-        APIService().doGet<ArrayList<Planning>>("events/${eventId}/timeline",
+        APIService(requireContext()).doGet<ArrayList<Planning>>("events/${eventId}/timeline",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     plannings.clear()
@@ -297,7 +297,7 @@ class EventDetails : Fragment() {
             }
         }
 
-        APIService().doGet<FundResponse>(
+        APIService(requireContext()).doGet<FundResponse>(
             "events/${eventId}/funds",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {

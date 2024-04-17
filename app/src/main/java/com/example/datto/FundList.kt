@@ -210,7 +210,7 @@ class FundList (
         shareMoneyBtn = view.findViewById(R.id.fund_list_share_button)
 
         shareMoneyBtn.setOnClickListener{
-            APIService().doGet<SplitFundResponse>("events/$param1/split-funds",
+            APIService(requireContext()).doGet<SplitFundResponse>("events/$param1/split-funds",
                 object: APICallback<Any> {
                     override fun onSuccess(data: Any) {
                         Log.d("API_SERVICE", "Data: $data")
@@ -259,7 +259,7 @@ class FundList (
             )
         }
 
-        APIService().doGet<FundResponse>("events/$param1/funds",
+        APIService(requireContext()).doGet<FundResponse>("events/$param1/funds",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")
