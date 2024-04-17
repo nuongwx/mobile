@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import com.google.android.material.appbar.MaterialToolbar
 
 // TODO: Rename parameter arguments, choose names that match
@@ -47,6 +48,7 @@ class NewGroupInviteCode(
         menuItem.setOnMenuItemClickListener(null)
 
         appBar.title = param1
+        appBar.navigationIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_back)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,20 +73,24 @@ class NewGroupInviteCode(
 
         // Copy invite code to clipboard when click on it
         inviteCodeText.setOnClickListener {
-            val clipboard = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clipboard =
+                requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("invite code", param2)
             clipboard.setPrimaryClip(clip)
 
-            Toast.makeText(requireContext(), "Invite code copied to clipboard", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Invite code copied to clipboard", Toast.LENGTH_SHORT)
+                .show()
         }
 
         // Copy invite code to clipboard when click on copy button
         copyButton.setOnClickListener {
-            val clipboard = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clipboard =
+                requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("invite code", param2)
             clipboard.setPrimaryClip(clip)
 
-            Toast.makeText(requireContext(), "Invite code copied to clipboard", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Invite code copied to clipboard", Toast.LENGTH_SHORT)
+                .show()
         }
 
         // Share invite code when click on share button

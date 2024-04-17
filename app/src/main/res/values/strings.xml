@@ -1,5 +1,15 @@
 <resources>
     <string name="app_name">Datto</string>
+    <string name="sign_in_title">Sign in</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="email">Email</string>
+    <string name="required_helper_text">This field cannot be empty</string>
+    <string name="invalid_email_helper_text">Invalid email</string>
+    <string name="not_match_password_helper_text">Passwords do not match</string>
+    <string name="reset_password">Reset password</string>
+    <string name="verify_otp">Verify OTP</string>
+    <string name="sign_up_title">Sign up</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment Hello blank fragment Hello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragmentHello blank fragment</string>
     <string name="dummy_button">Dummy Button</string>
