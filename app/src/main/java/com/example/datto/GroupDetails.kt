@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -16,6 +17,7 @@ import com.db.williamchart.view.LineChartView
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.DataClass.GroupResponse
+import com.example.datto.DataClass.MemoryResponse
 import com.example.datto.GlobalVariable.GlobalVariable
 import com.google.android.material.appbar.MaterialToolbar
 import com.squareup.picasso.Picasso
@@ -30,9 +32,7 @@ private const val ARG_PARAM1 = "groupId"
  * create an instance of this fragment.
  */
 
-class MemoryThumbnail(val imgUrl: URL)
-
-class MemoriesListAdapter(private val memories: ArrayList<MemoryThumbnail>) :
+class MemoriesListAdapter(private val memories: ArrayList<MemoryResponse>) :
     RecyclerView.Adapter<MemoriesListAdapter.MemoriesViewHolder>() {
 
     inner class MemoriesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -64,20 +64,28 @@ class MemoriesListAdapter(private val memories: ArrayList<MemoryThumbnail>) :
             // set unique button for the first item
             holder.imageButton.visibility = View.VISIBLE
             holder.setOnClickListener = {
-                val newMemoryFragment = NewMemory()
+                val newMemoryFragment = NewMemory().apply {
+                    arguments = Bundle().apply {
+                        putString(
+                            "groupId",
+                            (holder.itemView.context as MainActivity).supportFragmentManager.fragments.last().arguments?.getString(
+                                "groupId"
+                            )
+                        )
+                    }
+                }
                 val transaction =
                     (holder.itemView.context as MainActivity).supportFragmentManager.beginTransaction()
                 transaction.replace(R.id.app_fragment, newMemoryFragment)
                 transaction.addToBackStack(null)
                 transaction.commit()
             }
-        }
-        else { // hide button
+        } else { // hide button
             holder.imageButton.visibility = View.GONE
             val thread = Thread {
                 try {
                     val bitmap = BitmapFactory.decodeStream(
-                        currentItem.imgUrl.openConnection().getInputStream()
+                        URL(GlobalVariable.BASE_URL + "files/" + currentItem.thumbnail).openStream()
                     )
                     holder.memoryThumbnail.post {
                         holder.memoryThumbnail.setImageBitmap(bitmap)
@@ -89,12 +97,21 @@ class MemoriesListAdapter(private val memories: ArrayList<MemoryThumbnail>) :
             thread.start()
 
             holder.setOnClickListener = {
-                val imgUrl = currentItem.imgUrl
                 val MemoryViewFragment = MemoryView()
                 val transaction =
                     (holder.itemView.context as MainActivity).supportFragmentManager.beginTransaction()
                 val bundle = Bundle()
-                bundle.putString("imgUrl", imgUrl.toString())
+                bundle.putString(
+                    "imgUrl",
+                    GlobalVariable.BASE_URL + "files/" + currentItem.thumbnail
+                )
+                bundle.putString(
+                    "groupId",
+                    (holder.itemView.context as MainActivity).supportFragmentManager.fragments.last().arguments?.getString(
+                        "groupId"
+                    )
+                )
+                bundle.putString("id", currentItem.id)
                 MemoryViewFragment.arguments = bundle
                 transaction.replace(R.id.app_fragment, MemoryViewFragment)
                 transaction.addToBackStack(null)
@@ -199,18 +216,39 @@ class GroupDetails : Fragment() {
 
 
         // create a thread to fetch the images
-        val memories = arrayListOf<MemoryThumbnail>()
-        memories.add(MemoryThumbnail(URL("https://www.gstatic.com/webp/gallery/1.jpg")))
-        memories.add(MemoryThumbnail(URL("https://www.gstatic.com/webp/gallery/2.jpg")))
-        memories.add(MemoryThumbnail(URL("https://www.gstatic.com/webp/gallery/3.jpg")))
+        val memories = ArrayList<MemoryResponse>()
 
         val memoriesRecyclerView: RecyclerView =
             view.findViewById(R.id.recyclerView) // scroll horizontally
         memoriesRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(
             view.context, RecyclerView.HORIZONTAL, false
         )
-        memoriesRecyclerView.adapter = MemoriesListAdapter(memories)
+        val adapter = MemoriesListAdapter(memories)
+        memoriesRecyclerView.adapter = adapter
         memoriesRecyclerView.setHasFixedSize(true)
+
+        APIService().doGet<List<MemoryResponse>>("groups/${groupId}/memories",
+            object : APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    Log.d("API_SERVICE", "Data: $data")
+
+                    data as List<MemoryResponse>
+
+                    memories.clear()
+                    memories.add(MemoryResponse("", "😎", ""))
+
+                    for (memory in data) {
+                        memories.add(MemoryResponse(memory.thumbnail, memory.info, memory.id))
+                    }
+
+                    adapter.notifyDataSetChanged()
+                }
+
+                override fun onError(error: Throwable) {
+                    Log.e("API_SERVICE", "Error: ${error.message}")
+                }
+            })
+
 
         val chart: LineChartView = view.findViewById(R.id.chart)
         val entries: List<Pair<String, Float>> = listOf(
@@ -229,7 +267,7 @@ class GroupDetails : Fragment() {
         )
         chart.show(entries)
 
-        chart.setOnClickListener{
+        chart.setOnClickListener {
             Toast.makeText(context, "Chart clicked", Toast.LENGTH_SHORT).show()
         }
     }

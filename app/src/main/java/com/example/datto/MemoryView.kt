@@ -6,9 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.RelativeLayout
+import android.widget.TextView
+import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
+import com.example.datto.API.APICallback
+import com.example.datto.API.APIService
+import com.example.datto.DataClass.MemoryResponse
+import com.example.datto.GlobalVariable.GlobalVariable
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -30,6 +36,7 @@ class MemoryView : Fragment() {
     private var param2: String? = null
 
     private val imageView: ImageView by lazy { requireView().findViewById(R.id.memoryViewImageView) }
+    private val infoText: TextView by lazy { requireView().findViewById(R.id.memoryViewMemoryNameTextView) }
     private var layoutParams = CoordinatorLayout.LayoutParams(
         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
     )
@@ -52,8 +59,28 @@ class MemoryView : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val imgUrl = arguments?.getString("imgUrl")
-        Picasso.get().load(imgUrl).into(imageView)
+
+        APIService().doGet<MemoryResponse>(
+            "groups/${arguments?.getString("groupId")}/memories/${
+                arguments?.getString(
+                    "id"
+                )
+            }", object :
+                APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    val memory = data as MemoryResponse
+                    infoText.text = memory.info
+                    Picasso.get().load(GlobalVariable.BASE_URL + "files/" + memory.thumbnail)
+                        .into(imageView)
+                }
+
+                override fun onError(error: Throwable) {
+                    Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
+                }
+            })
+
+        // val imgUrl = arguments?.getString("imgUrl")
+        // Picasso.get().load(imgUrl).into(imageView)
     }
 
     override fun onStart() {
@@ -124,6 +151,7 @@ class MemoryView : Fragment() {
         appBar.navigationIcon = ResourcesCompat.getDrawable(resources, R.drawable.ic_back, null)
             .apply { this?.setTint(resources.getColor(R.color.md_theme_onPrimary, null)) }
         appBar.title = ""
+        appBar.menu.findItem(R.id.edit).isVisible = false
 
         // set transparent background
         appBar.setBackgroundColor(resources.getColor(android.R.color.transparent, null))
