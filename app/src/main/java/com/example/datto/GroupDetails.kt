@@ -219,7 +219,7 @@ class GroupDetails : Fragment() {
         val memories = ArrayList<MemoryResponse>()
 
         val memoriesRecyclerView: RecyclerView =
-            view.findViewById(R.id.recyclerView) // scroll horizontally
+            view.findViewById(R.id.memoriesCoverGroupDetailsRecyclerView) // scroll horizontally
         memoriesRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(
             view.context, RecyclerView.HORIZONTAL, false
         )
