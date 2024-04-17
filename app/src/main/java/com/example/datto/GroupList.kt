@@ -78,7 +78,9 @@ class GroupListAdapter(
         val currentItem = groups[position]
 
         holder.groupName.text = currentItem.name
-        "${currentItem.events.size} event${if (currentItem.events.size > 1) "s" else ""} together".also { holder.groupDes.text = it }
+        "${currentItem.events.size} event${if (currentItem.events.size > 1) "s" else ""} together".also {
+            holder.groupDes.text = it
+        }
 
         // Load image with Picasso and new thread
         try {
@@ -212,70 +214,86 @@ class GroupList : Fragment() {
 
                     data as List<CustomGroupResponse>
 
-                    data.forEach {
-                        groupList.add(it)
+                    if (data.isEmpty()) {
+                        view.findViewById<TextView>(R.id.noGroupsTextView).isVisible = true
+                        view.findViewById<TextView>(R.id.materialTextView).isVisible = false
+                    } else {
+                        view.findViewById<TextView>(R.id.noGroupsTextView).isVisible = false
 
-                        it.events.forEach { event ->
-                            accountEvents.add(Event(it.name, event))
-                        }
-                    }
+                        data.forEach {
+                            groupList.add(it)
 
-                    val groupRecyclerView =
-                        view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerView2)
-                    groupRecyclerView.layoutManager =
-                        androidx.recyclerview.widget.LinearLayoutManager(
-                            view.context, androidx.recyclerview.widget.RecyclerView.VERTICAL, false
-                        )
-                    groupRecyclerView.adapter = GroupListAdapter(groupList)
-                    groupRecyclerView.setHasFixedSize(true)
-
-                    // Add click listener to each item
-                    val gestureDetector = GestureDetector(context,
-                        object : GestureDetector.SimpleOnGestureListener() {
-                            override fun onSingleTapUp(e: MotionEvent): Boolean {
-                                return true
+                            it.events.forEach { event ->
+                                accountEvents.add(Event(it.name, event))
                             }
+                        }
+
+                        val groupRecyclerView =
+                            view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerView2)
+                        groupRecyclerView.layoutManager =
+                            androidx.recyclerview.widget.LinearLayoutManager(
+                                view.context,
+                                androidx.recyclerview.widget.RecyclerView.VERTICAL,
+                                false
+                            )
+                        groupRecyclerView.adapter = GroupListAdapter(groupList)
+                        groupRecyclerView.setHasFixedSize(true)
+
+                        // Add click listener to each item
+                        val gestureDetector = GestureDetector(context,
+                            object : GestureDetector.SimpleOnGestureListener() {
+                                override fun onSingleTapUp(e: MotionEvent): Boolean {
+                                    return true
+                                }
+                            })
+
+                        groupRecyclerView.addOnItemTouchListener(object :
+                            RecyclerView.OnItemTouchListener {
+                            override fun onInterceptTouchEvent(
+                                rv: RecyclerView, e: MotionEvent
+                            ): Boolean {
+                                val childView = rv.findChildViewUnder(e.x, e.y)
+                                if (childView != null && gestureDetector.onTouchEvent(e)) {
+                                    val position = rv.getChildAdapterPosition(childView)
+                                    val groupResponse =
+                                        (rv.adapter as GroupListAdapter).getItem(position)
+
+                                    val groupDetailsFragment = GroupDetails()
+                                    val bundle = Bundle()
+                                    bundle.putString("groupId", groupResponse.id)
+                                    groupDetailsFragment.arguments = bundle
+                                    parentFragmentManager.beginTransaction()
+                                        .replace(R.id.app_fragment, groupDetailsFragment)
+                                        .addToBackStack("GroupDetails").commit()
+
+                                    return true
+                                }
+                                return false
+                            }
+
+                            override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
+
+                            override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
                         })
 
-                    groupRecyclerView.addOnItemTouchListener(object :
-                        RecyclerView.OnItemTouchListener {
-                        override fun onInterceptTouchEvent(
-                            rv: RecyclerView, e: MotionEvent
-                        ): Boolean {
-                            val childView = rv.findChildViewUnder(e.x, e.y)
-                            if (childView != null && gestureDetector.onTouchEvent(e)) {
-                                val position = rv.getChildAdapterPosition(childView)
-                                val groupResponse =
-                                    (rv.adapter as GroupListAdapter).getItem(position)
+                        val latestEvents =
+                            accountEvents.sortedByDescending { it.event.time.start }.takeLast(3)
 
-                                val groupDetailsFragment = GroupDetails()
-                                val bundle = Bundle()
-                                bundle.putString("groupId", groupResponse.id)
-                                groupDetailsFragment.arguments = bundle
-                                parentFragmentManager.beginTransaction()
-                                    .replace(R.id.app_fragment, groupDetailsFragment)
-                                    .addToBackStack("GroupDetails").commit()
-
-                                return true
-                            }
-                            return false
+                        if (latestEvents.isNotEmpty()) {
+                            view.findViewById<TextView>(R.id.materialTextView).isVisible = true
                         }
 
-                        override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
-
-                        override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
-                    })
-
-                    val latestEvents = accountEvents.sortedByDescending { it.event.time.start }.takeLast(3)
-
-                    val eventRecyclerView =
-                        view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.currentEventsRecyclerView)
-                    eventRecyclerView.layoutManager =
-                        androidx.recyclerview.widget.LinearLayoutManager(
-                            view.context, androidx.recyclerview.widget.RecyclerView.VERTICAL, false
-                        )
-                    eventRecyclerView.adapter = EventAdapter(latestEvents)
-                    eventRecyclerView.setHasFixedSize(true)
+                        val eventRecyclerView =
+                            view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.currentEventsRecyclerView)
+                        eventRecyclerView.layoutManager =
+                            androidx.recyclerview.widget.LinearLayoutManager(
+                                view.context,
+                                androidx.recyclerview.widget.RecyclerView.VERTICAL,
+                                false
+                            )
+                        eventRecyclerView.adapter = EventAdapter(latestEvents)
+                        eventRecyclerView.setHasFixedSize(true)
+                    }
                 }
 
                 override fun onError(error: Throwable) {
