@@ -58,7 +58,7 @@ data class Availability(
     var availability: List<LocalDate> // my condolences to the poor naming scheme
 )
 
-data class Event(
+data class W2MEvent(
     val id: String, val availability: List<Availability>
 )
 
@@ -77,9 +77,6 @@ class LocalDateSerializer : JsonSerializer<LocalDate> {
         return JsonPrimitive(src.toString())
     }
 }
-
-val schedules = ArrayList<Event>()
-var event: Event? = null
 
 data class AvailabilityResponse(
     val createdBy: String,
@@ -101,13 +98,16 @@ class W2M : Fragment() {
 
     var voting = false
 
+    val schedules = ArrayList<W2MEvent>()
+    var event: W2MEvent? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             eventId = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
-
+        Toast.makeText(requireContext(), eventId, Toast.LENGTH_SHORT).show()
         APIService().doGet<Array<AvailabilityResponse>>("events/${eventId}/calendars",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
@@ -567,7 +567,7 @@ class W2M : Fragment() {
         updateSchedules()
 
         configTopAppBar()
-
+        // Toast.makeText(requireContext(), eventId, Toast.LENGTH_SHORT).show()
 
     }
 
@@ -578,7 +578,7 @@ class W2M : Fragment() {
                     val availability = data as Array<AvailabilityResponse>
                     schedules.clear()
 
-                    schedules.add(Event(eventId!!, availability.map {
+                    schedules.add(W2MEvent(eventId!!, availability.map {
                         Availability(it.createdBy, it.time.map {
                             it.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
                         })

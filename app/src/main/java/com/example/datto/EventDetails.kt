@@ -201,7 +201,13 @@ class EventDetails : Fragment() {
         val newMemoryButton: Button = view.findViewById(R.id.eventDetailsNewMemoryButton)
 
         w2mButton.setOnClickListener {
-            Toast.makeText(view.context, "W2M", Toast.LENGTH_SHORT).show()
+            requireActivity().supportFragmentManager.beginTransaction().apply {
+                replace(R.id.app_fragment, W2M().apply {
+                    arguments = bundleOf("eventId" to eventId)
+                })
+                addToBackStack(null)
+                commit()
+            }
         }
 
         val plannings = ArrayList<Planning>()

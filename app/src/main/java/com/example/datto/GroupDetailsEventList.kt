@@ -9,8 +9,6 @@ import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
-import java.text.SimpleDateFormat
-import java.util.Date
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.DataClass.EventResponse
@@ -92,7 +90,8 @@ class GroupDetailsEventList : Fragment() {
                             )
                         }
 
-                        val eventRecyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
+                        val eventRecyclerView =
+                            view.findViewById<RecyclerView>(R.id.eventListGroupDetailsRecyclerView)
                         eventRecyclerView.layoutManager =
                             androidx.recyclerview.widget.LinearLayoutManager(view.context)
                         eventRecyclerView.adapter = EventAdapter(eventList)
