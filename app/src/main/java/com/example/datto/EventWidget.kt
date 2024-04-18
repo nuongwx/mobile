@@ -18,6 +18,7 @@ import com.example.datto.DataClass.AccountResponse
 import com.example.datto.DataClass.EventResponse
 import java.text.DateFormat
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
@@ -35,6 +36,7 @@ class EventWidget : AppWidgetProvider() {
         for (appWidgetId in appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId)
         }
+        Toast.makeText(context, "Widget Updated", Toast.LENGTH_SHORT).show()
     }
 
     override fun onEnabled(context: Context) {
@@ -62,10 +64,6 @@ internal fun updateAppWidget(
 
                 data as List<CustomGroupResponse>
 
-                /////////////////////////////////////
-                // Remove widget if no group later //
-                /////////////////////////////////////
-
                 val events = mutableListOf<EventResponse>()
 
                 for (group in data) {
@@ -73,8 +71,46 @@ internal fun updateAppWidget(
                 }
 
                 // Get upcoming event
-                val nearestUpcomingEvent = events.minByOrNull { it.time.start }
+                val upComingEvent = events.filter {
+                    val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                    parser.timeZone = TimeZone.getTimeZone("UTC")
 
+                    val formattedDateEnd = parser.parse(it.time.end)
+
+                    // Create a Calendar instance and set it to the parsed date
+                    val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                    calendar.time = formattedDateEnd!!
+
+                    // Set the time to the end of the day
+                    calendar.set(Calendar.HOUR_OF_DAY, 23)
+                    calendar.set(Calendar.MINUTE, 59)
+                    calendar.set(Calendar.SECOND, 59)
+                    calendar.set(Calendar.MILLISECOND, 999)
+
+                    val endOfDayTimestamp = calendar.time.time
+
+                    endOfDayTimestamp > System.currentTimeMillis()
+                }
+
+                // Get lastest upcoming event
+                val nearestUpcomingEvent = upComingEvent.minByOrNull { it.time.start }
+
+                Log.d("WIDGET", "Nearest Upcoming Event: $nearestUpcomingEvent")
+
+                // Check if there is no upcoming event
+                if (nearestUpcomingEvent == null) {
+                    // Update visibility
+                    views.setViewVisibility(R.id.widget_group_name, View.INVISIBLE)
+                    views.setViewVisibility(R.id.widget_event_name, View.INVISIBLE)
+                    views.setViewVisibility(R.id.widget_date, View.INVISIBLE)
+                    views.setViewVisibility(R.id.widget_warning, View.VISIBLE)
+
+                    // Instruct the widget manager to update the widget
+                    appWidgetManager.updateAppWidget(appWidgetId, views)
+                    return
+                }
+
+                // Otherwise, continue
                 // Get group name
                 var groupName = ""
 
@@ -119,6 +155,4 @@ internal fun updateAppWidget(
                 views.setViewVisibility(R.id.widget_warning, View.VISIBLE)
             }
         })
-
-
 }
