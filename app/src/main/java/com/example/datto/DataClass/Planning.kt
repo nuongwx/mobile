@@ -6,8 +6,8 @@ import java.util.Date
 data class Planning(
     val name: String,
     val description: String,
-    val start: Date,
-    val end: Date,
+    val start: String,
+    val end: String,
     @SerializedName("_id")
     var id: String = ""
 )

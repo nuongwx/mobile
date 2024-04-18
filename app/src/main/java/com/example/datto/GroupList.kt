@@ -78,7 +78,9 @@ class GroupListAdapter(
         val currentItem = groups[position]
 
         holder.groupName.text = currentItem.name
-        "${currentItem.events.size} event${if (currentItem.events.size > 1) "s" else ""} together".also { holder.groupDes.text = it }
+        "${currentItem.events.size} event${if (currentItem.events.size > 1) "s" else ""} together".also {
+            holder.groupDes.text = it
+        }
 
         // Load image with Picasso and new thread
         try {
@@ -266,7 +268,8 @@ class GroupList : Fragment() {
                         override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
                     })
 
-                    val latestEvents = accountEvents.sortedByDescending { it.event.time.start }.takeLast(3) as ArrayList<Event>
+                    val latestEvents = accountEvents.sortedByDescending { it.event.time.start }
+                        .takeLast(3) as ArrayList<Event>
 
                     val eventRecyclerView =
                         view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.currentEventsRecyclerView)

@@ -19,17 +19,24 @@ import com.example.datto.API.APIService
 import com.example.datto.DataClass.EventResponse
 import com.example.datto.DataClass.FundResponse
 import com.example.datto.DataClass.Planning
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.time.Duration
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Currency
 import java.util.Date
 import java.util.Locale
 
-// TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "eventId"
-private const val ARG_PARAM2 = "param2"
+private const val ARG_PARAM2 = "groupName"
+
+private val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
 
 /**
  * A simple [Fragment] subclass.
@@ -58,8 +65,7 @@ class PlanningListAdapter(private val plannings: List<Planning>) :
     }
 
     override fun onCreateViewHolder(
-        parent: ViewGroup,
-        viewType: Int
+        parent: ViewGroup, viewType: Int
     ): PlanningListAdapter.PlanningViewHolder {
         val itemView = LayoutInflater.from(parent.context)
             .inflate(R.layout.event_details_planning_list_items, parent, false)
@@ -72,11 +78,16 @@ class PlanningListAdapter(private val plannings: List<Planning>) :
         holder.planningName.text = currentItem.name
         holder.planningDesc.text = currentItem.description
         holder.startingTime.text =
-            SimpleDateFormat("HH:mm", Locale.getDefault()).format(currentItem.start)
+            SimpleDateFormat(
+                "HH:mm",
+                Locale.getDefault()
+            ).format(originalFormat.parse(currentItem.start))
         holder.duration.text = buildString {
             append(
-                Duration.between(currentItem.start.toInstant(), currentItem.end.toInstant())
-                    .toMinutes()
+                Duration.between(
+                    originalFormat.parse(currentItem.start).toInstant(),
+                    originalFormat.parse(currentItem.end).toInstant()
+                ).toMinutes()
             )
             append(" min")
         }
@@ -117,8 +128,7 @@ class FunkyDatedPlanningAdapter(private val plans: List<Planning>) :
     }
 
     override fun onCreateViewHolder(
-        parent: ViewGroup,
-        viewType: Int
+        parent: ViewGroup, viewType: Int
     ): FunkyDatedPlanningAdapter.PlanningViewHolder {
         val itemView = LayoutInflater.from(parent.context)
             .inflate(R.layout.event_details_planning_daily_items, parent, false)
@@ -126,21 +136,47 @@ class FunkyDatedPlanningAdapter(private val plans: List<Planning>) :
     }
 
     override fun onBindViewHolder(
-        holder: FunkyDatedPlanningAdapter.PlanningViewHolder,
-        position: Int
+        holder: FunkyDatedPlanningAdapter.PlanningViewHolder, position: Int
     ) {
         val currentItem = plans[position]
 
-        if (position == 0 || currentItem.start.day != plans[position - 1].start.day) {
+        if (position == 0 || SimpleDateFormat(
+                "dd", Locale.getDefault()
+            ).format(
+                originalFormat.parse(currentItem.start)
+            ) != SimpleDateFormat(
+                "dd", Locale.getDefault()
+            ).format(
+                originalFormat.parse(plans[position - 1].start)
+            )
+        ) {
             holder.itemView.findViewById<CardView>(R.id.eventDetailsPlanningDateTitleCardView).visibility =
                 View.VISIBLE
             holder.recyclerView.visibility = View.VISIBLE
 
-            val plansInDate = plans.filter { it.start.day == currentItem.start.day }
+            val plansInDate = plans.filter {
+                SimpleDateFormat(
+                    "dd", Locale.getDefault()
+                ).format(
+                    originalFormat.parse(it.start)
+                ) == SimpleDateFormat(
+                    "dd", Locale.getDefault()
+                ).format(
+                    originalFormat.parse(
+                        currentItem.start
+                    )
+                )
+            }
 
-            val dayOfWeek = SimpleDateFormat("EEEE", Locale.getDefault()).format(currentItem.start)
+            val dayOfWeek = SimpleDateFormat("EEEE", Locale.getDefault()).format(
+                originalFormat.parse(currentItem.start)
+            )
             val dayOfMonth =
-                SimpleDateFormat("dd MMM", Locale.getDefault()).format(currentItem.start)
+                SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(
+                    originalFormat.parse(
+                        currentItem.start
+                    )
+                )
 
             holder.weekDayTextView.text = dayOfWeek
             holder.dayTextView.text = dayOfMonth
@@ -159,22 +195,19 @@ class FunkyDatedPlanningAdapter(private val plans: List<Planning>) :
 
 class EventDetails : Fragment() {
 
-    // TODO: Rename and change types of parameters
     private var eventId: String? = null
-    private var param2: String? = null
+    private var groupName: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             eventId = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+            groupName = it.getString(ARG_PARAM2)
         }
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_event_details, container, false)
@@ -183,10 +216,11 @@ class EventDetails : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // configTopAppBar("Event Name")
-
         val eventName: TextView = view.findViewById(R.id.eventDetailsEventNameTextView)
         val w2mButton: Button = view.findViewById(R.id.eventDetailsW2MButton)
+
+        val startDateTextView: TextView = view.findViewById(R.id.startDateTextView)
+        val endDateTextView: TextView = view.findViewById(R.id.endDateTextView)
 
         val startToPlanButton: Button = view.findViewById(R.id.eventDetailsStartPlaningButton)
         val planningRecyclerView: RecyclerView =
@@ -212,25 +246,113 @@ class EventDetails : Fragment() {
 
         val plannings = ArrayList<Planning>()
 
-        APIService().doGet<EventResponse>(
-            "events/${eventId}",
-            object : APICallback<Any> {
-                override fun onSuccess(data: Any) {
-                    data as EventResponse
-                    val appBar =
-                        requireActivity().findViewById<com.google.android.material.appbar.MaterialToolbar>(
-                            R.id.app_top_app_bar
+        APIService().doGet<EventResponse>("events/${eventId}", object : APICallback<Any> {
+            override fun onSuccess(data: Any) {
+                data as EventResponse
+                val appBar =
+                    requireActivity().findViewById<com.google.android.material.appbar.MaterialToolbar>(
+                        R.id.app_top_app_bar
+                    )
+                eventName.text = data.name
+                appBar.title = data.name
+
+                val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                val targetFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
+                val startDate = originalFormat.parse(data.time.start)
+                val endDate = originalFormat.parse(data.time.end)
+
+                startDateTextView.text = targetFormat.format(startDate)
+                endDateTextView.text = targetFormat.format(endDate)
+
+                val menuItem = appBar.menu.findItem(R.id.edit)
+                menuItem.setOnMenuItemClickListener {
+                    val builder = MaterialAlertDialogBuilder(requireContext())
+                    builder.setTitle("Edit event")
+
+                    val layoutInflater = LayoutInflater.from(requireContext())
+                    val view = layoutInflater.inflate(R.layout.fragment_create, null)
+                    val input = view.findViewById<TextInputEditText>(R.id.create_name)
+                    val group =
+                        view.findViewById<com.google.android.material.textfield.MaterialAutoCompleteTextView>(
+                            R.id.create_group_dropdown
                         )
-                    eventName.text = data.name
-                    appBar.title = data.name
-                }
+                    val start = view.findViewById<TextInputEditText>(R.id.create_start_date)
+                    val end = view.findViewById<TextInputEditText>(R.id.create_end_date)
 
-                override fun onError(error: Throwable) {
-                    Log.e("API_SERVICE", "Error: $error")
-                }
-            })
+                    input.setText(data.name)
+                    group.setText(groupName, false)
+                    group.isEnabled = false
+                    start.setText(targetFormat.format(startDate))
+                    end.setText(targetFormat.format(endDate))
 
-        APIService().doGet<ArrayList<Planning>>("events/${eventId}/timeline",
+                    start.setOnClickListener {
+                        val datePicker = MaterialDatePicker.Builder.datePicker().build()
+                        datePicker.addOnPositiveButtonClickListener {
+                            val date = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault())
+                                .toLocalDate()
+                            val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                            start.setText(date.format(formatter))
+                        }
+                        datePicker.show(parentFragmentManager, "date_picker")
+                    }
+
+                    end.setOnClickListener {
+                        val datePicker = MaterialDatePicker.Builder.datePicker().build()
+                        datePicker.addOnPositiveButtonClickListener {
+                            val date = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault())
+                                .toLocalDate()
+                            val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                            end.setText(date.format(formatter))
+                        }
+                        datePicker.show(parentFragmentManager, "date_picker")
+                    }
+
+                    builder.setView(view)
+
+                    builder.setPositiveButton("Save") { dialog, _ ->
+                        val newName = input.text.toString()
+
+                        // Format date
+                        val formattedStart = targetFormat.parse(start.text.toString())!!
+                            .let { originalFormat.format(it) }
+                        val formattedEnd = targetFormat.parse(end.text.toString())!!
+                            .let { originalFormat.format(it) }
+
+                        Log.d("start", formattedStart)
+                        Log.d("end", formattedEnd)
+
+                        APIService().doPatch<Any>("events/${eventId}", mapOf(
+                            "name" to newName,
+                            "start" to formattedStart,
+                            "end" to formattedEnd
+                        ), object : APICallback<Any> {
+                            override fun onSuccess(data: Any) {
+                                eventName.text = newName
+                                appBar.title = newName
+                            }
+
+                            override fun onError(error: Throwable) {
+                                Log.e("API_SERVICE", "Error: $error")
+                            }
+                        })
+                        dialog.dismiss()
+                    }
+                    builder.setNegativeButton("Cancel") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    builder.show()
+
+                    true
+                }
+            }
+
+            override fun onError(error: Throwable) {
+                Log.e("API_SERVICE", "Error: $error")
+            }
+        })
+
+        APIService().doGet<ArrayList<Planning>>(
+            "events/${eventId}/timeline",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     plannings.clear()
@@ -249,9 +371,11 @@ class EventDetails : Fragment() {
                     }
 
                     planningRecyclerView.layoutManager =
-                        LinearLayoutManager(view.context)
+                        LinearLayoutManager(view.context, RecyclerView.VERTICAL, false)
                     val adapter =
-                        FunkyDatedPlanningAdapter(plannings.filter { it.start.after(Date()) })
+                        FunkyDatedPlanningAdapter(plannings.filter {
+                            originalFormat.parse(it.start).after(Date())
+                        })
                     planningRecyclerView.adapter = adapter
                     planningRecyclerView.setHasFixedSize(true)
 
@@ -303,63 +427,60 @@ class EventDetails : Fragment() {
             }
         }
 
-        APIService().doGet<FundResponse>(
-            "events/${eventId}/funds",
-            object : APICallback<Any> {
-                override fun onSuccess(data: Any) {
-                    data as FundResponse
+        APIService().doGet<FundResponse>("events/${eventId}/funds", object : APICallback<Any> {
+            override fun onSuccess(data: Any) {
+                data as FundResponse
 
-                    val fundList = ArrayList<FundItem>()
-                    var inAmount = 0.0
-                    var outAmount = 0.0
+                val fundList = ArrayList<FundItem>()
+                var inAmount = 0.0
+                var outAmount = 0.0
 
-                    for (fund in data.funds) {
-                        // Format paidAt date
-                        val originalFormat =
-                            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
-                        val targetFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.US)
-                        val date = originalFormat.parse(fund.paidAt)
+                for (fund in data.funds) {
+                    // Format paidAt date
+                    val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                    val targetFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.US)
+                    val date = originalFormat.parse(fund.paidAt)
 
-                        val f = FundItem(
-                            fund.id,
-                            fund.info,
-                            fund.amount,
-                            fund.paidBy.profile.fullName,
-                            targetFormat.format(date!!)
-                        )
-                        fundList.add(f)
+                    val f = FundItem(
+                        fund.id,
+                        fund.info,
+                        fund.amount,
+                        fund.paidBy.profile.fullName,
+                        targetFormat.format(date!!)
+                    )
+                    fundList.add(f)
 
-                        if (fund.amount > 0) {
-                            inAmount += fund.amount
-                        } else {
-                            outAmount -= fund.amount
-                        }
-                    }
-
-                    if (fundList.isEmpty()) {
-                        expenseDetailsButton.visibility = View.INVISIBLE
-                        newExpenseButton.visibility = View.VISIBLE
-                        view.findViewById<CardView>(R.id.eventDetailsExpenseOverViewCardView).visibility =
-                            View.INVISIBLE
+                    if (fund.amount > 0) {
+                        inAmount += fund.amount
                     } else {
-                        expenseDetailsButton.visibility = View.VISIBLE
-                        newExpenseButton.visibility = View.GONE
-                        view.findViewById<CardView>(R.id.eventDetailsExpenseOverViewCardView).visibility =
-                            View.VISIBLE
-
+                        outAmount -= fund.amount
                     }
-
-                    val format: NumberFormat = NumberFormat.getCurrencyInstance()
-                    format.setMaximumFractionDigits(0)
-                    format.currency = Currency.getInstance("VND")
-                    expenseInTextView.text = format.format(inAmount)
-                    expenseOutTextView.text = format.format(outAmount)
                 }
 
-                override fun onError(error: Throwable) {
-                    Log.e("API_SERVICE", "Error: $error")
+                if (fundList.isEmpty()) {
+                    expenseDetailsButton.visibility = View.INVISIBLE
+                    newExpenseButton.visibility = View.VISIBLE
+                    view.findViewById<CardView>(R.id.incomeCardView).visibility = View.INVISIBLE
+                    view.findViewById<CardView>(R.id.spendingsCardView).visibility = View.INVISIBLE
+                } else {
+                    expenseDetailsButton.visibility = View.VISIBLE
+                    newExpenseButton.visibility = View.GONE
+                    view.findViewById<CardView>(R.id.incomeCardView).visibility = View.VISIBLE
+                    view.findViewById<CardView>(R.id.spendingsCardView).visibility = View.VISIBLE
+
                 }
-            })
+
+                val format: NumberFormat = NumberFormat.getCurrencyInstance()
+                format.setMaximumFractionDigits(0)
+                format.currency = Currency.getInstance("VND")
+                expenseInTextView.text = format.format(inAmount)
+                expenseOutTextView.text = format.format(outAmount)
+            }
+
+            override fun onError(error: Throwable) {
+                Log.e("API_SERVICE", "Error: $error")
+            }
+        })
 
         newMemoryButton.setOnClickListener {
             Toast.makeText(view.context, "New Memory", Toast.LENGTH_SHORT).show()
@@ -376,11 +497,6 @@ class EventDetails : Fragment() {
         menuItem.isVisible = true
         menuItem.title = null
         menuItem.setIcon(R.drawable.ic_edit)
-        menuItem.setOnMenuItemClickListener {
-            Toast.makeText(requireContext(), "Edit event: $eventId", Toast.LENGTH_SHORT).show()
-            true
-        }
-        appBar.title = "Events"
 
         appBar.navigationIcon = AppCompatResources.getDrawable(requireContext(), R.drawable.ic_back)
     }
@@ -395,9 +511,10 @@ class EventDetails : Fragment() {
          * @return A new instance of fragment EventDetails.
          */
         @JvmStatic
-        fun newInstance(param1: String) = EventDetails().apply {
+        fun newInstance(param1: String, param2: String) = EventDetails().apply {
             arguments = Bundle().apply {
                 putString(ARG_PARAM1, param1)
+                putString(ARG_PARAM2, param2)
             }
         }
     }

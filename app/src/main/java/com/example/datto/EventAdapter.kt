@@ -30,6 +30,7 @@ class EventAdapter(
                 val eventDetailsFragment = EventDetails()
                 val bundle = Bundle()
                 bundle.putString("eventId", event.event.id)
+                bundle.putString("groupName", event.groupName)
                 eventDetailsFragment.arguments = bundle
                 val transaction = (it.context as MainActivity).supportFragmentManager.beginTransaction()
                 transaction.replace(R.id.app_fragment, eventDetailsFragment)
