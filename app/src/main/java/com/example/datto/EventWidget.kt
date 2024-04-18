@@ -146,13 +146,16 @@ internal fun updateAppWidget(
             }
 
             override fun onError(error: Throwable) {
-                Log.e("API_SERVICE", "Error: ${error.message}")
+                Log.e("WIDGET", "Error: ${error.message}")
 
                 // Update visibility
                 views.setViewVisibility(R.id.widget_group_name, View.INVISIBLE)
                 views.setViewVisibility(R.id.widget_event_name, View.INVISIBLE)
                 views.setViewVisibility(R.id.widget_date, View.INVISIBLE)
                 views.setViewVisibility(R.id.widget_warning, View.VISIBLE)
+
+                // Instruct the widget manager to update the widget
+                appWidgetManager.updateAppWidget(appWidgetId, views)
             }
         })
 }
