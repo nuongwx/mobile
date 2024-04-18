@@ -4,6 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.annotation.SuppressLint
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
+import android.content.Context
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -40,6 +43,20 @@ class MainActivity : AppCompatActivity() {
         // Disable dark mode
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
+        // Update widget
+        val widgetUpdateIntent = Intent(this, EventWidget::class.java)
+        widgetUpdateIntent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+
+        // Use an array and EXTRA_APPWIDGET_IDS instead of AppWidgetManager.EXTRA_APPWIDGET_ID,
+        // since it seems the onUpdate() is only fired on that:
+        val ids = AppWidgetManager.getInstance(this).getAppWidgetIds(
+            ComponentName(this, EventWidget::class.java)
+        )
+        widgetUpdateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+
+        this.sendBroadcast(widgetUpdateIntent)
+
+        // Set up layout
         if (CredentialService().get() == "") {
             setContentView(R.layout.activity_main)
             findViewById<Button>(R.id.sign_in_button).setOnClickListener{
