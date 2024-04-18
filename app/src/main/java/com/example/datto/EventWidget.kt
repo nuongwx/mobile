@@ -36,7 +36,6 @@ class EventWidget : AppWidgetProvider() {
         for (appWidgetId in appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId)
         }
-        Toast.makeText(context, "Widget Updated", Toast.LENGTH_SHORT).show()
     }
 
     override fun onEnabled(context: Context) {
@@ -60,7 +59,6 @@ internal fun updateAppWidget(
         object : APICallback<Any> {
             override fun onSuccess(data: Any) {
                 Log.d("API_SERVICE", "Data: $data")
-                Log.d("WIDGET", "AppWidgetId: $data")
 
                 data as List<CustomGroupResponse>
 
@@ -94,8 +92,6 @@ internal fun updateAppWidget(
 
                 // Get lastest upcoming event
                 val nearestUpcomingEvent = upComingEvent.minByOrNull { it.time.start }
-
-                Log.d("WIDGET", "Nearest Upcoming Event: $nearestUpcomingEvent")
 
                 // Check if there is no upcoming event
                 if (nearestUpcomingEvent == null) {
@@ -146,7 +142,7 @@ internal fun updateAppWidget(
             }
 
             override fun onError(error: Throwable) {
-                Log.e("WIDGET", "Error: ${error.message}")
+                Log.e("API_SERVICE", "Error: ${error.message}")
 
                 // Update visibility
                 views.setViewVisibility(R.id.widget_group_name, View.INVISIBLE)
