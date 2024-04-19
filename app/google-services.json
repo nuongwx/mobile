@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "195508505282",
+    "project_id": "datto-65a5b",
+    "storage_bucket": "datto-65a5b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:195508505282:android:c0d538198df834572e095b",
+        "android_client_info": {
+          "package_name": "com.example.datto"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "195508505282-0tj5pq583vcj496lede4u58c4kvttu5b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.datto",
+            "certificate_hash": "703929ed9fa847f78b64edee106645a711393bb5"
+          }
+        },
+        {
+          "client_id": "195508505282-4ib1kcrahhpu22c6s5ddhp09vic4r5ar.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4PqJkamx4k3qzRjXuJf8PKFaXyRTzE8U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "195508505282-4ib1kcrahhpu22c6s5ddhp09vic4r5ar.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
