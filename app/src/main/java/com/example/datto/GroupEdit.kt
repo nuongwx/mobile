@@ -62,7 +62,7 @@ class GroupEdit : Fragment() {
                         )
 
                         // Patch group
-                        APIService().doPatch<GroupEditRequest>(
+                        APIService(requireContext()).doPatch<GroupEditRequest>(
                             "groups/${groupId}",
                             groupEditRequest,
                             object :
@@ -101,7 +101,7 @@ class GroupEdit : Fragment() {
                                 requestBody
                             )
 
-                        APIService().doPutMultipart<BucketResponse>("files", multipartBody, object :
+                        APIService(requireContext()).doPutMultipart<BucketResponse>("files", multipartBody, object :
                             APICallback<Any> {
                             override fun onSuccess(data: Any) {
                                 // Cast data to BucketResponse
@@ -115,7 +115,7 @@ class GroupEdit : Fragment() {
                                 )
 
                                 // Call API to patch profile
-                                APIService().doPatch<GroupEditRequest>(
+                                APIService(requireContext()).doPatch<GroupEditRequest>(
                                     "groups/${groupId}",
                                     groupEditRequest,
                                     object :

@@ -19,6 +19,7 @@ import com.example.datto.API.APIService
 import com.example.datto.DataClass.EventResponse
 import com.example.datto.DataClass.FundResponse
 import com.example.datto.DataClass.Planning
+import com.example.datto.utils.WidgetUpdater
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
@@ -310,6 +311,9 @@ class EventDetails : Fragment() {
                                 appBar.title = newName
                                 startDateTextView.text = start.text.toString()
                                 endDateTextView.text = end.text.toString()
+
+                                // Update widget
+                                WidgetUpdater().update(requireContext())
                             }
 
                             override fun onError(error: Throwable) {

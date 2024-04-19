@@ -7,6 +7,7 @@ import com.example.datto.GlobalVariable.GlobalVariable
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 
 class RetrofitInstance {
     private val BASE_URL: String = GlobalVariable.BASE_URL
@@ -17,7 +18,9 @@ class RetrofitInstance {
         val networkCapabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
         return networkCapabilities != null && (
                 networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                        networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR))
+                networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) &&
+                networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
     }
 
     private fun getCacheInstance(context: Context): OkHttpClient {

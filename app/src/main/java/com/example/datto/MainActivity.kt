@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.widget.NestedScrollView
 import com.example.datto.Credential.CredentialService
+import com.example.datto.utils.WidgetUpdater
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
@@ -43,17 +44,7 @@ class MainActivity : AppCompatActivity() {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
         // Update widget
-        val widgetUpdateIntent = Intent(this, EventWidget::class.java)
-        widgetUpdateIntent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-
-        // Use an array and EXTRA_APPWIDGET_IDS instead of AppWidgetManager.EXTRA_APPWIDGET_ID,
-        // since it seems the onUpdate() is only fired on that:
-        val ids = AppWidgetManager.getInstance(this).getAppWidgetIds(
-            ComponentName(this, EventWidget::class.java)
-        )
-        widgetUpdateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
-
-        this.sendBroadcast(widgetUpdateIntent)
+        WidgetUpdater().update(this)
 
         // Set up layout
         if (CredentialService().get() == "") {
