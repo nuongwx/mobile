@@ -227,7 +227,7 @@ class GroupDetails : Fragment() {
         memoriesRecyclerView.adapter = adapter
         memoriesRecyclerView.setHasFixedSize(true)
 
-        APIService().doGet<List<MemoryResponse>>("groups/${groupId}/memories",
+        APIService(requireContext()).doGet<List<MemoryResponse>>("groups/${groupId}/memories",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")

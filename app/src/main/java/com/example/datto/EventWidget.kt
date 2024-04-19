@@ -48,7 +48,7 @@ internal fun updateAppWidget(
 ) {
     val views = RemoteViews(context.packageName, R.layout.event_widget)
 
-    APIService().doGet<List<CustomGroupResponse>>(
+    APIService(context).doGet<List<CustomGroupResponse>>(
         "accounts/${CredentialService().get()}/groups",
         object : APICallback<Any> {
             override fun onSuccess(data: Any) {

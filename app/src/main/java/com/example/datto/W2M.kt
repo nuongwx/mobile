@@ -108,13 +108,13 @@ class W2M : Fragment() {
             param2 = it.getString(ARG_PARAM2)
         }
         Toast.makeText(requireContext(), eventId, Toast.LENGTH_SHORT).show()
-        APIService().doGet<Array<AvailabilityResponse>>("events/${eventId}/calendars",
+        APIService(requireContext()).doGet<Array<AvailabilityResponse>>("events/${eventId}/calendars",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     val availability = data as Array<AvailabilityResponse>
                     if (availability.find { it.createdBy == userId } == null) {
                         val responseObject = AvailabilityResponse(userId, ArrayList())
-                        APIService().doPost<AvailabilityResponse>("events/${eventId}/calendars",
+                        APIService(requireContext()).doPost<AvailabilityResponse>("events/${eventId}/calendars",
                             responseObject,
                             object : APICallback<Any> {
                                 override fun onSuccess(data: Any) {
@@ -194,12 +194,12 @@ class W2M : Fragment() {
         val availableRecyclerView = view.findViewById<RecyclerView>(R.id.availableW2MRecyclerView)
         availableRecyclerView.layoutManager =
             androidx.recyclerview.widget.LinearLayoutManager(view.context)
-        availableRecyclerView.adapter = MemberListAdapter(ArrayList(), "")
+        availableRecyclerView.adapter = MemberListAdapter(ArrayList(), "", requireContext())
         val unavailableRecyclerView =
             view.findViewById<RecyclerView>(R.id.unavailableW2MRecyclerView)
         unavailableRecyclerView.layoutManager =
             androidx.recyclerview.widget.LinearLayoutManager(view.context)
-        unavailableRecyclerView.adapter = MemberListAdapter(ArrayList(), "")
+        unavailableRecyclerView.adapter = MemberListAdapter(ArrayList(), "", requireContext())
 
         val scrollView = requireActivity().findViewById<View>(R.id.scrollView)
 
@@ -280,7 +280,7 @@ class W2M : Fragment() {
                             unavailableRecyclerView.adapter = unavailableAdapter
 
                             event?.availability?.forEach {
-                                APIService().doGet<AccountResponse>("accounts/${it.person}",
+                                APIService(requireContext()).doGet<AccountResponse>("accounts/${it.person}",
                                     object : APICallback<Any> {
                                         override fun onSuccess(data: Any) {
                                             val account = data as AccountResponse
@@ -572,7 +572,7 @@ class W2M : Fragment() {
     }
 
     fun updateSchedules() {
-        APIService().doGet<Array<AvailabilityResponse>>("events/${eventId}/calendars",
+        APIService(requireContext()).doGet<Array<AvailabilityResponse>>("events/${eventId}/calendars",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     val availability = data as Array<AvailabilityResponse>
@@ -615,7 +615,7 @@ class W2M : Fragment() {
             )
         })
 
-        APIService().doPost<AvailabilityResponse>("events/${eventId}/calendars",
+        APIService(requireContext()).doPost<AvailabilityResponse>("events/${eventId}/calendars",
             responseObject,
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {

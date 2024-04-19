@@ -45,7 +45,7 @@ class RetrofitInstance {
                 *  and indicate an error in fetching the response.
                 *  The 'max-age' attribute is responsible for this behavior.
                 */
-                    request.newBuilder().header("Cache-Control", "public, max-age=$maxAge").build()
+                    request.newBuilder().header("Cache-Control", "public, max-age=5").build()
                 else
                 /*
                 *  If there is no Internet, get the cache that was stored 7 days ago.

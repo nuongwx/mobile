@@ -60,7 +60,7 @@ class MemoryView : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        APIService().doGet<MemoryResponse>(
+        APIService(requireContext()).doGet<MemoryResponse>(
             "groups/${arguments?.getString("groupId")}/memories/${
                 arguments?.getString(
                     "id"
