@@ -63,7 +63,7 @@ class GroupEdit : Fragment() {
 
                         // Patch group
                         APIService().doPatch<GroupEditRequest>(
-                            "groups/${CredentialService().get()}",
+                            "groups/${groupId}",
                             groupEditRequest,
                             object :
                                 APICallback<Any> {

@@ -27,7 +27,6 @@ import java.util.Currency
 import java.util.Locale
 
 
-// TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -78,7 +77,7 @@ class FundListAdapter(private val funds: ArrayList<FundItem>) :
             holder.fundAmount.setTextColor(
                 ContextCompat.getColor(
                     holder.itemView.context,
-                    R.color.light_blue_600
+                    R.color.md_theme_tertiary
                 )
             )
         } else {
@@ -86,7 +85,7 @@ class FundListAdapter(private val funds: ArrayList<FundItem>) :
             holder.fundAmount.setTextColor(
                 ContextCompat.getColor(
                     holder.itemView.context,
-                    R.color.md_theme_primaryFixed_mediumContrast
+                    R.color.md_theme_primary
                 )
             )
         }

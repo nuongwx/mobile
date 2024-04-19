@@ -128,4 +128,33 @@ class APIService {
             }
         })
     }
+
+    inline fun <reified T> doDelete(endpoint: String, callback: APICallback<Any>) {
+        val service = retrofitClient.create(APIInterface::class.java).delete(endpoint)
+
+        // Enqueue the request
+        service.enqueue(object : retrofit2.Callback<BaseResponse<JsonElement>> {
+            override fun onResponse(
+                call: Call<BaseResponse<JsonElement>>,
+                response: Response<BaseResponse<JsonElement>>
+            ) {
+                if (response.isSuccessful && response.body()!!.success) {
+                    val data = response.body()?.data
+                    val gson = Gson()
+                    val type = object : TypeToken<T>() {}.type
+                    val result = gson.fromJson(data, type) as Any
+
+                    // Custom callback to process data
+                    callback.onSuccess(result)
+                } else {
+                    callback.onError(Throwable(response.message()))
+                }
+            }
+
+            override fun onFailure(call: Call<BaseResponse<JsonElement>>, t: Throwable) {
+                // Custom callback to process data
+                callback.onError(t)
+            }
+        })
+    }
 }

@@ -1,20 +1,22 @@
 package com.example.datto
 
+import android.annotation.SuppressLint
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.annotation.SuppressLint
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.widget.NestedScrollView
+import com.example.datto.Credential.CredentialService
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.example.datto.Credential.CredentialService
 
 class MainActivity : AppCompatActivity() {
     // Handle back button to exit app
@@ -39,13 +41,27 @@ class MainActivity : AppCompatActivity() {
 
         // Disable dark mode
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        CredentialService().erase()
+
+        // Update widget
+        val widgetUpdateIntent = Intent(this, EventWidget::class.java)
+        widgetUpdateIntent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+
+        // Use an array and EXTRA_APPWIDGET_IDS instead of AppWidgetManager.EXTRA_APPWIDGET_ID,
+        // since it seems the onUpdate() is only fired on that:
+        val ids = AppWidgetManager.getInstance(this).getAppWidgetIds(
+            ComponentName(this, EventWidget::class.java)
+        )
+        widgetUpdateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+
+        this.sendBroadcast(widgetUpdateIntent)
+
+        // Set up layout
         if (CredentialService().get() == "") {
             setContentView(R.layout.activity_main)
-            findViewById<Button>(R.id.sign_in_button).setOnClickListener{
+            findViewById<Button>(R.id.sign_in_button).setOnClickListener {
                 startActivity(Intent(this, SignInActivity::class.java))
             }
-            findViewById<Button>(R.id.sign_up_button).setOnClickListener{
+            findViewById<Button>(R.id.sign_up_button).setOnClickListener {
                 startActivity(Intent(this, SignUpActivity::class.java))
             }
         } else {
@@ -56,15 +72,18 @@ class MainActivity : AppCompatActivity() {
                 val currentFragment = supportFragmentManager.findFragmentById(R.id.app_fragment)
                 when (currentFragment) {
                     is GroupList -> {
-                        bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_home).isChecked = true
+                        bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_home).isChecked =
+                            true
                     }
 
                     is Memories -> {
-                        bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_memory).isChecked = true
+                        bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_memory).isChecked =
+                            true
                     }
 
                     is Create -> {
-                        bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_event).isChecked = true
+                        bottomNavigation.menu.findItem(R.id.bottom_app_bar_menu_event).isChecked =
+                            true
                     }
 
                     is Notification -> {
@@ -98,7 +117,8 @@ class MainActivity : AppCompatActivity() {
                     R.id.bottom_app_bar_menu_memory -> {
                         Log.d("MainActivity", "Memory clicked")
                         setDefaultLayout(false)
-                        supportFragmentManager.beginTransaction().replace(R.id.app_fragment, Memories())
+                        supportFragmentManager.beginTransaction()
+                            .replace(R.id.app_fragment, Memories())
                             .addToBackStack(null)
                             .commit()
                         true
@@ -145,7 +165,7 @@ class MainActivity : AppCompatActivity() {
                 .commit()
         }
     }
-    
+
     private fun setDefaultLayout(viewBottomNav: Boolean = true) {
         bottomNavigation.visibility = if (viewBottomNav) View.VISIBLE else View.GONE
         val layoutParams = scrollView.layoutParams as ViewGroup.MarginLayoutParams

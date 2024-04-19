@@ -58,9 +58,10 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     // Picasso for image loading
     implementation("com.squareup.picasso:picasso:2.8")
-
     //Sign in with Google
     implementation("com.google.android.gms:play-services-auth:21.0.0")
     implementation("com.google.firebase:firebase-auth-ktx:21.0.1")
     implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
+    // Calendar
+    implementation("com.kizitonwose.calendar:view:2.5.0")
 }

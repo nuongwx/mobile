@@ -14,7 +14,7 @@ data class Event(
 )
 
 class EventAdapter(
-    private val events: ArrayList<Event>
+    private val events: List<Event>
 ) : androidx.recyclerview.widget.RecyclerView.Adapter<EventAdapter.EventViewHolder>() {
 
     inner class EventViewHolder(itemView: View) :
@@ -30,6 +30,7 @@ class EventAdapter(
                 val eventDetailsFragment = EventDetails()
                 val bundle = Bundle()
                 bundle.putString("eventId", event.event.id)
+                bundle.putString("groupName", event.groupName)
                 eventDetailsFragment.arguments = bundle
                 val transaction = (it.context as MainActivity).supportFragmentManager.beginTransaction()
                 transaction.replace(R.id.app_fragment, eventDetailsFragment)
