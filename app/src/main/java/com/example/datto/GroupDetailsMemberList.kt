@@ -1,6 +1,7 @@
 package com.example.datto
 
 import android.graphics.BitmapFactory
+import android.opengl.Visibility
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -11,6 +12,8 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
@@ -36,8 +39,10 @@ private const val ARG_PARAM3 = "param3"
  * create an instance of this fragment.
  */
 
-class MemberListAdapter(private val members: ArrayList<AccountResponse>) :
-    RecyclerView.Adapter<MemberListAdapter.MemberViewHolder>() {
+class MemberListAdapter(
+    private val members: ArrayList<AccountResponse>,
+    private val groupId: String
+) : RecyclerView.Adapter<MemberListAdapter.MemberViewHolder>() {
 
     inner class MemberViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val memberName: TextView = itemView.findViewById(R.id.memberNameTextView)
@@ -50,8 +55,18 @@ class MemberListAdapter(private val members: ArrayList<AccountResponse>) :
             }
 
             removeButton.setOnClickListener {
-                members.removeAt(absoluteAdapterPosition)
-                notifyItemRemoved(absoluteAdapterPosition)
+                APIService().doDelete<Any>("groups/${groupId}/members/${members[absoluteAdapterPosition].id}", object : APICallback<Any> {
+                    override fun onSuccess(data: Any) {
+                        Log.d("API_SERVICE", "Data: $data")
+
+                        members.removeAt(absoluteAdapterPosition)
+                        notifyItemRemoved(absoluteAdapterPosition)
+                    }
+
+                    override fun onError(error: Throwable) {
+                        Log.e("API_SERVICE", "Error: ${error.message}")
+                    }
+                })
             }
         }
     }
@@ -68,6 +83,15 @@ class MemberListAdapter(private val members: ArrayList<AccountResponse>) :
     override fun onBindViewHolder(holder: MemberListAdapter.MemberViewHolder, position: Int) {
         val currentItem = members[position]
         holder.memberName.text = currentItem.profile.fullName
+
+        // If position == 0 -> Group's administrator -> Cannot remove themselves
+        // Solution: Hide remove button
+        if (position == 0)
+            holder.removeButton.isInvisible = true
+
+        // Only Group's administrator can remove members
+        if (CredentialService().get() != members[0].id)
+            holder.removeButton.isInvisible = true
 
         try {
             val imageUrl =
@@ -138,11 +162,22 @@ class GroupDetailsMemberList : Fragment() {
 
                     // Check if all requests have completed
                     if (completedRequests == memberIds.size) {
+                        // Sort memberList base on the original order of memberIds
+                        val sortedMemberList = ArrayList<AccountResponse>()
+                        for (memberId in memberIds) {
+                            for (member in memberList) {
+                                if (member.id == memberId) {
+                                    sortedMemberList.add(member)
+                                    break
+                                }
+                            }
+                        }
+
                         val memberRecyclerView =
                             view.findViewById<RecyclerView>(R.id.memberRecyclerView)
                         memberRecyclerView.layoutManager =
                             androidx.recyclerview.widget.LinearLayoutManager(view.context)
-                        memberRecyclerView.adapter = MemberListAdapter(memberList)
+                        memberRecyclerView.adapter = MemberListAdapter(sortedMemberList, arguments?.getString("groupId")!!)
                         memberRecyclerView.setHasFixedSize(true)
                     }
                 }

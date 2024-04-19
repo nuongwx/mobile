@@ -1,5 +1,7 @@
 package com.example.datto
 
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -141,6 +143,18 @@ class Profile : Fragment() {
 
             // Empty all fragment
             parentFragmentManager.popBackStack(null, parentFragmentManager.backStackEntryCount)
+
+            // Update widget
+            val widgetUpdateIntent = Intent(requireContext(), EventWidget::class.java)
+            widgetUpdateIntent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+
+            // Use an array and EXTRA_APPWIDGET_IDS instead of AppWidgetManager.EXTRA_APPWIDGET_ID,
+            // since it seems the onUpdate() is only fired on that:
+            val ids = AppWidgetManager.getInstance(requireContext()).getAppWidgetIds(
+                ComponentName(requireContext(), EventWidget::class.java)
+            )
+            widgetUpdateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+            requireContext().sendBroadcast(widgetUpdateIntent)
 
             // Move back to main activity
             startActivity(Intent(requireContext(), MainActivity::class.java))

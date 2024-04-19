@@ -14,7 +14,7 @@ data class Event(
 )
 
 class EventAdapter(
-    private val events: ArrayList<Event>
+    private val events: List<Event>
 ) : androidx.recyclerview.widget.RecyclerView.Adapter<EventAdapter.EventViewHolder>() {
 
     inner class EventViewHolder(itemView: View) :
