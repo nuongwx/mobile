@@ -1,25 +1,19 @@
 package com.example.datto
 
-import android.annotation.SuppressLint
+import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
-import android.icu.text.AlphabeticIndex.ImmutableIndex
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
-import android.widget.RemoteViewsService
-import android.widget.Toast
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.Credential.CredentialService
-import com.example.datto.DataClass.AccountResponse
 import com.example.datto.DataClass.EventResponse
-import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
@@ -104,6 +98,17 @@ internal fun updateAppWidget(
                     // Instruct the widget manager to update the widget
                     appWidgetManager.updateAppWidget(appWidgetId, views)
                     return
+                } else {
+                    // Create an Intent to launch MainActivity
+                    val intent = Intent(context, MainActivity::class.java)
+                    val pendingIntent =
+                        PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
+                    // Widgets allow click handlers to only launch pending intents
+                    views.setOnClickPendingIntent(R.id.widget_item, pendingIntent)
+
+                    // Instruct the widget manager to update the widget
+                    appWidgetManager.updateAppWidget(appWidgetId, views)
                 }
 
                 // Otherwise, continue
@@ -123,8 +128,10 @@ internal fun updateAppWidget(
                 val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.US)
 
                 // Format the date
-                val formattedStartDate = formatter.format(parser.parse(nearestUpcomingEvent?.time?.start!!)!!)
-                val formattedEndDate = formatter.format(parser.parse(nearestUpcomingEvent?.time?.end!!)!!)
+                val formattedStartDate =
+                    formatter.format(parser.parse(nearestUpcomingEvent?.time?.start!!)!!)
+                val formattedEndDate =
+                    formatter.format(parser.parse(nearestUpcomingEvent?.time?.end!!)!!)
 
                 // Set the text
                 views.setTextViewText(R.id.widget_group_name, groupName)

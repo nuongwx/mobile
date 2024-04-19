@@ -28,7 +28,6 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/widget_event_name"
         android:paddingLeft="16dp"
-        android:paddingBottom="16dp"
         android:text="TextView"
         android:textColor="#FFFFFF"
         android:visibility="invisible" />
@@ -39,10 +38,10 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/widget_date"
         android:paddingLeft="16dp"
-        android:paddingBottom="16dp"
         android:text="TextView"
         android:textColor="#FFFFFF"
         android:textFontWeight="600"
+        android:textSize="16sp"
         android:visibility="invisible" />
 
     <TextView
