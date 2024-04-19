@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingVertical="16dp"
     tools:context=".EventDetails">
 
     <ScrollView
@@ -22,6 +21,7 @@
                 android:layout_width="0dp"
                 android:layout_height="192dp"
                 android:scaleType="centerCrop"
+                android:src="@drawable/cover"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -32,7 +32,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginVertical="8dp"
                 android:orientation="vertical"
                 app:layout_constraintTop_toBottomOf="@+id/imageView2"
                 tools:layout_editor_absoluteX="16dp">
@@ -51,11 +50,6 @@
                         android:text="Plan"
                         android:textSize="16sp" />
 
-                    <Space
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1" />
-
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/eventDetailsW2MButton"
                         android:layout_width="wrap_content"
@@ -72,9 +66,107 @@
                         app:iconTint="@color/md_theme_onBackground" />
                 </LinearLayout>
 
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="0dp"
+                    app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+                    tools:layout_editor_absoluteX="16dp">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/rounded_border_card"
+                        android:padding="12dp">
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/eventsListGroupDetailsLL"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent">
+
+
+                            <TextView
+                                android:id="@+id/textView3"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/be_vietnam"
+                                android:text="Start date"
+                                android:textSize="16sp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/startDateTextView"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/be_vietnam"
+                                android:textSize="16sp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                        <com.google.android.material.divider.MaterialDivider
+                            android:id="@+id/materialDivider"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            app:layout_constraintBottom_toTopOf="@+id/membersListGroupDetailsLL"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/eventsListGroupDetailsLL" />
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/membersListGroupDetailsLL"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/materialDivider">
+
+                            <TextView
+                                android:id="@+id/textView"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/be_vietnam"
+                                android:text="End date"
+                                android:textSize="16sp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/endDateTextView"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="@font/be_vietnam"
+                                android:textSize="16sp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </androidx.cardview.widget.CardView>
+
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp">
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/eventDetailsPlanningRecyclerView"
@@ -132,7 +224,6 @@
                         app:strokeWidth="1dp" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
-
             </LinearLayout>
 
             <LinearLayout
@@ -140,7 +231,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginVertical="8dp"
                 android:orientation="vertical"
                 app:layout_constraintTop_toBottomOf="@+id/eventDetailsPlanningLL"
                 tools:layout_editor_absoluteX="16dp">
@@ -148,6 +238,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_marginBottom="8dp"
+                    android:gravity="center"
                     android:orientation="horizontal">
 
                     <TextView
@@ -155,27 +247,21 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:fontFamily="@font/be_vietnam_medium"
+                        android:fontFamily="@font/be_vietnam_semibold"
                         android:text="Expenses"
-                        android:textSize="16sp" />
-
-                    <Space
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1" />
+                        android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                        android:textFontWeight="600" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/eventDetailsExpensesDetailsButton"
+                        style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="#00FFFFFF"
                         android:elegantTextHeight="true"
                         android:fontFamily="@font/be_vietnam"
-                        android:text="View Details"
-                        android:textColor="@color/md_theme_primary"
+                        android:text="View details"
                         android:textSize="12sp"
-                        android:visibility="invisible"
-                        app:backgroundTint="#00FFFFFF" />
+                        android:visibility="invisible" />
 
                 </LinearLayout>
 
@@ -203,91 +289,127 @@
                         app:strokeColor="@color/md_theme_primary"
                         app:strokeWidth="1dp" />
 
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/eventDetailsExpensesListRecyclerView"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:visibility="gone"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/eventDetailsExpenseOverViewCardView"
-                        tools:visibility="gone" />
-
                     <androidx.cardview.widget.CardView
-                        android:id="@+id/eventDetailsExpenseOverViewCardView"
+                        android:id="@+id/incomeCardView"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
                         android:visibility="gone"
-                        app:cardBackgroundColor="@color/md_theme_secondaryContainer"
                         app:cardCornerRadius="8dp"
                         app:cardElevation="0dp"
-                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/spendingsCardView"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent">
 
-                        <LinearLayout
+                        <androidx.constraintlayout.widget.ConstraintLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:orientation="horizontal"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="16dp">
+                            android:background="@drawable/rounded_border_card"
+                            android:padding="12dp">
 
                             <LinearLayout
+                                android:id="@+id/linearLayout6"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:orientation="vertical">
+                                android:orientation="vertical"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent">
 
                                 <TextView
                                     android:id="@+id/textView5"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:fontFamily="@font/be_vietnam"
+                                    android:fontFamily="@font/be_vietnam_medium"
                                     android:text="Income"
-                                    android:textColor="@color/md_theme_onSecondaryFixedVariant"
-                                    android:textSize="12sp" />
+                                    android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                                    android:textColor="#929292"
+                                    android:textFontWeight="500" />
 
                                 <TextView
                                     android:id="@+id/eventDetailsExpenseInTextView"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:fontFamily="@font/be_vietnam_medium"
-                                    android:text="+5.000.000 VND"
-                                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                                    android:textSize="16sp" />
+                                    android:fontFamily="@font/be_vietnam_bold"
+                                    android:text="+ 5.000.000đ"
+                                    android:textColor="?attr/colorPrimary"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold" />
                             </LinearLayout>
 
-                            <com.google.android.material.divider.MaterialDivider
-                                android:layout_width="1dp"
-                                android:layout_height="match_parent"
-                                android:layout_marginHorizontal="8dp" />
+                            <ImageView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:src="@drawable/ic_trending_up"
+                                app:layout_constraintBottom_toBottomOf="@+id/linearLayout6"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="@+id/linearLayout6" />
+
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/spendingsCardView"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:visibility="gone"
+                        app:cardCornerRadius="8dp"
+                        app:cardElevation="0dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/incomeCardView"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/rounded_border_card"
+                            android:padding="12dp">
 
                             <LinearLayout
+                                android:id="@+id/linearLayout7"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:orientation="vertical">
+                                android:orientation="vertical"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent">
 
                                 <TextView
                                     android:id="@+id/textView10"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:fontFamily="@font/be_vietnam"
+                                    android:fontFamily="@font/be_vietnam_medium"
                                     android:text="Spendings"
-                                    android:textColor="@color/md_theme_onSecondaryFixedVariant"
+                                    android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                                    android:textColor="#929292"
+                                    android:textFontWeight="500"
                                     android:textSize="12sp" />
 
                                 <TextView
                                     android:id="@+id/eventDetailsExpenseOutTextView"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:fontFamily="@font/be_vietnam_medium"
+                                    android:fontFamily="@font/be_vietnam_bold"
                                     android:text="-4.999.991 VND"
-                                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                                    android:textSize="16sp" />
+                                    android:textColor="@color/md_theme_tertiary"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold" />
                             </LinearLayout>
-                        </LinearLayout>
+
+                            <ImageView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:src="@drawable/ic_trending_down"
+                                app:layout_constraintBottom_toBottomOf="@+id/linearLayout7"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="@+id/linearLayout7" />
+
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
                     </androidx.cardview.widget.CardView>
+
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </LinearLayout>
@@ -297,7 +419,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginVertical="8dp"
                 android:orientation="vertical"
                 app:layout_constraintTop_toBottomOf="@+id/eventDetailsExpensesLL"
                 tools:layout_editor_absoluteX="16dp">
@@ -305,6 +426,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
                     android:orientation="horizontal">
 
                     <TextView
@@ -312,9 +435,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:fontFamily="@font/be_vietnam_medium"
+                        android:fontFamily="@font/be_vietnam_semibold"
                         android:text="Memories"
-                        android:textSize="16sp" />
+                        android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                        android:textFontWeight="600" />
 
                     <Space
                         android:layout_width="wrap_content"
