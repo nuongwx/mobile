@@ -77,16 +77,14 @@ class PlanningListAdapter(private val plannings: List<Planning>) :
 
         holder.planningName.text = currentItem.name
         holder.planningDesc.text = currentItem.description
-        holder.startingTime.text =
-            SimpleDateFormat(
-                "HH:mm",
-                Locale.getDefault()
-            ).format(originalFormat.parse(currentItem.start))
+        holder.startingTime.text = SimpleDateFormat(
+            "HH:mm", Locale.getDefault()
+        ).format(originalFormat.parse(currentItem.start)!!)
         holder.duration.text = buildString {
             append(
                 Duration.between(
-                    originalFormat.parse(currentItem.start).toInstant(),
-                    originalFormat.parse(currentItem.end).toInstant()
+                    originalFormat.parse(currentItem.start)!!.toInstant(),
+                    originalFormat.parse(currentItem.end)!!.toInstant()
                 ).toMinutes()
             )
             append(" min")
@@ -140,43 +138,26 @@ class FunkyDatedPlanningAdapter(private val plans: List<Planning>) :
     ) {
         val currentItem = plans[position]
 
-        if (position == 0 || SimpleDateFormat(
-                "dd", Locale.getDefault()
-            ).format(
-                originalFormat.parse(currentItem.start)
-            ) != SimpleDateFormat(
-                "dd", Locale.getDefault()
-            ).format(
-                originalFormat.parse(plans[position - 1].start)
-            )
+        if (position == 0 || originalFormat.parse(currentItem.start)!!.date != originalFormat.parse(
+                plans[position - 1].start
+            )!!.date
         ) {
             holder.itemView.findViewById<CardView>(R.id.eventDetailsPlanningDateTitleCardView).visibility =
                 View.VISIBLE
             holder.recyclerView.visibility = View.VISIBLE
 
             val plansInDate = plans.filter {
-                SimpleDateFormat(
-                    "dd", Locale.getDefault()
-                ).format(
-                    originalFormat.parse(it.start)
-                ) == SimpleDateFormat(
-                    "dd", Locale.getDefault()
-                ).format(
-                    originalFormat.parse(
-                        currentItem.start
-                    )
-                )
+                originalFormat.parse(it.start)!!.date == originalFormat.parse(currentItem.start)!!.date
             }
 
             val dayOfWeek = SimpleDateFormat("EEEE", Locale.getDefault()).format(
-                originalFormat.parse(currentItem.start)
+                originalFormat.parse(currentItem.start)!!
             )
-            val dayOfMonth =
-                SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(
-                    originalFormat.parse(
-                        currentItem.start
-                    )
-                )
+            val dayOfMonth = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(
+                originalFormat.parse(
+                    currentItem.start
+                )!!
+            )
 
             holder.weekDayTextView.text = dayOfWeek
             holder.dayTextView.text = dayOfMonth
@@ -261,8 +242,8 @@ class EventDetails : Fragment() {
                 val startDate = originalFormat.parse(data.time.start)
                 val endDate = originalFormat.parse(data.time.end)
 
-                startDateTextView.text = targetFormat.format(startDate)
-                endDateTextView.text = targetFormat.format(endDate)
+                startDateTextView.text = targetFormat.format(startDate!!)
+                endDateTextView.text = targetFormat.format(endDate!!)
 
                 val menuItem = appBar.menu.findItem(R.id.edit)
                 menuItem.setOnMenuItemClickListener {
@@ -322,9 +303,7 @@ class EventDetails : Fragment() {
                         Log.d("end", formattedEnd)
 
                         APIService().doPatch<Any>("events/${eventId}", mapOf(
-                            "name" to newName,
-                            "start" to formattedStart,
-                            "end" to formattedEnd
+                            "name" to newName, "start" to formattedStart, "end" to formattedEnd
                         ), object : APICallback<Any> {
                             override fun onSuccess(data: Any) {
                                 eventName.text = newName
@@ -372,10 +351,9 @@ class EventDetails : Fragment() {
 
                     planningRecyclerView.layoutManager =
                         LinearLayoutManager(view.context, RecyclerView.VERTICAL, false)
-                    val adapter =
-                        FunkyDatedPlanningAdapter(plannings.filter {
-                            originalFormat.parse(it.start).after(Date())
-                        })
+                    val adapter = FunkyDatedPlanningAdapter(plannings.filter {
+                        originalFormat.parse(it.start)!!.after(Date())
+                    })
                     planningRecyclerView.adapter = adapter
                     planningRecyclerView.setHasFixedSize(true)
 
