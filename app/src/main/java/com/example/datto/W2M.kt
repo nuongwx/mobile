@@ -194,12 +194,12 @@ class W2M : Fragment() {
         val availableRecyclerView = view.findViewById<RecyclerView>(R.id.availableW2MRecyclerView)
         availableRecyclerView.layoutManager =
             androidx.recyclerview.widget.LinearLayoutManager(view.context)
-        availableRecyclerView.adapter = MemberListAdapter(ArrayList())
+        availableRecyclerView.adapter = MemberListAdapter(ArrayList(), "")
         val unavailableRecyclerView =
             view.findViewById<RecyclerView>(R.id.unavailableW2MRecyclerView)
         unavailableRecyclerView.layoutManager =
             androidx.recyclerview.widget.LinearLayoutManager(view.context)
-        unavailableRecyclerView.adapter = MemberListAdapter(ArrayList())
+        unavailableRecyclerView.adapter = MemberListAdapter(ArrayList(), "")
 
         val scrollView = requireActivity().findViewById<View>(R.id.scrollView)
 
