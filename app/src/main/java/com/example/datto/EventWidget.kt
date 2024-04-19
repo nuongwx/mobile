@@ -144,6 +144,14 @@ internal fun updateAppWidget(
                 views.setViewVisibility(R.id.widget_date, View.VISIBLE)
                 views.setViewVisibility(R.id.widget_warning, View.INVISIBLE)
 
+                // Create an Intent to launch MainActivity
+                val intent = Intent(context, MainActivity::class.java)
+                val pendingIntent =
+                    PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
+                // Widgets allow click handlers to only launch pending intents
+                views.setOnClickPendingIntent(R.id.widget_item, pendingIntent)
+
                 // Instruct the widget manager to update the widget
                 appWidgetManager.updateAppWidget(appWidgetId, views)
             }
@@ -156,6 +164,14 @@ internal fun updateAppWidget(
                 views.setViewVisibility(R.id.widget_event_name, View.INVISIBLE)
                 views.setViewVisibility(R.id.widget_date, View.INVISIBLE)
                 views.setViewVisibility(R.id.widget_warning, View.VISIBLE)
+
+                // Create an Intent to launch MainActivity
+                val intent = Intent(context, MainActivity::class.java)
+                val pendingIntent =
+                    PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
+                // Widgets allow click handlers to only launch pending intents
+                views.setOnClickPendingIntent(R.id.widget_item, pendingIntent)
 
                 // Instruct the widget manager to update the widget
                 appWidgetManager.updateAppWidget(appWidgetId, views)
