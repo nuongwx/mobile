@@ -12,7 +12,7 @@ data class GroupResponse(
     var id: String,
     var members: List<String>,
     var events: List<String>,
-    var memories: List<MemoryResponse>,
+    var memories: List<String>,
     var name: String,
     var inviteCode: String,
     val thumbnail: String,

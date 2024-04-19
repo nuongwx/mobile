@@ -90,7 +90,8 @@ class GroupDetailsEventList : Fragment() {
                             )
                         }
 
-                        val eventRecyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
+                        val eventRecyclerView =
+                            view.findViewById<RecyclerView>(R.id.eventListGroupDetailsRecyclerView)
                         eventRecyclerView.layoutManager =
                             androidx.recyclerview.widget.LinearLayoutManager(view.context)
                         eventRecyclerView.adapter = EventAdapter(eventList)

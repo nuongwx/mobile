@@ -24,7 +24,6 @@ import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
-// TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "eventId"
 private const val ARG_PARAM2 = "id"
@@ -35,7 +34,6 @@ private const val ARG_PARAM2 = "id"
  * create an instance of this fragment.
  */
 class PlanningEdit : Fragment() {
-    // TODO: Rename and change types of parameters
     private var eventId: String? = null
     private var planningId: String? = null
 
@@ -73,13 +71,15 @@ class PlanningEdit : Fragment() {
 
                     planningName.setText(data.name)
                     planningDescription.setText(data.description)
-                    val startTime: Date = data.start
-                    val endTime: Date = data.end
 
-                    val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+                    val originalFormat =
+                        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                    val targetFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.US)
+                    val startTime = originalFormat.parse(data.start)
+                    val endTime = originalFormat.parse(data.end)
 
-                    planningStartTime.setText(formatter.format(startTime))
-                    planningEndTime.setText(formatter.format(endTime))
+                    planningStartTime.setText(targetFormat.format(startTime))
+                    planningEndTime.setText(targetFormat.format(endTime))
                 }
 
                 override fun onError(error: Throwable) {
@@ -142,13 +142,10 @@ class PlanningEdit : Fragment() {
         val startTime = planningStartTime.text.toString()
         val endTime = planningEndTime.text.toString()
 
-        val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-        val start = formatter.parse(startTime)!!
-        val end = formatter.parse(endTime)!!
-
-        // accounts for time zone from local time to UTC
-        start.time += start.timezoneOffset * 60 * 1000
-        end.time += end.timezoneOffset * 60 * 1000
+        val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.US)
+        val targetFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+        val start = formatter.parse(startTime)!!.let { targetFormat.format(it) }
+        val end = formatter.parse(endTime)!!.let { targetFormat.format(it) }
 
         val planning = Planning(name, description, start, end)
 

@@ -23,6 +23,10 @@ import com.example.datto.GlobalVariable.GlobalVariable
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.gson.annotations.SerializedName
 import com.squareup.picasso.Picasso
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+import java.util.TimeZone
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -281,8 +285,31 @@ class GroupList : Fragment() {
                             override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
                         })
 
+                        val upComingEvents =
+                            accountEvents.filter {
+                                // Parse ISO 8601 date string
+                                val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                                parser.timeZone = TimeZone.getTimeZone("UTC")
+
+                                val formattedDateEnd = parser.parse(it.event.time.end)
+
+                                // Create a Calendar instance and set it to the parsed date
+                                val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                                calendar.time = formattedDateEnd!!
+
+                                // Set the time to the end of the day
+                                calendar.set(Calendar.HOUR_OF_DAY, 23)
+                                calendar.set(Calendar.MINUTE, 59)
+                                calendar.set(Calendar.SECOND, 59)
+                                calendar.set(Calendar.MILLISECOND, 999)
+
+                                val endOfDayTimestamp = calendar.time.time
+
+                                endOfDayTimestamp > System.currentTimeMillis()
+                            }
+
                         val latestEvents =
-                            accountEvents.sortedByDescending { it.event.time.start }.takeLast(3)
+                            upComingEvents.sortedByDescending { it.event.time.start }.takeLast(3)
 
                         if (latestEvents.isNotEmpty()) {
                             view.findViewById<TextView>(R.id.materialTextView).isVisible = true

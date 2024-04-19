@@ -57,4 +57,6 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     // Picasso for image loading
     implementation("com.squareup.picasso:picasso:2.8")
+    // Calendar
+    implementation("com.kizitonwose.calendar:view:2.5.0")
 }
