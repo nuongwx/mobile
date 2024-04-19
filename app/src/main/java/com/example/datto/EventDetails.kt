@@ -308,6 +308,8 @@ class EventDetails : Fragment() {
                             override fun onSuccess(data: Any) {
                                 eventName.text = newName
                                 appBar.title = newName
+                                startDateTextView.text = start.text.toString()
+                                endDateTextView.text = end.text.toString()
                             }
 
                             override fun onError(error: Throwable) {
