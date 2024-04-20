@@ -78,7 +78,7 @@ class GoogleAuth(private val context: Context) {
                                                     account.uid,
                                                     account.displayName.toString(),
                                                     account.photoUrl.toString())
-        APIService().doPost<NewAccountResponse>(
+        APIService(context).doPost<NewAccountResponse>(
             "accounts/auth-google",
             newGoogleAccount,
             object :
