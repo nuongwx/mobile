@@ -17,10 +17,14 @@ import com.example.datto.DataClass.NewAccountRequest
 import com.example.datto.DataClass.NewGroupResponse
 import com.example.datto.DataClass.NewOtpRequest
 import com.example.datto.DataClass.OtpResponse
+import com.example.datto.utils.GoogleAuth
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.textfield.TextInputEditText
 
 class SignUpActivity : AppCompatActivity() {
+
+    private lateinit var googleAuth: GoogleAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -77,10 +81,21 @@ class SignUpActivity : AppCompatActivity() {
                     })
             }
         }
+
+        googleAuth = GoogleAuth(this)
+        findViewById<Button>(R.id.google_button).setOnClickListener {
+            googleAuth.signInWithGoogle()
+        }
     }
 
     private fun isValidEmail(email: String): Boolean {
         val emailRegex = Regex("^\\S+@\\S+\\.\\S+\$")
         return emailRegex.matches(email)
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        googleAuth.onActivityResult(requestCode, data)
     }
 }

@@ -7,7 +7,6 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -15,13 +14,16 @@ import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.Credential.CredentialService
 import com.example.datto.DataClass.AccountRequest
-import com.example.datto.DataClass.AccountResponse
 import com.example.datto.DataClass.NewAccountResponse
+import com.example.datto.utils.GoogleAuth
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.textfield.TextInputEditText
 
 
 class SignInActivity : AppCompatActivity() {
+
+    private lateinit var googleAuth: GoogleAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -64,7 +66,7 @@ class SignInActivity : AppCompatActivity() {
                             data as NewAccountResponse
                             Log.d("API_SERVICE", "Data: ${data.id}")
                             CredentialService().set(data.id)
-                            val i: Intent = Intent(applicationContext, MainActivity::class.java)
+                            val i = Intent(applicationContext, MainActivity::class.java)
                             startActivity(i)
                         }
 
@@ -79,7 +81,15 @@ class SignInActivity : AppCompatActivity() {
                     })
             }
         }
-
+        googleAuth = GoogleAuth(this)
+        findViewById<Button>(R.id.google_button).setOnClickListener {
+            googleAuth.signInWithGoogle()
+        }
     }
 
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        googleAuth.onActivityResult(requestCode, data)
+    }
 }

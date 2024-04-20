@@ -30,3 +30,10 @@ data class NewPasswordRequest(
     var email: String,
     var password: String,
 )
+
+data class GoogleAccountRequest(
+    var email: String,
+    var googleId: String,
+    var fullName: String,
+    var avatar: String,
+)
