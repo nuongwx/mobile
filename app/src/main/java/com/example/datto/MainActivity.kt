@@ -157,17 +157,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setDefaultLayout(viewBottomNav: Boolean = true) {
-        bottomNavigation.visibility = if (viewBottomNav) View.VISIBLE else View.GONE
-        val layoutParams = scrollView.layoutParams as ViewGroup.MarginLayoutParams
-        layoutParams.setMargins(
-            layoutParams.leftMargin,
-            layoutParams.topMargin,
-            layoutParams.rightMargin,
-            if (viewBottomNav) 80 else 0
-        )
-        scrollView.layoutParams = layoutParams
-    }
+private fun setDefaultLayout(viewBottomNav: Boolean = true) {
+    val layoutParams = scrollView.layoutParams as ViewGroup.MarginLayoutParams
+    layoutParams.setMargins(
+        layoutParams.leftMargin,
+        layoutParams.topMargin,
+        layoutParams.rightMargin,
+        if (viewBottomNav) resources.getDimensionPixelSize(R.dimen.bottom_navigation_height) else 0
+    )
+    scrollView.layoutParams = layoutParams
+    bottomNavigation.visibility = if (viewBottomNav) View.VISIBLE else View.GONE
+}
 
     private fun handleBackEvent() {
         if (supportFragmentManager.backStackEntryCount > 1) {
