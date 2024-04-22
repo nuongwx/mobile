@@ -129,8 +129,6 @@ class NewMemory : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         configTopAppBar()
 
-        Toast.makeText(context, groupId, Toast.LENGTH_SHORT).show()
-
         imageUpload.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             startActivityForResult(intent, 42)

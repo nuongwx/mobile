@@ -273,7 +273,7 @@ class GroupDetails : Fragment() {
             })
 
         val lineChart: LineChart = view.findViewById(R.id.lineChart)
-        APIService().doGet<List<GroupFundsResponse>>("groups/${groupId}/funds",
+        APIService(requireContext()).doGet<List<GroupFundsResponse>>("groups/${groupId}/funds",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")
