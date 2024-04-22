@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -278,6 +279,11 @@ class GroupDetails : Fragment() {
                     Log.d("API_SERVICE", "Data: $data")
 
                     data as List<GroupFundsResponse>
+
+                    // Check data.funds is not an empty list
+                    if (data.isEmpty() || data[0].funds.isEmpty()) {
+                        return
+                    }
 
                     val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
                     sdf.timeZone = TimeZone.getTimeZone("UTC")
