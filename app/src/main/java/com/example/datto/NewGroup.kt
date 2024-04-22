@@ -201,6 +201,13 @@ class NewGroup : Fragment() {
         if (requestCode == this.requestCode && resultCode == Activity.RESULT_OK && data != null) {
             Picasso.get().load(data.data).into(thumbnail)
             thumbnailChangeStatus = true
+
+            val layoutParams = thumbnail.layoutParams
+            layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
+            val density = resources.displayMetrics.density
+            layoutParams.height = (200 * density).toInt()
+            thumbnail.layoutParams = layoutParams
+            thumbnail.scaleType = ImageView.ScaleType.CENTER_CROP
         }
     }
 

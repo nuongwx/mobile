@@ -169,18 +169,16 @@
                     android:id="@+id/textView6"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
                     android:fontFamily="@font/be_vietnam_medium"
                     android:text="Expenses"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
-                <com.db.williamchart.view.LineChartView
-                    android:id="@+id/chart"
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/lineChart"
                     android:layout_width="match_parent"
-                    android:layout_height="200dp"
-                    android:layout_marginTop="16dp"
-                    app:chart_axis="none"
-                    app:chart_smoothLine="true" />
+                    android:layout_height="300dp" />
             </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
