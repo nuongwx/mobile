@@ -11,17 +11,29 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
-import com.db.williamchart.view.LineChartView
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.DataClass.GroupResponse
 import com.example.datto.DataClass.MemoryResponse
 import com.example.datto.GlobalVariable.GlobalVariable
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.AxisBase
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.gson.annotations.SerializedName
 import com.squareup.picasso.Picasso
 import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+import java.util.TimeZone
 
 
 private const val ARG_PARAM1 = "groupId"
@@ -125,9 +137,20 @@ class MemoriesListAdapter(private val memories: ArrayList<MemoryResponse>) :
     }
 }
 
+data class FundData(
+    @SerializedName("_id")
+    val id: String,
+    val amount: Double,
+    val paidAt: String
+)
+
+data class GroupFundsResponse(
+    @SerializedName("_id")
+    val id: String,
+    val funds: List<FundData>
+)
 
 class GroupDetails : Fragment() {
-    // TODO: Rename and change types of parameters
     private var groupId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -249,27 +272,123 @@ class GroupDetails : Fragment() {
                 }
             })
 
+        val lineChart: LineChart = view.findViewById(R.id.lineChart)
+        APIService().doGet<List<GroupFundsResponse>>("groups/${groupId}/funds",
+            object : APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    Log.d("API_SERVICE", "Data: $data")
 
-        val chart: LineChartView = view.findViewById(R.id.chart)
-        val entries: List<Pair<String, Float>> = listOf(
-            "Jan" to 4f,
-            "Feb" to 2f,
-            "Mar" to 3f,
-            "Apr" to 1f,
-            "May" to 5f,
-            "Jun" to 2f,
-            "Jul" to 4f,
-            "Aug" to 3f,
-            "Sep" to 4f,
-            "Oct" to 2f,
-            "Nov" to 3f,
-            "Dec" to 6f
-        )
-        chart.show(entries)
+                    data as List<GroupFundsResponse>
 
-        chart.setOnClickListener {
-            Toast.makeText(context, "Chart clicked", Toast.LENGTH_SHORT).show()
-        }
+                    // Check data.funds is not an empty list
+                    if (data.isEmpty() || data[0].funds.isEmpty()) {
+                        return
+                    }
+
+                    val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                    sdf.timeZone = TimeZone.getTimeZone("UTC")
+                    val targetFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+                    targetFormat.timeZone = TimeZone.getTimeZone("UTC")
+
+                    val positiveAmountsByDay = mutableMapOf<String, Double>()
+                    val negativeAmountsByDay = mutableMapOf<String, Double>()
+
+                    data.flatMap { groupFundsResponse ->
+                        groupFundsResponse.funds.map { fundData ->
+                            val fullDate = sdf.parse(fundData.paidAt)!!.let {
+                                targetFormat.format(it)
+                            }
+
+                            if (fundData.amount >= 0) {
+                                positiveAmountsByDay[fullDate] = positiveAmountsByDay.getOrDefault(
+                                    fullDate,
+                                    0.0
+                                ) + fundData.amount
+                            } else {
+                                negativeAmountsByDay[fullDate] = negativeAmountsByDay.getOrDefault(
+                                    fullDate,
+                                    0.0
+                                ) + fundData.amount
+                            }
+                        }
+                    }
+
+                    var positiveEntries = positiveAmountsByDay.map { (fullDate, amount) ->
+                        val date = targetFormat.parse(fullDate)
+                        val calendar = Calendar.getInstance()
+                        calendar.time = date
+                        val dayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
+                        Entry(dayOfYear.toFloat(), amount.toFloat())
+                    }
+
+                    var negativeEntries = negativeAmountsByDay.map { (fullDate, amount) ->
+                        val date = targetFormat.parse(fullDate)
+                        val calendar = Calendar.getInstance()
+                        calendar.time = date
+                        val dayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
+                        Entry(dayOfYear.toFloat(), -1 * amount.toFloat())
+                    }
+
+                    positiveEntries = positiveEntries.sortedBy { it.x }
+                    negativeEntries = negativeEntries.sortedBy { it.x }
+
+                    Log.d("API_SERVICE", "Positive entries: $positiveEntries")
+                    Log.d("API_SERVICE", "Negative entries: $negativeEntries")
+
+                    val positiveLineDataSet =
+                        LineDataSet(positiveEntries, "Funds").apply {
+                            setColor(
+                                ContextCompat.getColor(
+                                    requireContext(),
+                                    R.color.md_theme_primary
+                                )
+                            )
+                            setCircleColor(
+                                ContextCompat.getColor(
+                                    requireContext(),
+                                    R.color.md_theme_primary
+                                )
+                            )
+                        }
+                    val negativeLineDataSet =
+                        LineDataSet(negativeEntries, "Expenses").apply {
+                            setColor(
+                                ContextCompat.getColor(
+                                    requireContext(),
+                                    R.color.md_theme_tertiary
+                                )
+                            )
+                            setCircleColor(
+                                ContextCompat.getColor(
+                                    requireContext(),
+                                    R.color.md_theme_tertiary
+                                )
+                            )
+                        }
+                    val lineData = LineData(positiveLineDataSet, negativeLineDataSet)
+
+                    lineChart.xAxis.valueFormatter = object : ValueFormatter() {
+                        override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+                            val calendar = Calendar.getInstance()
+                            calendar.set(Calendar.DAY_OF_YEAR, value.toInt())
+                            return SimpleDateFormat("MMM dd", Locale.US).format(calendar.time)
+                        }
+                    }
+                    lineChart.description.isEnabled = false // Disable the description
+                    lineChart.xAxis.position = XAxis.XAxisPosition.BOTTOM // Set the x-axis position
+                    val font = ResourcesCompat.getFont(requireContext(), R.font.be_vietnam)
+                    lineChart.xAxis.typeface = font
+                    lineChart.axisLeft.typeface = font
+                    lineChart.axisRight.typeface = font
+                    lineChart.legend.typeface = font
+                    lineChart.data = lineData
+                    lineChart.invalidate() // refresh the chart
+                }
+
+                override fun onError(error: Throwable) {
+                    Log.e("API_SERVICE", "Error: ${error.message}")
+                }
+            })
     }
 
     private fun configTopAppBar(name: String, thumbnail: String) {
