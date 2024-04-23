@@ -50,7 +50,7 @@ class PlanningList : Fragment() {
 
         val plannings = ArrayList<Planning>()
 
-        APIService().doGet<List<Planning>>("events/${eventId}/timeline", object : APICallback<Any> {
+        APIService(requireContext()).doGet<List<Planning>>("events/${eventId}/timeline", object : APICallback<Any> {
             override fun onSuccess(data: Any) {
                 plannings.clear()
                 plannings.addAll(data as List<Planning>)

@@ -61,7 +61,7 @@ class PlanningEdit : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         if (planningId != null && planningId!!.isNotEmpty()) {
-            APIService().doGet<Planning>("events/${arguments?.getString("eventId")}/timeline/${
+            APIService(requireContext()).doGet<Planning>("events/${arguments?.getString("eventId")}/timeline/${
                 arguments?.getString(
                     "id"
                 )
@@ -150,7 +150,7 @@ class PlanningEdit : Fragment() {
         val planning = Planning(name, description, start, end)
 
         if (planningId == null) {
-            APIService().doPost<Any>("events/${eventId}/timeline",
+            APIService(requireContext()).doPost<Any>("events/${eventId}/timeline",
                 planning,
                 object : APICallback<Any> {
                     override fun onSuccess(data: Any) {
@@ -164,7 +164,7 @@ class PlanningEdit : Fragment() {
                     }
                 })
         } else {
-            APIService().doPatch<Any>("events/${eventId}/timeline/${planningId}",
+            APIService(requireContext()).doPatch<Any>("events/${eventId}/timeline/${planningId}",
                 planning,
                 object : APICallback<Any> {
                     override fun onSuccess(data: Any) {

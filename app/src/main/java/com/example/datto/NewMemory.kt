@@ -70,7 +70,7 @@ class NewMemory : Fragment() {
             val multipartBody =
                 MultipartBody.Part.createFormData("file", "thumbnail.jpg", requestBody)
 
-            APIService().doPutMultipart<BucketResponse>("files", multipartBody, object :
+            APIService(requireContext()).doPutMultipart<BucketResponse>("files", multipartBody, object :
                 APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     // Cast data to BucketResponse
@@ -82,7 +82,7 @@ class NewMemory : Fragment() {
                         memoryInfo.text.toString()
                     )
 
-                    APIService().doPost<MemoryResponse>(
+                    APIService(requireContext()).doPost<MemoryResponse>(
                         "groups/$groupId/memories",
                         newGroupRequest,
                         object : APICallback<Any> {
@@ -128,8 +128,6 @@ class NewMemory : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         configTopAppBar()
-
-        Toast.makeText(context, groupId, Toast.LENGTH_SHORT).show()
 
         imageUpload.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)

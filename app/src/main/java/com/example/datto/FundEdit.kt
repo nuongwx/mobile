@@ -102,14 +102,14 @@ class FundEdit(
         val typeItems = arrayOf("Add fund", "Expense")
         type.setSimpleItems(typeItems)
 
-        APIService().doGet<FundResponseUnit>("funds/$id",
+        APIService(requireContext()).doGet<FundResponseUnit>("funds/$id",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")
 
                     val outerData = data as FundResponseUnit
 
-                    APIService().doGet<EventMemberResponse>("funds/$id/members",
+                    APIService(requireContext()).doGet<EventMemberResponse>("funds/$id/members",
                         object : APICallback<Any> {
                             override fun onSuccess(data: Any) {
                                 Log.d("API_SERVICE", "Data: $data")
@@ -211,7 +211,7 @@ class FundEdit(
                                         paidAt = formattedPaidAt,
                                     )
 
-                                    APIService().doPatch<Any>("funds/$id", fundRequest, object :
+                                    APIService(requireContext()).doPatch<Any>("funds/$id", fundRequest, object :
                                         APICallback<Any> {
                                         override fun onSuccess(data: Any) {
                                             Log.d("API_SERVICE", "Data: $data")

@@ -1,13 +1,16 @@
 package com.example.datto
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsets
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
@@ -41,6 +44,22 @@ class MemoryView : Fragment() {
         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
     )
 
+    private fun setDefaultLayout(viewBottomNav: Boolean = true) {
+        val scrollView = requireActivity().findViewById<View>(R.id.app_scroll_view)
+        val bottomNavigation =
+            requireActivity().findViewById<BottomNavigationView>(R.id.bottom_navigation)
+
+        val layoutParams = scrollView.layoutParams as ViewGroup.MarginLayoutParams
+        layoutParams.setMargins(
+            layoutParams.leftMargin,
+            layoutParams.topMargin,
+            layoutParams.rightMargin,
+            if (viewBottomNav) resources.getDimensionPixelSize(R.dimen.bottom_navigation_height) else 0
+        )
+        scrollView.layoutParams = layoutParams
+        bottomNavigation.visibility = if (viewBottomNav) View.VISIBLE else View.GONE
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -60,7 +79,7 @@ class MemoryView : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        APIService().doGet<MemoryResponse>(
+        APIService(requireContext()).doGet<MemoryResponse>(
             "groups/${arguments?.getString("groupId")}/memories/${
                 arguments?.getString(
                     "id"
@@ -78,9 +97,6 @@ class MemoryView : Fragment() {
                     Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
                 }
             })
-
-        // val imgUrl = arguments?.getString("imgUrl")
-        // Picasso.get().load(imgUrl).into(imageView)
     }
 
     override fun onStart() {
@@ -91,6 +107,10 @@ class MemoryView : Fragment() {
     override fun onResume() {
         super.onResume()
         configTopAppBar()
+
+        // Hide the bottom navigation bar
+        setDefaultLayout(false)
+
     }
 
 

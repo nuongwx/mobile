@@ -1,5 +1,6 @@
 package com.example.datto
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.GestureDetector
@@ -50,7 +51,8 @@ data class CustomGroupResponse(
 )
 
 class GroupListAdapter(
-    private val groups: ArrayList<CustomGroupResponse>
+    private val groups: ArrayList<CustomGroupResponse>,
+    private val context: Context
 ) : androidx.recyclerview.widget.RecyclerView.Adapter<GroupListAdapter.GroupViewHolder>() {
 
     inner class GroupViewHolder(itemView: View) :
@@ -100,7 +102,7 @@ class GroupListAdapter(
         }
 
         currentItem.members.forEachIndexed { index, member ->
-            APIService().doGet<AccountResponse>("accounts/${member}", object : APICallback<Any> {
+            APIService(context).doGet<AccountResponse>("accounts/${member}", object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")
 
@@ -157,6 +159,7 @@ class GroupList : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
+    private var currentContext: Context? = null
 
     private fun configTopAppBar() {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
@@ -187,6 +190,7 @@ class GroupList : Fragment() {
     override fun onResume() {
         super.onResume()
         configTopAppBar()
+        currentContext = requireContext()
     }
 
     override fun onCreateView(
@@ -200,6 +204,7 @@ class GroupList : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         configTopAppBar()
+        currentContext = requireContext()
 
         val newGroupBtn: Button = view.findViewById(R.id.newGroupButton)
         newGroupBtn.setOnClickListener {
@@ -210,7 +215,7 @@ class GroupList : Fragment() {
         val groupList = ArrayList<CustomGroupResponse>()
         val accountEvents = ArrayList<Event>()
 
-        APIService().doGet<List<CustomGroupResponse>>(
+        APIService(requireContext()).doGet<List<CustomGroupResponse>>(
             "accounts/${CredentialService().get()}/groups",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
@@ -240,7 +245,7 @@ class GroupList : Fragment() {
                                 androidx.recyclerview.widget.RecyclerView.VERTICAL,
                                 false
                             )
-                        groupRecyclerView.adapter = GroupListAdapter(groupList)
+                        groupRecyclerView.adapter = GroupListAdapter(groupList, currentContext!!)
                         groupRecyclerView.setHasFixedSize(true)
 
                         // Add click listener to each item

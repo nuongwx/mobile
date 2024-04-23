@@ -19,6 +19,7 @@ import com.example.datto.API.APIService
 import com.example.datto.DataClass.EventResponse
 import com.example.datto.DataClass.FundResponse
 import com.example.datto.DataClass.Planning
+import com.example.datto.utils.WidgetUpdater
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
@@ -227,7 +228,7 @@ class EventDetails : Fragment() {
 
         val plannings = ArrayList<Planning>()
 
-        APIService().doGet<EventResponse>("events/${eventId}", object : APICallback<Any> {
+        APIService(requireContext()).doGet<EventResponse>("events/${eventId}", object : APICallback<Any> {
             override fun onSuccess(data: Any) {
                 data as EventResponse
                 val appBar =
@@ -302,7 +303,7 @@ class EventDetails : Fragment() {
                         Log.d("start", formattedStart)
                         Log.d("end", formattedEnd)
 
-                        APIService().doPatch<Any>("events/${eventId}", mapOf(
+                        APIService(requireContext()).doPatch<Any>("events/${eventId}", mapOf(
                             "name" to newName, "start" to formattedStart, "end" to formattedEnd
                         ), object : APICallback<Any> {
                             override fun onSuccess(data: Any) {
@@ -310,6 +311,9 @@ class EventDetails : Fragment() {
                                 appBar.title = newName
                                 startDateTextView.text = start.text.toString()
                                 endDateTextView.text = end.text.toString()
+
+                                // Update widget
+                                WidgetUpdater().update(requireContext())
                             }
 
                             override fun onError(error: Throwable) {
@@ -332,7 +336,7 @@ class EventDetails : Fragment() {
             }
         })
 
-        APIService().doGet<ArrayList<Planning>>(
+        APIService(requireContext()).doGet<ArrayList<Planning>>(
             "events/${eventId}/timeline",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
@@ -407,7 +411,7 @@ class EventDetails : Fragment() {
             }
         }
 
-        APIService().doGet<FundResponse>("events/${eventId}/funds", object : APICallback<Any> {
+        APIService(requireContext()).doGet<FundResponse>("events/${eventId}/funds", object : APICallback<Any> {
             override fun onSuccess(data: Any) {
                 data as FundResponse
 

@@ -50,7 +50,7 @@ class SignUpActivity : AppCompatActivity() {
                 email.error = getString(R.string.invalid_email_helper_text)
             } else {
                 val otp = NewOtpRequest("Sign up", email.text.toString())
-                APIService().doPost<OtpResponse>(
+                APIService(this).doPost<OtpResponse>(
                     "otp",
                     otp,
                     object :

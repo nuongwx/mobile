@@ -10,10 +10,12 @@ import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.Credential.CredentialService
 import com.example.datto.DataClass.GroupResponse
+import com.example.datto.utils.WidgetUpdater
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.ZoneId
@@ -73,12 +75,15 @@ class Create : Fragment() {
                 "name" to name, "start" to formattedStart, "end" to formattedEnd
             )
 
-            APIService().doPost<EventRequest>(
+            APIService(requireContext()).doPost<EventRequest>(
                 "groups/${group}/events",
                 data,
                 object : APICallback<Any> {
                     override fun onSuccess(data: Any) {
                         if (groupId != null) {
+                            // Update widget
+                            WidgetUpdater().update(requireContext())
+
                             requireActivity().supportFragmentManager.popBackStack()
                             return
                         }
@@ -120,7 +125,7 @@ class Create : Fragment() {
 
         val groupList = ArrayList<CustomGroupResponse>()
 
-        APIService().doGet<List<CustomGroupResponse>>("accounts/${CredentialService().get()}/groups",
+        APIService(requireContext()).doGet<List<CustomGroupResponse>>("accounts/${CredentialService().get()}/groups",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")
@@ -142,7 +147,7 @@ class Create : Fragment() {
                         groupName?.let { name ->
                             val index = groups.values.indexOf(name)
                             groupSelect.setText(name, false)
-                            groupSelect.isEnabled = false
+                            requireActivity().findViewById<TextInputLayout>(R.id.create_group_dropdown_title).isEnabled = false
                         }
                     }
                 }

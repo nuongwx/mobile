@@ -38,7 +38,7 @@ class ResetPasswordActivity : AppCompatActivity() {
                 email.error = getString(R.string.required_helper_text)
             } else {
                 val otp = NewOtpRequest("Reset password", email.text.toString())
-                APIService().doPost<OtpResponse>(
+                APIService(this).doPost<OtpResponse>(
                     "otp",
                     otp,
                     object :

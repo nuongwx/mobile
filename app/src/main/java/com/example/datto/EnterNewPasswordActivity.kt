@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.datto.API.APICallback
@@ -51,7 +52,7 @@ class EnterNewPasswordActivity : AppCompatActivity() {
                     email.toString(),
                     password.text.toString()
                 )
-                APIService().doPost<NewPasswordRequest>(
+                APIService(this).doPost<NewPasswordRequest>(
                     "accounts/reset-password",
                     newPassword,
                     object :

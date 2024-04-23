@@ -1,5 +1,6 @@
 package com.example.datto.API
 
+import android.content.Context
 import android.util.Log
 import com.example.datto.DataClass.BaseResponse
 import com.google.gson.Gson
@@ -9,8 +10,10 @@ import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.Response
 
-class APIService {
-    val retrofitClient = RetrofitInstance().get()
+class APIService (
+    context: Context
+) {
+    val retrofitClient = RetrofitInstance().get(context)
 
     inline fun <reified T> doGet(endpoint: String, callback: APICallback<Any>) {
         val service = retrofitClient.create(APIInterface::class.java).get(endpoint)

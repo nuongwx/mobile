@@ -102,7 +102,7 @@ class NewFund (
         type.setSimpleItems(typeItems)
 
         // Set paidBy dropdown
-        APIService().doGet<EventMemberResponse>("events/${param1}/members", object :
+        APIService(requireContext()).doGet<EventMemberResponse>("events/${param1}/members", object :
             APICallback<Any> {
             override fun onSuccess(data: Any) {
                 data as EventMemberResponse
@@ -179,7 +179,7 @@ class NewFund (
                         paidAt = formattedPaidAt,
                     )
 
-                    APIService().doPost<Any>("events/$param1/funds", fundRequest, object :
+                    APIService(requireContext()).doPost<Any>("events/$param1/funds", fundRequest, object :
                         APICallback<Any> {
                         override fun onSuccess(data: Any) {
                             Log.d("API_SERVICE", "Data: $data")

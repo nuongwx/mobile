@@ -84,7 +84,7 @@ class ProfileEdit : Fragment() {
                         )
 
                         // Patch profile
-                        APIService().doPatch<ProfileEditRequest>("accounts/${CredentialService().get()}", profileEditRequest, object :
+                        APIService(requireContext()).doPatch<ProfileEditRequest>("accounts/${CredentialService().get()}", profileEditRequest, object :
                             APICallback<Any> {
                             override fun onSuccess(data: Any) {
                                 Log.d("API_SERVICE", "Data: $data")
@@ -113,7 +113,7 @@ class ProfileEdit : Fragment() {
                         val multipartBody =
                             MultipartBody.Part.createFormData("file", "avatar.jpg", requestBody)
 
-                        APIService().doPutMultipart<BucketResponse>("files", multipartBody, object :
+                        APIService(requireContext()).doPutMultipart<BucketResponse>("files", multipartBody, object :
                             APICallback<Any> {
                             override fun onSuccess(data: Any) {
                                 // Cast data to BucketResponse
@@ -136,7 +136,7 @@ class ProfileEdit : Fragment() {
                                 )
 
                                 // Call API to patch profile
-                                APIService().doPatch<ProfileEditRequest>("accounts/${CredentialService().get()}", profileEditRequest, object :
+                                APIService(requireContext()).doPatch<ProfileEditRequest>("accounts/${CredentialService().get()}", profileEditRequest, object :
                                     APICallback<Any> {
                                     override fun onSuccess(data: Any) {
                                         Log.d("API_SERVICE", "Data: $data")
@@ -195,7 +195,7 @@ class ProfileEdit : Fragment() {
         dob = requireActivity().findViewById(R.id.profile_edit_dob)
 
 
-        APIService().doGet<AccountResponse>("accounts/${CredentialService().get()}", object :
+        APIService(requireContext()).doGet<AccountResponse>("accounts/${CredentialService().get()}", object :
             APICallback<Any> {
             override fun onSuccess(data: Any) {
                 Log.d("API_SERVICE", "Data: $data")

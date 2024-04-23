@@ -171,7 +171,7 @@ class GroupDetails : Fragment() {
 
         var group: GroupResponse? = null
 
-        APIService().doGet<GroupResponse>("groups/${groupId}",
+        APIService(requireContext()).doGet<GroupResponse>("groups/${groupId}",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")
@@ -250,7 +250,7 @@ class GroupDetails : Fragment() {
         memoriesRecyclerView.adapter = adapter
         memoriesRecyclerView.setHasFixedSize(true)
 
-        APIService().doGet<List<MemoryResponse>>("groups/${groupId}/memories",
+        APIService(requireContext()).doGet<List<MemoryResponse>>("groups/${groupId}/memories",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")
@@ -273,7 +273,7 @@ class GroupDetails : Fragment() {
             })
 
         val lineChart: LineChart = view.findViewById(R.id.lineChart)
-        APIService().doGet<List<GroupFundsResponse>>("groups/${groupId}/funds",
+        APIService(requireContext()).doGet<List<GroupFundsResponse>>("groups/${groupId}/funds",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")
