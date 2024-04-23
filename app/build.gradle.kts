@@ -65,4 +65,6 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
     // Calendar
     implementation("com.kizitonwose.calendar:view:2.5.0")
+    // JWT Decoder
+    implementation("com.auth0.android:jwtdecode:2.0.2")
 }

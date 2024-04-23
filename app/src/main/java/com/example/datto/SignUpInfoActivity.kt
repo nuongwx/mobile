@@ -66,7 +66,7 @@ class SignUpInfoActivity : AppCompatActivity() {
                         override fun onSuccess(data: Any) {
                             Log.d("API_SERVICE", "Data: $data")
                             data as NewAccountResponse
-                            CredentialService().set(data.id)
+                            CredentialService().set(data.token)
                             val i: Intent = Intent(applicationContext, MainActivity::class.java)
                             startActivity(i)
                         }
