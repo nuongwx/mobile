@@ -94,7 +94,7 @@ class GroupDetailsEventList : Fragment() {
                             view.findViewById<RecyclerView>(R.id.eventListGroupDetailsRecyclerView)
                         eventRecyclerView.layoutManager =
                             androidx.recyclerview.widget.LinearLayoutManager(view.context)
-                        eventRecyclerView.adapter = EventAdapter(eventList)
+                        eventRecyclerView.adapter = EventAdapter(eventList, view.context)
                         eventRecyclerView.setHasFixedSize(true)
                     }
                 }

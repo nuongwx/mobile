@@ -6,8 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.cardview.widget.CardView
 import androidx.core.os.bundleOf
@@ -18,11 +18,14 @@ import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.DataClass.EventResponse
 import com.example.datto.DataClass.FundResponse
+import com.example.datto.DataClass.MemoryResponse
 import com.example.datto.DataClass.Planning
+import com.example.datto.GlobalVariable.GlobalVariable
 import com.example.datto.utils.WidgetUpdater
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import com.squareup.picasso.Picasso
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.time.Duration
@@ -198,6 +201,8 @@ class EventDetails : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val eventThumbnail: ImageView = view.findViewById(R.id.imageView2)
+
         val eventName: TextView = view.findViewById(R.id.eventDetailsEventNameTextView)
         val w2mButton: Button = view.findViewById(R.id.eventDetailsW2MButton)
 
@@ -214,8 +219,6 @@ class EventDetails : Fragment() {
         val expenseInTextView: TextView = view.findViewById(R.id.eventDetailsExpenseInTextView)
         val expenseOutTextView: TextView = view.findViewById(R.id.eventDetailsExpenseOutTextView)
 
-        val newMemoryButton: Button = view.findViewById(R.id.eventDetailsNewMemoryButton)
-
         w2mButton.setOnClickListener {
             requireActivity().supportFragmentManager.beginTransaction().apply {
                 replace(R.id.app_fragment, W2M().apply {
@@ -228,113 +231,146 @@ class EventDetails : Fragment() {
 
         val plannings = ArrayList<Planning>()
 
-        APIService(requireContext()).doGet<EventResponse>("events/${eventId}", object : APICallback<Any> {
-            override fun onSuccess(data: Any) {
-                data as EventResponse
-                val appBar =
-                    requireActivity().findViewById<com.google.android.material.appbar.MaterialToolbar>(
-                        R.id.app_top_app_bar
-                    )
-                eventName.text = data.name
-                appBar.title = data.name
-
-                val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
-                val targetFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
-                val startDate = originalFormat.parse(data.time.start)
-                val endDate = originalFormat.parse(data.time.end)
-
-                startDateTextView.text = targetFormat.format(startDate!!)
-                endDateTextView.text = targetFormat.format(endDate!!)
-
-                val menuItem = appBar.menu.findItem(R.id.edit)
-                menuItem.setOnMenuItemClickListener {
-                    val builder = MaterialAlertDialogBuilder(requireContext())
-                    builder.setTitle("Edit event")
-
-                    val layoutInflater = LayoutInflater.from(requireContext())
-                    val view = layoutInflater.inflate(R.layout.fragment_create, null)
-                    val input = view.findViewById<TextInputEditText>(R.id.create_name)
-                    val group =
-                        view.findViewById<com.google.android.material.textfield.MaterialAutoCompleteTextView>(
-                            R.id.create_group_dropdown
+        APIService(requireContext()).doGet<EventResponse>(
+            "events/${eventId}",
+            object : APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    data as EventResponse
+                    val appBar =
+                        requireActivity().findViewById<com.google.android.material.appbar.MaterialToolbar>(
+                            R.id.app_top_app_bar
                         )
-                    val start = view.findViewById<TextInputEditText>(R.id.create_start_date)
-                    val end = view.findViewById<TextInputEditText>(R.id.create_end_date)
+                    eventName.text = data.name
+                    appBar.title = data.name
 
-                    input.setText(data.name)
-                    group.setText(groupName, false)
-                    group.isEnabled = false
-                    start.setText(targetFormat.format(startDate))
-                    end.setText(targetFormat.format(endDate))
+                    val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                    val targetFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
+                    val startDate = originalFormat.parse(data.time.start)
+                    val endDate = originalFormat.parse(data.time.end)
 
-                    start.setOnClickListener {
-                        val datePicker = MaterialDatePicker.Builder.datePicker().build()
-                        datePicker.addOnPositiveButtonClickListener {
-                            val date = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault())
-                                .toLocalDate()
-                            val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-                            start.setText(date.format(formatter))
-                        }
-                        datePicker.show(parentFragmentManager, "date_picker")
-                    }
+                    startDateTextView.text = targetFormat.format(startDate!!)
+                    endDateTextView.text = targetFormat.format(endDate!!)
 
-                    end.setOnClickListener {
-                        val datePicker = MaterialDatePicker.Builder.datePicker().build()
-                        datePicker.addOnPositiveButtonClickListener {
-                            val date = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault())
-                                .toLocalDate()
-                            val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-                            end.setText(date.format(formatter))
-                        }
-                        datePicker.show(parentFragmentManager, "date_picker")
-                    }
+                    val menuItem = appBar.menu.findItem(R.id.edit)
+                    menuItem.setOnMenuItemClickListener {
+                        val builder = MaterialAlertDialogBuilder(requireContext())
+                        builder.setTitle("Edit event")
 
-                    builder.setView(view)
+                        val layoutInflater = LayoutInflater.from(requireContext())
+                        val view = layoutInflater.inflate(R.layout.fragment_create, null)
+                        val input = view.findViewById<TextInputEditText>(R.id.create_name)
+                        val group =
+                            view.findViewById<com.google.android.material.textfield.MaterialAutoCompleteTextView>(
+                                R.id.create_group_dropdown
+                            )
+                        val start = view.findViewById<TextInputEditText>(R.id.create_start_date)
+                        val end = view.findViewById<TextInputEditText>(R.id.create_end_date)
 
-                    builder.setPositiveButton("Save") { dialog, _ ->
-                        val newName = input.text.toString()
+                        input.setText(data.name)
+                        group.setText(groupName, false)
+                        group.isEnabled = false
+                        start.setText(targetFormat.format(startDate))
+                        end.setText(targetFormat.format(endDate))
 
-                        // Format date
-                        val formattedStart = targetFormat.parse(start.text.toString())!!
-                            .let { originalFormat.format(it) }
-                        val formattedEnd = targetFormat.parse(end.text.toString())!!
-                            .let { originalFormat.format(it) }
-
-                        Log.d("start", formattedStart)
-                        Log.d("end", formattedEnd)
-
-                        APIService(requireContext()).doPatch<Any>("events/${eventId}", mapOf(
-                            "name" to newName, "start" to formattedStart, "end" to formattedEnd
-                        ), object : APICallback<Any> {
-                            override fun onSuccess(data: Any) {
-                                eventName.text = newName
-                                appBar.title = newName
-                                startDateTextView.text = start.text.toString()
-                                endDateTextView.text = end.text.toString()
-
-                                // Update widget
-                                WidgetUpdater().update(requireContext())
+                        start.setOnClickListener {
+                            val datePicker = MaterialDatePicker.Builder.datePicker().build()
+                            datePicker.addOnPositiveButtonClickListener {
+                                val date = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault())
+                                    .toLocalDate()
+                                val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                                start.setText(date.format(formatter))
                             }
+                            datePicker.show(parentFragmentManager, "date_picker")
+                        }
 
-                            override fun onError(error: Throwable) {
-                                Log.e("API_SERVICE", "Error: $error")
+                        end.setOnClickListener {
+                            val datePicker = MaterialDatePicker.Builder.datePicker().build()
+                            datePicker.addOnPositiveButtonClickListener {
+                                val date = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault())
+                                    .toLocalDate()
+                                val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                                end.setText(date.format(formatter))
                             }
-                        })
-                        dialog.dismiss()
-                    }
-                    builder.setNegativeButton("Cancel") { dialog, _ ->
-                        dialog.dismiss()
-                    }
-                    builder.show()
+                            datePicker.show(parentFragmentManager, "date_picker")
+                        }
 
-                    true
+                        builder.setView(view)
+
+                        builder.setPositiveButton("Save") { dialog, _ ->
+                            val newName = input.text.toString()
+
+                            // Format date
+                            val formattedStart = targetFormat.parse(start.text.toString())!!
+                                .let { originalFormat.format(it) }
+                            val formattedEnd = targetFormat.parse(end.text.toString())!!
+                                .let { originalFormat.format(it) }
+
+                            APIService(requireContext()).doPatch<Any>("events/${eventId}", mapOf(
+                                "name" to newName,
+                                "start" to formattedStart,
+                                "end" to formattedEnd
+                            ), object : APICallback<Any> {
+                                override fun onSuccess(data: Any) {
+                                    eventName.text = newName
+                                    appBar.title = newName
+                                    startDateTextView.text = start.text.toString()
+                                    endDateTextView.text = end.text.toString()
+
+                                    // Update widget
+                                    WidgetUpdater().update(requireContext())
+                                }
+
+                                override fun onError(error: Throwable) {
+                                    Log.e("API_SERVICE", "Error: $error")
+                                }
+                            })
+                            dialog.dismiss()
+                        }
+                        builder.setNegativeButton("Cancel") { dialog, _ ->
+                            dialog.dismiss()
+                        }
+                        builder.show()
+
+                        true
+                    }
+
+                    if (data.memory != null) {
+                        APIService(requireContext()).doGet<MemoryResponse>(
+                            "memories/${data.memory}",
+                            object : APICallback<Any> {
+                                override fun onSuccess(data: Any) {
+                                    Log.d("API_SERVICE", "Data: $data")
+
+                                    data as MemoryResponse
+
+                                    try {
+                                        val imageUrl =
+                                            if (data.thumbnail != null) GlobalVariable.BASE_URL + "files/" + data.thumbnail else null
+                                        Log.d("EVENT_ADAPTER", "Image URL: $imageUrl")
+                                        if (imageUrl != null) {
+                                            Picasso.get().load(imageUrl).into(eventThumbnail)
+                                        } else {
+                                            Picasso.get().load(R.drawable.cover)
+                                                .into(eventThumbnail)
+                                        }
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                    }
+                                }
+
+                                override fun onError(error: Throwable) {
+                                    Log.e("API_SERVICE", "Error: ${error.message}")
+                                }
+                            })
+                    } else {
+                        Picasso.get().load(R.drawable.cover).into(eventThumbnail)
+                    }
                 }
-            }
 
-            override fun onError(error: Throwable) {
-                Log.e("API_SERVICE", "Error: $error")
-            }
-        })
+                override fun onError(error: Throwable) {
+                    Log.e("API_SERVICE", "Error: $error")
+                }
+            })
 
         APIService(requireContext()).doGet<ArrayList<Planning>>(
             "events/${eventId}/timeline",
@@ -411,64 +447,65 @@ class EventDetails : Fragment() {
             }
         }
 
-        APIService(requireContext()).doGet<FundResponse>("events/${eventId}/funds", object : APICallback<Any> {
-            override fun onSuccess(data: Any) {
-                data as FundResponse
+        APIService(requireContext()).doGet<FundResponse>(
+            "events/${eventId}/funds",
+            object : APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    data as FundResponse
 
-                val fundList = ArrayList<FundItem>()
-                var inAmount = 0.0
-                var outAmount = 0.0
+                    val fundList = ArrayList<FundItem>()
+                    var inAmount = 0.0
+                    var outAmount = 0.0
 
-                for (fund in data.funds) {
-                    // Format paidAt date
-                    val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
-                    val targetFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.US)
-                    val date = originalFormat.parse(fund.paidAt)
+                    for (fund in data.funds) {
+                        // Format paidAt date
+                        val originalFormat =
+                            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                        val targetFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.US)
+                        val date = originalFormat.parse(fund.paidAt)
 
-                    val f = FundItem(
-                        fund.id,
-                        fund.info,
-                        fund.amount,
-                        fund.paidBy.profile.fullName,
-                        targetFormat.format(date!!)
-                    )
-                    fundList.add(f)
+                        val f = FundItem(
+                            fund.id,
+                            fund.info,
+                            fund.amount,
+                            fund.paidBy.profile.fullName,
+                            targetFormat.format(date!!)
+                        )
+                        fundList.add(f)
 
-                    if (fund.amount > 0) {
-                        inAmount += fund.amount
-                    } else {
-                        outAmount -= fund.amount
+                        if (fund.amount > 0) {
+                            inAmount += fund.amount
+                        } else {
+                            outAmount -= fund.amount
+                        }
                     }
+
+                    if (fundList.isEmpty()) {
+                        expenseDetailsButton.visibility = View.INVISIBLE
+                        newExpenseButton.visibility = View.VISIBLE
+                        view.findViewById<CardView>(R.id.incomeCardView).visibility = View.INVISIBLE
+                        view.findViewById<CardView>(R.id.spendingsCardView).visibility =
+                            View.INVISIBLE
+                    } else {
+                        expenseDetailsButton.visibility = View.VISIBLE
+                        newExpenseButton.visibility = View.GONE
+                        view.findViewById<CardView>(R.id.incomeCardView).visibility = View.VISIBLE
+                        view.findViewById<CardView>(R.id.spendingsCardView).visibility =
+                            View.VISIBLE
+
+                    }
+
+                    val format: NumberFormat = NumberFormat.getCurrencyInstance()
+                    format.setMaximumFractionDigits(0)
+                    format.currency = Currency.getInstance("VND")
+                    expenseInTextView.text = format.format(inAmount)
+                    expenseOutTextView.text = format.format(outAmount)
                 }
 
-                if (fundList.isEmpty()) {
-                    expenseDetailsButton.visibility = View.INVISIBLE
-                    newExpenseButton.visibility = View.VISIBLE
-                    view.findViewById<CardView>(R.id.incomeCardView).visibility = View.INVISIBLE
-                    view.findViewById<CardView>(R.id.spendingsCardView).visibility = View.INVISIBLE
-                } else {
-                    expenseDetailsButton.visibility = View.VISIBLE
-                    newExpenseButton.visibility = View.GONE
-                    view.findViewById<CardView>(R.id.incomeCardView).visibility = View.VISIBLE
-                    view.findViewById<CardView>(R.id.spendingsCardView).visibility = View.VISIBLE
-
+                override fun onError(error: Throwable) {
+                    Log.e("API_SERVICE", "Error: $error")
                 }
-
-                val format: NumberFormat = NumberFormat.getCurrencyInstance()
-                format.setMaximumFractionDigits(0)
-                format.currency = Currency.getInstance("VND")
-                expenseInTextView.text = format.format(inAmount)
-                expenseOutTextView.text = format.format(outAmount)
-            }
-
-            override fun onError(error: Throwable) {
-                Log.e("API_SERVICE", "Error: $error")
-            }
-        })
-
-        newMemoryButton.setOnClickListener {
-            Toast.makeText(view.context, "New Memory", Toast.LENGTH_SHORT).show()
-        }
+            })
 
         configTopAppBar()
     }

@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -240,31 +239,30 @@ class GroupDetails : Fragment() {
 
         // create a thread to fetch the images
         val memories = ArrayList<MemoryResponse>()
+        memories.clear()
+        memories.add(MemoryResponse("", "😎", ""))
 
-        val memoriesRecyclerView: RecyclerView =
-            view.findViewById(R.id.memoriesCoverGroupDetailsRecyclerView) // scroll horizontally
-        memoriesRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(
-            view.context, RecyclerView.HORIZONTAL, false
-        )
-        val adapter = MemoriesListAdapter(memories)
-        memoriesRecyclerView.adapter = adapter
-        memoriesRecyclerView.setHasFixedSize(true)
-
-        APIService(requireContext()).doGet<List<MemoryResponse>>("groups/${groupId}/memories",
+        APIService(requireContext()).doGet<List<MemoryResponse>>(
+            "groups/${groupId}/memories",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")
 
                     data as List<MemoryResponse>
 
-                    memories.clear()
-                    memories.add(MemoryResponse("", "😎", ""))
-
-                    for (memory in data) {
-                        memories.add(MemoryResponse(memory.thumbnail, memory.info, memory.id))
+                    data.forEach() {
+                        memories.add(it)
                     }
 
-                    adapter.notifyDataSetChanged()
+                    val memoriesRecyclerView: RecyclerView =
+                        view.findViewById(R.id.memoriesCoverGroupDetailsRecyclerView) // scroll horizontally
+                    memoriesRecyclerView.layoutManager =
+                        androidx.recyclerview.widget.LinearLayoutManager(
+                            view.context, RecyclerView.HORIZONTAL, false
+                        )
+                    val adapter = MemoriesListAdapter(memories)
+                    memoriesRecyclerView.adapter = adapter
+                    memoriesRecyclerView.setHasFixedSize(true)
                 }
 
                 override fun onError(error: Throwable) {
@@ -331,9 +329,6 @@ class GroupDetails : Fragment() {
 
                     positiveEntries = positiveEntries.sortedBy { it.x }
                     negativeEntries = negativeEntries.sortedBy { it.x }
-
-                    Log.d("API_SERVICE", "Positive entries: $positiveEntries")
-                    Log.d("API_SERVICE", "Negative entries: $negativeEntries")
 
                     val positiveLineDataSet =
                         LineDataSet(positiveEntries, "Funds").apply {

@@ -13,10 +13,10 @@
         android:layout_height="120dp">
 
         <ImageView
+            android:id="@+id/eventImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:src="@drawable/cover" />
+            android:scaleType="centerCrop" />
 
         <ImageView
             android:layout_width="match_parent"
