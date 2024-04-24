@@ -130,21 +130,30 @@ internal fun updateAppWidget(
                                         val imageUrl =
                                             if (data.thumbnail != null) GlobalVariable.BASE_URL + "files/" + data.thumbnail else null
                                         if (imageUrl != null) {
+                                            val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
+                                            val widgetHeightDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
+                                            val widgetWidthDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
+
                                             val inputStream = URL(imageUrl).openStream()
                                             val originalBitmap =
                                                 BitmapFactory.decodeStream(inputStream)
 
-                                            // Scale down the bitmap
-                                            val scaledBitmap = Bitmap.createScaledBitmap(
-                                                originalBitmap,
-                                                300, 300,
-                                                false
-                                            )
+                                            val scale = context.resources.displayMetrics.density
+                                            val widgetHeightPx = (widgetHeightDp * scale + 0.5f).toInt()
+                                            val widgetWidthPx = (widgetWidthDp * scale + 0.5f).toInt()
+
+                                            val originalWidth = originalBitmap.width
+                                            val originalHeight = originalBitmap.height
+
+                                            val startX = (originalWidth - widgetWidthPx) / 2
+                                            val startY = (originalHeight - widgetHeightPx) / 2
+
+                                            val croppedBitmap = Bitmap.createBitmap(originalBitmap, startX, startY, widgetWidthPx, widgetHeightPx)
 
                                             withContext(Dispatchers.Main) {
                                                 views.setImageViewBitmap(
                                                     R.id.widget_cover,
-                                                    scaledBitmap
+                                                    croppedBitmap
                                                 )
                                                 appWidgetManager.updateAppWidget(appWidgetId, views)
                                             }
