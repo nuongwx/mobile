@@ -130,25 +130,59 @@ internal fun updateAppWidget(
                                         val imageUrl =
                                             if (data.thumbnail != null) GlobalVariable.BASE_URL + "files/" + data.thumbnail else null
                                         if (imageUrl != null) {
-                                            val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
-                                            val widgetHeightDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
-                                            val widgetWidthDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
+                                            val options =
+                                                appWidgetManager.getAppWidgetOptions(appWidgetId)
+                                            val widgetHeightDp =
+                                                options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
+                                            val widgetWidthDp =
+                                                options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
 
                                             val inputStream = URL(imageUrl).openStream()
                                             val originalBitmap =
                                                 BitmapFactory.decodeStream(inputStream)
 
                                             val scale = context.resources.displayMetrics.density
-                                            val widgetHeightPx = (widgetHeightDp * scale + 0.5f).toInt()
-                                            val widgetWidthPx = (widgetWidthDp * scale + 0.5f).toInt()
+                                            val widgetHeightPx =
+                                                (widgetHeightDp * scale + 0.5f).toInt()
+                                            val widgetWidthPx =
+                                                (widgetWidthDp * scale + 0.5f).toInt()
 
                                             val originalWidth = originalBitmap.width
                                             val originalHeight = originalBitmap.height
 
-                                            val startX = (originalWidth - widgetWidthPx) / 2
-                                            val startY = (originalHeight - widgetHeightPx) / 2
+                                            val originalAspectRatio =
+                                                originalWidth.toFloat() / originalHeight.toFloat()
+                                            val widgetAspectRatio =
+                                                widgetWidthPx.toFloat() / widgetHeightPx.toFloat()
 
-                                            val croppedBitmap = Bitmap.createBitmap(originalBitmap, startX, startY, widgetWidthPx, widgetHeightPx)
+                                            val finalWidth: Int
+                                            val finalHeight: Int
+
+                                            if (originalAspectRatio > widgetAspectRatio) {
+                                                // Original image is wider than the widget, scale based on height
+                                                finalHeight = widgetHeightPx
+                                                finalWidth =
+                                                    (widgetHeightPx * originalAspectRatio).toInt()
+                                            } else {
+                                                // Original image is taller than the widget, scale based on width
+                                                finalWidth = widgetWidthPx
+                                                finalHeight =
+                                                    (widgetWidthPx / originalAspectRatio).toInt()
+                                            }
+
+                                            val scaledBitmap = Bitmap.createScaledBitmap(
+                                                originalBitmap,
+                                                finalWidth,
+                                                finalHeight,
+                                                true
+                                            )
+                                            val croppedBitmap = Bitmap.createBitmap(
+                                                scaledBitmap,
+                                                (finalWidth - widgetWidthPx) / 2,
+                                                (finalHeight - widgetHeightPx) / 2,
+                                                widgetWidthPx,
+                                                widgetHeightPx
+                                            )
 
                                             withContext(Dispatchers.Main) {
                                                 views.setImageViewBitmap(
