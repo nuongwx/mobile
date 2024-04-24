@@ -22,6 +22,7 @@ import com.example.datto.API.APIService
 import com.example.datto.DataClass.BucketResponse
 import com.example.datto.DataClass.EventResponse
 import com.example.datto.DataClass.MemoryRequest
+import com.example.datto.utils.WidgetUpdater
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -130,6 +131,8 @@ class NewMemory : Fragment() {
                                 override fun onSuccess(data: Any) {
                                     Toast.makeText(context, "Memory created", Toast.LENGTH_SHORT)
                                         .show()
+
+                                    WidgetUpdater().update(requireContext())
                                     parentFragmentManager.popBackStack()
                                 }
 
