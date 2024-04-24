@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.example.datto.API.APICallback
@@ -30,7 +29,6 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-// TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -43,7 +41,6 @@ private const val ARG_PARAM2 = "param2"
 class NewFund (
     eventId: String
 ) : Fragment() {
-    // TODO: Rename and change types of parameters
     private var param1: String? = eventId
     private var param2: String? = null
 
@@ -237,7 +234,6 @@ class NewFund (
          * @param param2 Parameter 2.
          * @return A new instance of fragment NewFund.
          */
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
             NewFund(param1).apply {

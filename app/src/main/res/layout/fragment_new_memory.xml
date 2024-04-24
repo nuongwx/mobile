@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".NewMemory">
 
-    <!-- TODO: Update blank fragment layout -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -16,7 +15,6 @@
             android:layout_width="0dp"
             android:layout_height="192dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:src="@drawable/upload"
             app:layout_constraintEnd_toEndOf="parent"
@@ -24,22 +22,42 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/newMemoryNameTextInputLayout"
+            android:id="@+id/events_dropdown"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:hint="Event"
+            app:layout_constraintTop_toBottomOf="@+id/newMemoryImageUpload">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/create_memory_dropdown"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/new_memory_create_at_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
-            android:hint="Memory's name"
+            android:hint="Create at"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/newMemoryImageUpload">
+            app:layout_constraintTop_toBottomOf="@+id/events_dropdown">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/newMemoryNameEditText"
+                android:id="@+id/new_memory_created_at"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/be_vietnam" />
+                android:clickable="true"
+                android:enabled="true"
+                android:focusable="false" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -58,7 +76,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/newMemoryNameTextInputLayout"
+            app:layout_constraintTop_toBottomOf="@+id/events_dropdown"
             app:layout_constraintVertical_chainStyle="spread_inside" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

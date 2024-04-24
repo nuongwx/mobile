@@ -323,7 +323,7 @@ class GroupList : Fragment() {
                                 androidx.recyclerview.widget.RecyclerView.VERTICAL,
                                 false
                             )
-                        eventRecyclerView.adapter = EventAdapter(latestEvents)
+                        eventRecyclerView.adapter = EventAdapter(latestEvents, currentContext!!)
                         eventRecyclerView.setHasFixedSize(true)
                     }
                 }

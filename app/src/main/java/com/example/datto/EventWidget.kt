@@ -5,6 +5,8 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
@@ -12,6 +14,13 @@ import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.Credential.CredentialService
 import com.example.datto.DataClass.EventResponse
+import com.example.datto.DataClass.MemoryResponse
+import com.example.datto.GlobalVariable.GlobalVariable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -22,9 +31,7 @@ import java.util.TimeZone
  */
 class EventWidget : AppWidgetProvider() {
     override fun onUpdate(
-        context: Context,
-        appWidgetManager: AppWidgetManager,
-        appWidgetIds: IntArray
+        context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray
     ) {
         // There may be multiple widgets active, so update all of them
         for (appWidgetId in appWidgetIds) {
@@ -42,14 +49,11 @@ class EventWidget : AppWidgetProvider() {
 }
 
 internal fun updateAppWidget(
-    context: Context,
-    appWidgetManager: AppWidgetManager,
-    appWidgetId: Int
+    context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int
 ) {
     val views = RemoteViews(context.packageName, R.layout.event_widget)
 
-    APIService(context).doGet<List<CustomGroupResponse>>(
-        "accounts/${CredentialService().get()}/groups",
+    APIService(context).doGet<List<CustomGroupResponse>>("accounts/${CredentialService().get()}/groups",
         object : APICallback<Any> {
             override fun onSuccess(data: Any) {
                 Log.d("API_SERVICE", "Data: $data")
@@ -112,6 +116,85 @@ internal fun updateAppWidget(
                 }
 
                 // Otherwise, continue
+                // Get event thumbnail
+                if (nearestUpcomingEvent.memory != null) {
+                    APIService(context).doGet<MemoryResponse>("memories/${nearestUpcomingEvent.memory}",
+                        object : APICallback<Any> {
+                            override fun onSuccess(data: Any) {
+                                Log.d("API_SERVICE", "Data: $data")
+
+                                data as MemoryResponse
+
+                                GlobalScope.launch(Dispatchers.IO) {
+                                    try {
+                                        val imageUrl =
+                                            if (data.thumbnail != null) GlobalVariable.BASE_URL + "files/" + data.thumbnail else null
+                                        if (imageUrl != null) {
+                                            val inputStream = URL(imageUrl).openStream()
+                                            val originalBitmap =
+                                                BitmapFactory.decodeStream(inputStream)
+
+                                            // Define the size to which you want to scale the image
+                                            val requiredWidth = 300
+                                            val requiredHeight = 300
+
+                                            // Scale down the bitmap
+                                            val scaledBitmap = Bitmap.createScaledBitmap(
+                                                originalBitmap,
+                                                requiredWidth,
+                                                requiredHeight,
+                                                false
+                                            )
+
+                                            withContext(Dispatchers.Main) {
+                                                views.setImageViewBitmap(
+                                                    R.id.widget_cover,
+                                                    scaledBitmap
+                                                )
+                                                appWidgetManager.updateAppWidget(appWidgetId, views)
+                                            }
+                                        } else {
+                                            val bitmap = BitmapFactory.decodeResource(
+                                                context.resources,
+                                                R.drawable.cover
+                                            )
+                                            withContext(Dispatchers.Main) {
+                                                views.setBitmap(
+                                                    R.id.widget_cover,
+                                                    "setImageBitmap",
+                                                    bitmap
+                                                )
+                                                appWidgetManager.updateAppWidget(appWidgetId, views)
+                                            }
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.e("API_SERVICE", "Image loading error: ${e.message}")
+                                        e.printStackTrace()
+                                    }
+                                }
+                            }
+
+                            override fun onError(error: Throwable) {
+                                Log.e("API_SERVICE", "Error: ${error.message}")
+                            }
+                        })
+                } else {
+                    GlobalScope.launch(Dispatchers.IO) {
+                        val bitmap = BitmapFactory.decodeResource(
+                            context.resources,
+                            R.drawable.cover
+                        )
+                        withContext(Dispatchers.Main) {
+                            views.setBitmap(
+                                R.id.widget_cover,
+                                "setImageBitmap",
+                                bitmap
+                            )
+                            appWidgetManager.updateAppWidget(appWidgetId, views)
+                        }
+                    }
+                }
+
                 // Get group name
                 var groupName = ""
 
