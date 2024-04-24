@@ -209,6 +209,10 @@ class W2M : Fragment() {
             override fun create(view: View): DayViewContainer {
                 return DayViewContainer(view).apply {
                     textView.setOnClickListener { // val date = day.date
+                        if(voting) {
+                            return@setOnClickListener
+                        }
+
                         val availability = event?.availability?.find { it.person == userId }
                         if (availability != null) { // list all the users that are available on that day
 
