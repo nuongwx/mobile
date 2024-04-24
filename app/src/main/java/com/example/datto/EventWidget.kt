@@ -134,15 +134,10 @@ internal fun updateAppWidget(
                                             val originalBitmap =
                                                 BitmapFactory.decodeStream(inputStream)
 
-                                            // Define the size to which you want to scale the image
-                                            val requiredWidth = 300
-                                            val requiredHeight = 300
-
                                             // Scale down the bitmap
                                             val scaledBitmap = Bitmap.createScaledBitmap(
                                                 originalBitmap,
-                                                requiredWidth,
-                                                requiredHeight,
+                                                300, 300,
                                                 false
                                             )
 
@@ -154,18 +149,11 @@ internal fun updateAppWidget(
                                                 appWidgetManager.updateAppWidget(appWidgetId, views)
                                             }
                                         } else {
-                                            val bitmap = BitmapFactory.decodeResource(
-                                                context.resources,
+                                            views.setImageViewResource(
+                                                R.id.widget_cover,
                                                 R.drawable.cover
                                             )
-                                            withContext(Dispatchers.Main) {
-                                                views.setBitmap(
-                                                    R.id.widget_cover,
-                                                    "setImageBitmap",
-                                                    bitmap
-                                                )
-                                                appWidgetManager.updateAppWidget(appWidgetId, views)
-                                            }
+                                            appWidgetManager.updateAppWidget(appWidgetId, views)
                                         }
                                     } catch (e: Exception) {
                                         Log.e("API_SERVICE", "Image loading error: ${e.message}")
@@ -179,20 +167,8 @@ internal fun updateAppWidget(
                             }
                         })
                 } else {
-                    GlobalScope.launch(Dispatchers.IO) {
-                        val bitmap = BitmapFactory.decodeResource(
-                            context.resources,
-                            R.drawable.cover
-                        )
-                        withContext(Dispatchers.Main) {
-                            views.setBitmap(
-                                R.id.widget_cover,
-                                "setImageBitmap",
-                                bitmap
-                            )
-                            appWidgetManager.updateAppWidget(appWidgetId, views)
-                        }
-                    }
+                    views.setImageViewResource(R.id.widget_cover, R.drawable.cover)
+                    appWidgetManager.updateAppWidget(appWidgetId, views)
                 }
 
                 // Get group name
