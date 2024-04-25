@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.Credential.CredentialService
+import com.example.datto.DataClass.EventResponse
 import com.example.datto.DataClass.MemoryResponse
 import com.example.datto.GlobalVariable.GlobalVariable
 import com.example.datto.databinding.FragmentMemoriesBinding
@@ -31,7 +32,8 @@ import com.squareup.picasso.Picasso
 
 // wdyk, current data object for this response does not match the actual response
 data class YAGR(
-    @SerializedName("_id") val id: String, val memories: List<String>
+    @SerializedName("_id") val id: String,
+    val events: List<EventResponse>
 )
 
 
@@ -58,11 +60,18 @@ class MemoryViewAdapter(private val memoryIdList: List<Pair<String, String>>) :
         //     height = screenHeight
         // }
 
-        APIService(ctx).doGet<MemoryResponse>("groups/${currentItem.first}/memories/${currentItem.second}",
+        APIService(ctx).doGet<MemoryResponse>("memories/${currentItem.second}",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     data as MemoryResponse
                     holder.memoryName.text = data.info
+
+                    if (data.thumbnail == "") {
+                        Picasso.get().load(R.drawable.cover)
+                            .into(holder.memoryImage)
+                        return
+                    }
+
                     Picasso.get().load(GlobalVariable.BASE_URL + "files/" + data.thumbnail)
                         .into(holder.memoryImage)
                 }
@@ -199,8 +208,9 @@ class Memories : Fragment() {
                     data as List<YAGR>
                     val memoryIdList = ArrayList<Pair<String, String>>()
                     for (group in data) {
-                        for (memory in group.memories) {
-                            memoryIdList.add(Pair(group.id, memory))
+                        for (event in group.events)
+                        if (event.memory != null) {
+                            memoryIdList.add(Pair(group.id, event.memory))
                         }
                     }
                     adapter = MemoryViewAdapter(memoryIdList)
