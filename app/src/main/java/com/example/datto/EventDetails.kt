@@ -166,7 +166,7 @@ class FunkyDatedPlanningAdapter(private val plans: List<Planning>) :
             holder.weekDayTextView.text = dayOfWeek
             holder.dayTextView.text = dayOfMonth
             holder.recyclerView.adapter = PlanningListAdapter(plansInDate)
-            holder.recyclerView.setHasFixedSize(true)
+            // holder.recyclerView.setHasFixedSize(true)
             holder.recyclerView.layoutManager = LinearLayoutManager(holder.itemView.context)
         } else {
             holder.itemView.findViewById<CardView>(R.id.eventDetailsPlanningDateTitleCardView).visibility =
@@ -397,7 +397,7 @@ class EventDetails : Fragment() {
                         originalFormat.parse(it.start)!!.after(Date())
                     })
                     planningRecyclerView.adapter = adapter
-                    planningRecyclerView.setHasFixedSize(true)
+                    // planningRecyclerView.setHasFixedSize(true)
 
                 }
 
