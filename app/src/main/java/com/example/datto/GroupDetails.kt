@@ -1,6 +1,5 @@
 package com.example.datto
 
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -28,7 +27,6 @@ import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.gson.annotations.SerializedName
 import com.squareup.picasso.Picasso
-import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -102,16 +100,6 @@ class MemoriesListAdapter(private val memories: ArrayList<MemoryResponse>) :
                 val transaction =
                     (holder.itemView.context as MainActivity).supportFragmentManager.beginTransaction()
                 val bundle = Bundle()
-                bundle.putString(
-                    "imgUrl",
-                    GlobalVariable.BASE_URL + "files/" + currentItem.thumbnail
-                )
-                bundle.putString(
-                    "groupId",
-                    (holder.itemView.context as MainActivity).supportFragmentManager.fragments.last().arguments?.getString(
-                        "groupId"
-                    )
-                )
                 bundle.putString("id", currentItem.id)
                 MemoryViewFragment.arguments = bundle
                 transaction.replace(R.id.app_fragment, MemoryViewFragment)
