@@ -12,11 +12,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.RecyclerView
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.DataClass.BucketResponse
@@ -72,6 +69,11 @@ class NewMemory : Fragment() {
                 return@setOnMenuItemClickListener false
             }
 
+            if (eventId == null) {
+                Toast.makeText(context, "Please select an event", Toast.LENGTH_SHORT).show()
+                return@setOnMenuItemClickListener false
+            }
+
             val bitmap = (imageUpload.drawable as BitmapDrawable).bitmap
             val stream = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
@@ -91,9 +93,9 @@ class NewMemory : Fragment() {
             // Get event name
             val eventName =
                 view?.findViewById<MaterialAutoCompleteTextView>(R.id.create_memory_dropdown)?.text.toString()
-            if (eventId == null) {
-                eventId = events.filterValues { it == eventName }.keys.first()
-            }
+            // if (eventId == null) {
+            //     eventId = events.filterValues { it == eventName }.keys.first()
+            // }
 
             // Create multipart body
             val requestBody =

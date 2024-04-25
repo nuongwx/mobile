@@ -11,10 +11,13 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -25,15 +28,16 @@ import com.example.datto.DataClass.EventResponse
 import com.example.datto.DataClass.MemoryResponse
 import com.example.datto.GlobalVariable.GlobalVariable
 import com.example.datto.databinding.FragmentMemoriesBinding
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.gson.annotations.SerializedName
 import com.squareup.picasso.Picasso
 
 
 // wdyk, current data object for this response does not match the actual response
 data class YAGR(
-    @SerializedName("_id") val id: String,
-    val events: List<EventResponse>
+    @SerializedName("_id") val id: String, val events: List<EventResponse>
 )
 
 
@@ -60,15 +64,15 @@ class MemoryViewAdapter(private val memoryIdList: List<Pair<String, String>>) :
         //     height = screenHeight
         // }
 
-        APIService(ctx).doGet<MemoryResponse>("memories/${currentItem.second}",
+        APIService(ctx).doGet<MemoryResponse>(
+            "memories/${currentItem.second}",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     data as MemoryResponse
                     holder.memoryName.text = data.info
 
                     if (data.thumbnail == "") {
-                        Picasso.get().load(R.drawable.cover)
-                            .into(holder.memoryImage)
+                        Picasso.get().load(R.drawable.cover).into(holder.memoryImage)
                         return
                     }
 
@@ -130,6 +134,8 @@ class Memories : Fragment() {
     private var appBar: MaterialToolbar? = null
     private var recyclerView: RecyclerView? = null
 
+    private var layoutParams: CoordinatorLayout.LayoutParams? = null
+
     private var _binding: FragmentMemoriesBinding? = null
 
     // This property is only valid between onCreateView and
@@ -177,10 +183,9 @@ class Memories : Fragment() {
         snapHelper.attachToRecyclerView(recyclerView)
 
         // Set up the user interaction to manually show or hide the system UI.
-        // fullscreenContent?.setOnClickListener {
-        //     Toast.makeText(requireContext(), "Clicked", Toast.LENGTH_SHORT).show()
-        //     toggle()
-        // }
+        fullscreenContent?.setOnClickListener {
+            toggle()
+        }
 
         val gestureDetector =
             GestureDetector(requireContext(), object : GestureDetector.SimpleOnGestureListener() {
@@ -202,20 +207,30 @@ class Memories : Fragment() {
         // while interacting with the UI.
         dummyButton?.setOnTouchListener(delayHideTouchListener)
 
-        APIService(requireContext()).doGet<List<YAGR>>("accounts/${CredentialService().get()}/groups",
+        APIService(requireContext()).doGet<List<YAGR>>(
+            "accounts/${CredentialService().get()}/groups",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     data as List<YAGR>
                     val memoryIdList = ArrayList<Pair<String, String>>()
                     for (group in data) {
-                        for (event in group.events)
-                        if (event.memory != null) {
-                            memoryIdList.add(Pair(group.id, event.memory))
+                        for (event in group.events) {
+                            if (event.memory != null) {
+                                memoryIdList.add(Pair(group.id, event.memory))
+                            }
                         }
                     }
-                    adapter = MemoryViewAdapter(memoryIdList)
-                    recyclerView?.adapter = adapter
-                    adapter.notifyDataSetChanged()
+
+                    if (memoryIdList.isEmpty()) {
+                        recyclerView?.visibility = View.GONE
+                        fullscreenContent?.visibility = View.VISIBLE
+                    } else {
+                        recyclerView?.visibility = View.VISIBLE
+                        fullscreenContent?.visibility = View.GONE
+                        adapter = MemoryViewAdapter(memoryIdList)
+                        recyclerView?.adapter = adapter
+                        adapter.notifyDataSetChanged()
+                    }
                 }
 
                 override fun onError(error: Throwable) {
@@ -233,6 +248,11 @@ class Memories : Fragment() {
         // created, to briefly hint to the user that UI controls
         // are available.
         delayedHide(100)
+
+        configTopAppBar()
+
+        // Hide the bottom navigation bar
+        setDefaultLayout(false)
     }
 
     override fun onPause() {
@@ -316,5 +336,111 @@ class Memories : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onStart() {
+        super.onStart()
+        configTopAppBar()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
+        appBar.navigationIcon?.setTintList(null)
+
+        val appBarLayout = requireActivity().findViewById<AppBarLayout>(R.id.appBarLayout)
+        val scrollView = requireActivity().findViewById<View>(R.id.app_scroll_view)
+        val bottomNavigationView =
+            requireActivity().findViewById<BottomNavigationView>(R.id.bottom_navigation)
+
+        val main = requireActivity().findViewById<CoordinatorLayout>(R.id.main)
+        if (main.getChildAt(1) !is RelativeLayout) {
+            return
+        }
+        val relativeLayout = main.getChildAt(1) as RelativeLayout
+
+        main.removeView(relativeLayout)
+        relativeLayout.removeAllViews()
+
+        main.addView(appBarLayout, 0)
+        main.addView(scrollView, 1)
+        bottomNavigationView.visibility = View.VISIBLE
+
+        // hours spent on this 1 line: 3
+        // https://stackoverflow.com/a/31005613
+        // set the old layout params back 😭
+        scrollView.layoutParams = layoutParams
+
+        // scrollView.layoutParams = CoordinatorLayout.LayoutParams(
+        //     ViewGroup.LayoutParams.MATCH_PARENT,
+        //     ViewGroup.LayoutParams.MATCH_PARENT
+        // )
+        // (scrollView.layoutParams as CoordinatorLayout.LayoutParams).behavior = AppBarLayout.ScrollingViewBehavior()
+
+        val topMargin = (32 * resources.displayMetrics.density).toInt()
+        (main.layoutParams as ViewGroup.MarginLayoutParams).topMargin = topMargin
+        main.invalidate()
+    }
+
+    private fun setDefaultLayout(viewBottomNav: Boolean = true) {
+        val scrollView = requireActivity().findViewById<View>(R.id.app_scroll_view)
+        val bottomNavigation =
+            requireActivity().findViewById<BottomNavigationView>(R.id.bottom_navigation)
+
+        val layoutParams = scrollView.layoutParams as ViewGroup.MarginLayoutParams
+        layoutParams.setMargins(
+            layoutParams.leftMargin,
+            layoutParams.topMargin,
+            layoutParams.rightMargin,
+            if (viewBottomNav) resources.getDimensionPixelSize(R.dimen.bottom_navigation_height) else 0
+        )
+        scrollView.layoutParams = layoutParams
+        bottomNavigation.visibility = if (viewBottomNav) View.VISIBLE else View.GONE
+    }
+
+    private fun configTopAppBar() {
+        val main = requireActivity().findViewById<CoordinatorLayout>(R.id.main)
+        val appBarLayout = requireActivity().findViewById<AppBarLayout>(R.id.appBarLayout)
+        val scrollView = requireActivity().findViewById<View>(R.id.app_scroll_view)
+        val relativeLayout = RelativeLayout(context)
+        relativeLayout.layoutParams = CoordinatorLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
+        )
+
+        // get a independent copy of the scrollview layout params
+        if (scrollView.layoutParams is CoordinatorLayout.LayoutParams) {
+            layoutParams = scrollView.layoutParams as CoordinatorLayout.LayoutParams
+            scrollView.layoutParams = layoutParams
+        }
+
+        val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
+        appBar.navigationIcon = ResourcesCompat.getDrawable(resources, R.drawable.ic_back, null)
+            .apply { this?.setTint(resources.getColor(R.color.md_theme_onPrimary, null)) }
+        appBar.title = ""
+        appBar.menu.findItem(R.id.edit).isVisible = false
+
+        // set transparent background
+        appBar.setBackgroundColor(resources.getColor(android.R.color.transparent, null))
+        appBarLayout.setBackgroundColor(resources.getColor(android.R.color.transparent, null))
+
+        if (appBarLayout.parent is RelativeLayout) {
+            return
+        }
+
+        // remove parent from appbar and scrollbar
+        main.removeView(appBarLayout)
+        main.removeView(scrollView)
+
+        val bottomNavigationView =
+            requireActivity().findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        bottomNavigationView.visibility = View.GONE
+
+        relativeLayout.addView(scrollView, 0)
+        relativeLayout.addView(appBarLayout, 1)
+
+        // remove old components and add new layout
+        main.addView(relativeLayout, 1)
+        (main.layoutParams as ViewGroup.MarginLayoutParams).topMargin = 0
+        main.invalidate()
     }
 }

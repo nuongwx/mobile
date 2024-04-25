@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/fullscreenBackgroundColor"
     android:theme="@style/ThemeOverlay.Datto.FullscreenContainer"
     tools:context=".Memories">
 
@@ -16,19 +15,17 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:keepScreenOn="true"
-        android:text="@string/hello_blank_fragment"
-        android:textColor="?attr/fullscreenTextColor"
-        android:textSize="50sp"
-        android:textStyle="bold"
-        android:visibility="gone"
-        tools:visibility="gone" />
+        android:text="Go create some memories!"
+        android:textSize="16sp"
+        android:visibility="gone" />
 
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/swipeRight"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        tools:listitem="@layout/fragment_memory_view" />
 
     <FrameLayout
         android:layout_width="match_parent"
