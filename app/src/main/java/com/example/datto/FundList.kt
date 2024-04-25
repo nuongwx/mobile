@@ -246,7 +246,7 @@ class FundList (
                         val dialogRecyclerView = dialogView.findViewById<RecyclerView>(R.id.dialog_split_funds_list)
                         dialogRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
                         dialogRecyclerView.adapter = SplitFundAdapter(splitFundList)
-                        dialogRecyclerView.setHasFixedSize(true)
+                        // dialogRecyclerView.setHasFixedSize(true)
 
                         Log.d("API_SERVICE", "Data: ${data}")
                     }
