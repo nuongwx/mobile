@@ -1,6 +1,8 @@
 package com.example.datto
 
+import android.content.Context
 import android.graphics.BitmapFactory
+import android.opengl.Visibility
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -11,12 +13,16 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.Credential.CredentialService
 import com.example.datto.DataClass.AccountResponse
 import com.example.datto.DataClass.EventResponse
+import com.example.datto.DataClass.InviteCodeResponse
 import com.example.datto.GlobalVariable.GlobalVariable
 import com.squareup.picasso.Picasso
 import java.net.URL
@@ -27,6 +33,7 @@ import java.util.Locale
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
+private const val ARG_PARAM3 = "param3"
 
 /**
  * A simple [Fragment] subclass.
@@ -34,8 +41,11 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 
-class MemberListAdapter(private val members: ArrayList<AccountResponse>) :
-    RecyclerView.Adapter<MemberListAdapter.MemberViewHolder>() {
+class MemberListAdapter(
+    private val members: ArrayList<AccountResponse>,
+    private val groupId: String,
+    private val context: Context
+) : RecyclerView.Adapter<MemberListAdapter.MemberViewHolder>() {
 
     inner class MemberViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val memberName: TextView = itemView.findViewById(R.id.memberNameTextView)
@@ -48,8 +58,18 @@ class MemberListAdapter(private val members: ArrayList<AccountResponse>) :
             }
 
             removeButton.setOnClickListener {
-                members.removeAt(absoluteAdapterPosition)
-                notifyItemRemoved(absoluteAdapterPosition)
+                APIService(context).doDelete<Any>("groups/${groupId}/members/${members[absoluteAdapterPosition].id}", object : APICallback<Any> {
+                    override fun onSuccess(data: Any) {
+                        Log.d("API_SERVICE", "Data: $data")
+
+                        members.removeAt(absoluteAdapterPosition)
+                        notifyItemRemoved(absoluteAdapterPosition)
+                    }
+
+                    override fun onError(error: Throwable) {
+                        Log.e("API_SERVICE", "Error: ${error.message}")
+                    }
+                })
             }
         }
     }
@@ -66,6 +86,15 @@ class MemberListAdapter(private val members: ArrayList<AccountResponse>) :
     override fun onBindViewHolder(holder: MemberListAdapter.MemberViewHolder, position: Int) {
         val currentItem = members[position]
         holder.memberName.text = currentItem.profile.fullName
+
+        // If position == 0 -> Group's administrator -> Cannot remove themselves
+        // Solution: Hide remove button
+        if (position == 0)
+            holder.removeButton.isInvisible = true
+
+        // Only Group's administrator can remove members
+        if (CredentialService().get() != members[0].id)
+            holder.removeButton.isInvisible = true
 
         try {
             val imageUrl =
@@ -116,6 +145,7 @@ class GroupDetailsMemberList : Fragment() {
 
         val memberIds = arguments?.getStringArrayList("memberIds")
         val inviteCode = arguments?.getString("inviteCode")
+        val groupId = arguments?.getString("groupId")
 
         val inviteCodeTextView = view.findViewById<TextView>(R.id.inviteCodeTextView)
         inviteCodeTextView.text = inviteCode
@@ -123,7 +153,7 @@ class GroupDetailsMemberList : Fragment() {
         val memberList = ArrayList<AccountResponse>()
         var completedRequests = 0
         for (memberId in memberIds!!) {
-            APIService().doGet<AccountResponse>("accounts/${memberId}", object : APICallback<Any> {
+            APIService(requireContext()).doGet<AccountResponse>("accounts/${memberId}", object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")
 
@@ -135,11 +165,22 @@ class GroupDetailsMemberList : Fragment() {
 
                     // Check if all requests have completed
                     if (completedRequests == memberIds.size) {
+                        // Sort memberList base on the original order of memberIds
+                        val sortedMemberList = ArrayList<AccountResponse>()
+                        for (memberId in memberIds) {
+                            for (member in memberList) {
+                                if (member.id == memberId) {
+                                    sortedMemberList.add(member)
+                                    break
+                                }
+                            }
+                        }
+
                         val memberRecyclerView =
                             view.findViewById<RecyclerView>(R.id.memberRecyclerView)
                         memberRecyclerView.layoutManager =
                             androidx.recyclerview.widget.LinearLayoutManager(view.context)
-                        memberRecyclerView.adapter = MemberListAdapter(memberList)
+                        memberRecyclerView.adapter = MemberListAdapter(sortedMemberList, arguments?.getString("groupId")!!, requireContext())
                         memberRecyclerView.setHasFixedSize(true)
                     }
                 }
@@ -153,15 +194,30 @@ class GroupDetailsMemberList : Fragment() {
         val regenButton: ImageButton = view.findViewById(R.id.regenInviteCodeImageButton)
         regenButton.setOnClickListener {
             Toast.makeText(view.context, "Regenerating invite code", Toast.LENGTH_SHORT).show()
+            APIService(requireContext()).doGet<InviteCodeResponse>("groups/${groupId}/code-generation", object : APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    Log.d("API_SERVICE", "Data: $data")
+
+                    data as InviteCodeResponse
+
+                    inviteCodeTextView.text = data.inviteCode
+                }
+
+                override fun onError(error: Throwable) {
+                    Log.e("API_SERVICE", "Error: ${error.message}")
+                }
+            })
         }
 
         val copyButton: ImageButton = view.findViewById(R.id.copyInviteCodeImageButton)
         copyButton.setOnClickListener {
             val clipboard = android.content.Context.CLIPBOARD_SERVICE
-            val clip = android.content.ClipData.newPlainText("invite code", inviteCode)
+            val clip = android.content.ClipData.newPlainText("invite code", inviteCodeTextView.text)
             val clipboardManager =
                 view.context.getSystemService(clipboard) as android.content.ClipboardManager
             clipboardManager.setPrimaryClip(clip)
+
+            Toast.makeText(view.context, "Invite code copied", Toast.LENGTH_SHORT).show()
         }
 
     }
@@ -176,10 +232,11 @@ class GroupDetailsMemberList : Fragment() {
          * @return A new instance of fragment GroupDetailsMemberList.
          */ // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: String, param2: String) = GroupDetailsMemberList().apply {
+        fun newInstance(param1: String, param2: String, param3: String) = GroupDetailsMemberList().apply {
             arguments = Bundle().apply {
                 putString(ARG_PARAM1, param1)
                 putString(ARG_PARAM2, param2)
+                putString(ARG_PARAM3, param3)
             }
         }
     }

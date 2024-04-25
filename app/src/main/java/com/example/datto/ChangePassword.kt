@@ -12,8 +12,6 @@ import com.example.datto.API.APIService
 import com.example.datto.Credential.CredentialService
 import com.example.datto.DataClass.ChangePasswordRequest
 import com.google.android.material.appbar.MaterialToolbar
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -45,7 +43,7 @@ class ChangePassword : Fragment() {
             val body = ChangePasswordRequest(currentPassword.text.toString(), newPassword.text.toString(), confirmPassword.text.toString())
 
             // Set onClickListener to the button
-            APIService().doPatch<ChangePasswordRequest>("accounts/${CredentialService().get()}/password", body, object : APICallback<Any> {
+            APIService(requireContext()).doPatch<ChangePasswordRequest>("accounts/${CredentialService().get()}/password", body, object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Toast.makeText(requireContext(), "Password changed successfully", Toast.LENGTH_SHORT).show()
                     Log.d("API_SERVICE", "Data: $data")

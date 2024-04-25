@@ -13,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.Credential.CredentialService
@@ -83,7 +84,7 @@ class ProfileEdit : Fragment() {
                         )
 
                         // Patch profile
-                        APIService().doPatch<ProfileEditRequest>("accounts/${CredentialService().get()}", profileEditRequest, object :
+                        APIService(requireContext()).doPatch<ProfileEditRequest>("accounts/${CredentialService().get()}", profileEditRequest, object :
                             APICallback<Any> {
                             override fun onSuccess(data: Any) {
                                 Log.d("API_SERVICE", "Data: $data")
@@ -95,6 +96,7 @@ class ProfileEdit : Fragment() {
 
                             override fun onError(error: Throwable) {
                                 Log.e("API_SERVICE", "Error: ${error.message}")
+                                Toast.makeText(requireContext(), "Error: ${error.message}", Toast.LENGTH_SHORT).show()
                             }
                         })
                     } else {
@@ -111,7 +113,7 @@ class ProfileEdit : Fragment() {
                         val multipartBody =
                             MultipartBody.Part.createFormData("file", "avatar.jpg", requestBody)
 
-                        APIService().doPutMultipart<BucketResponse>("files", multipartBody, object :
+                        APIService(requireContext()).doPutMultipart<BucketResponse>("files", multipartBody, object :
                             APICallback<Any> {
                             override fun onSuccess(data: Any) {
                                 // Cast data to BucketResponse
@@ -134,7 +136,7 @@ class ProfileEdit : Fragment() {
                                 )
 
                                 // Call API to patch profile
-                                APIService().doPatch<ProfileEditRequest>("accounts/${CredentialService().get()}", profileEditRequest, object :
+                                APIService(requireContext()).doPatch<ProfileEditRequest>("accounts/${CredentialService().get()}", profileEditRequest, object :
                                     APICallback<Any> {
                                     override fun onSuccess(data: Any) {
                                         Log.d("API_SERVICE", "Data: $data")
@@ -146,6 +148,7 @@ class ProfileEdit : Fragment() {
 
                                     override fun onError(error: Throwable) {
                                         Log.e("API_SERVICE", "Error: ${error.message}")
+                                        Toast.makeText(requireContext(), "Error: ${error.message}", Toast.LENGTH_SHORT).show()
                                     }
                                 })
 
@@ -154,6 +157,7 @@ class ProfileEdit : Fragment() {
 
                             override fun onError(error: Throwable) {
                                 Log.e("API_SERVICE", "Error: ${error.message}")
+                                Toast.makeText(requireContext(), "Error: ${error.message}", Toast.LENGTH_SHORT).show()
                             }
                         })
                     }
@@ -167,6 +171,7 @@ class ProfileEdit : Fragment() {
         }
 
         appBar.title = "Edit Profile"
+        appBar.navigationIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_back)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -190,7 +195,7 @@ class ProfileEdit : Fragment() {
         dob = requireActivity().findViewById(R.id.profile_edit_dob)
 
 
-        APIService().doGet<AccountResponse>("accounts/${CredentialService().get()}", object :
+        APIService(requireContext()).doGet<AccountResponse>("accounts/${CredentialService().get()}", object :
             APICallback<Any> {
             override fun onSuccess(data: Any) {
                 Log.d("API_SERVICE", "Data: $data")

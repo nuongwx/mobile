@@ -12,6 +12,18 @@
         android:layout_width="match_parent"
         android:layout_height="120dp">
 
+        <ImageView
+            android:id="@+id/eventImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/content"
+            android:scaleType="centerCrop"/>
+
         <LinearLayout
             android:id="@+id/linearLayout2"
             android:layout_width="match_parent"
@@ -27,7 +39,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="jcxdc"
-                android:textAppearance="?attr/textAppearanceLabelSmall" />
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="#FFFFFF"/>
 
             <TextView
                 android:id="@+id/eventTitle"
@@ -35,15 +48,16 @@
                 android:layout_height="wrap_content"
                 android:text="Lang thang Rooftop"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
-
-                android:textFontWeight="600" />
+                android:textFontWeight="600"
+                android:textColor="#FFFFFF"/>
 
             <TextView
                 android:id="@+id/eventDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Feb 20 - Feb 20, 2024"
-                android:textAppearance="?attr/textAppearanceLabelSmall" />
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="#FFFFFF"/>
 
         </LinearLayout>
 

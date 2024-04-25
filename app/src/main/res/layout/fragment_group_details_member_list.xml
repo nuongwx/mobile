@@ -44,23 +44,27 @@
                 android:id="@+id/regenInviteCodeImageButton"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
+                android:layout_marginEnd="24dp"
                 android:background="#00FFFFFF"
+                android:contentDescription="Regenerate Invite Code"
                 android:src="@drawable/ic_refresh"
                 app:layout_constraintBottom_toBottomOf="@+id/inviteCodeTextView"
                 app:layout_constraintEnd_toStartOf="@+id/copyInviteCodeImageButton"
                 app:layout_constraintHorizontal_chainStyle="packed"
                 app:layout_constraintTop_toTopOf="@+id/textView2"
-                android:layout_marginRight="8dp"/>
+                tools:ignore="TouchTargetSizeCheck" />
 
             <ImageButton
                 android:id="@+id/copyInviteCodeImageButton"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:background="#00FFFFFF"
+                android:contentDescription="Copy Invite Code"
                 android:src="@drawable/ic_copy"
                 app:layout_constraintBottom_toBottomOf="@+id/regenInviteCodeImageButton"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/regenInviteCodeImageButton" />
+                app:layout_constraintTop_toTopOf="@+id/regenInviteCodeImageButton"
+                tools:ignore="TouchTargetSizeCheck" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/memberRecyclerView"

@@ -67,7 +67,7 @@ class JoinGroup : Fragment() {
             val joinGroupRequest = JoinGroupRequest(CredentialService().get(), inviteCode)
 
             // Call API to join group
-            APIService().doPost<Any>("groups/join", joinGroupRequest, object :
+            APIService(requireContext()).doPost<Any>("groups/join", joinGroupRequest, object :
                 APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Join group success")

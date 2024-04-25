@@ -1,18 +1,19 @@
 package com.example.datto.API
 
+import android.content.Context
 import android.util.Log
 import com.example.datto.DataClass.BaseResponse
 import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.reflect.TypeToken
 import okhttp3.MultipartBody
-import okhttp3.Request
-import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Response
 
-class APIService {
-    val retrofitClient = RetrofitInstance().get()
+class APIService (
+    context: Context
+) {
+    val retrofitClient = RetrofitInstance().get(context)
 
     inline fun <reified T> doGet(endpoint: String, callback: APICallback<Any>) {
         val service = retrofitClient.create(APIInterface::class.java).get(endpoint)
@@ -121,6 +122,35 @@ class APIService {
                     callback.onSuccess(result)
                 } else {
                     callback.onError(Throwable(response.body()!!.message))
+                }
+            }
+
+            override fun onFailure(call: Call<BaseResponse<JsonElement>>, t: Throwable) {
+                // Custom callback to process data
+                callback.onError(t)
+            }
+        })
+    }
+
+    inline fun <reified T> doDelete(endpoint: String, callback: APICallback<Any>) {
+        val service = retrofitClient.create(APIInterface::class.java).delete(endpoint)
+
+        // Enqueue the request
+        service.enqueue(object : retrofit2.Callback<BaseResponse<JsonElement>> {
+            override fun onResponse(
+                call: Call<BaseResponse<JsonElement>>,
+                response: Response<BaseResponse<JsonElement>>
+            ) {
+                if (response.isSuccessful && response.body()!!.success) {
+                    val data = response.body()?.data
+                    val gson = Gson()
+                    val type = object : TypeToken<T>() {}.type
+                    val result = gson.fromJson(data, type) as Any
+
+                    // Custom callback to process data
+                    callback.onSuccess(result)
+                } else {
+                    callback.onError(Throwable(response.message()))
                 }
             }
 

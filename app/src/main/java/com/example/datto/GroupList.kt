@@ -1,9 +1,9 @@
 package com.example.datto
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.GestureDetector
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -12,18 +12,21 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.Credential.CredentialService
 import com.example.datto.DataClass.AccountResponse
 import com.example.datto.DataClass.EventResponse
-import com.example.datto.DataClass.GroupResponse
 import com.example.datto.GlobalVariable.GlobalVariable
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.gson.annotations.SerializedName
 import com.squareup.picasso.Picasso
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Locale
+import java.util.TimeZone
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -36,13 +39,26 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 
+data class CustomGroupResponse(
+    @SerializedName("_id")
+    var id: String,
+    var members: List<String>,
+    var events: List<EventResponse>,
+    var memories: List<String>,
+    var name: String,
+    var inviteCode: String,
+    val thumbnail: String,
+)
+
 class GroupListAdapter(
-    private val groups: ArrayList<GroupResponse>
+    private val groups: ArrayList<CustomGroupResponse>,
+    private val context: Context
 ) : androidx.recyclerview.widget.RecyclerView.Adapter<GroupListAdapter.GroupViewHolder>() {
 
     inner class GroupViewHolder(itemView: View) :
         androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
         val groupName = itemView.findViewById<android.widget.TextView>(R.id.groupNameTextView)
+        val groupDes = itemView.findViewById<android.widget.TextView>(R.id.groupDescriptionTextView)
         val groupImage = itemView.findViewById<android.widget.ImageView>(R.id.groupImageView)
         val ava1 = itemView.findViewById<ImageView>(R.id.ava1)
         val ava2 = itemView.findViewById<ImageView>(R.id.ava2)
@@ -52,7 +68,7 @@ class GroupListAdapter(
         init {}
     }
 
-    fun getItem(position: Int): GroupResponse {
+    fun getItem(position: Int): CustomGroupResponse {
         return groups[position]
     }
 
@@ -68,6 +84,9 @@ class GroupListAdapter(
         val currentItem = groups[position]
 
         holder.groupName.text = currentItem.name
+        "${currentItem.events.size} event${if (currentItem.events.size > 1) "s" else ""} together".also {
+            holder.groupDes.text = it
+        }
 
         // Load image with Picasso and new thread
         try {
@@ -76,14 +95,14 @@ class GroupListAdapter(
             if (imageUrl != null) {
                 Picasso.get().load(imageUrl).into(holder.groupImage)
             } else {
-                Picasso.get().load(R.drawable.avatar).into(holder.groupImage)
+                Picasso.get().load(R.drawable.cover).into(holder.groupImage)
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
 
         currentItem.members.forEachIndexed { index, member ->
-            APIService().doGet<AccountResponse>("accounts/${member}", object : APICallback<Any> {
+            APIService(context).doGet<AccountResponse>("accounts/${member}", object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")
 
@@ -136,82 +155,11 @@ class GroupListAdapter(
     }
 }
 
-data class Event(
-    val groupName: String,
-    val id: String
-)
-
-class CurrentEventAdapter(
-    private val events: ArrayList<Event>
-) : androidx.recyclerview.widget.RecyclerView.Adapter<CurrentEventAdapter.EventViewHolder>() {
-
-    inner class EventViewHolder(itemView: View) :
-        androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
-        val eventGroupName = itemView.findViewById<android.widget.TextView>(R.id.eventGroupName)
-        val eventName = itemView.findViewById<android.widget.TextView>(R.id.eventTitle)
-        val eventDate = itemView.findViewById<android.widget.TextView>(R.id.eventDate)
-
-        init {}
-    }
-
-    fun getItem(position: Int): Event {
-        return events[position]
-    }
-
-    override fun onCreateViewHolder(
-        parent: ViewGroup, viewType: Int
-    ): CurrentEventAdapter.EventViewHolder {
-        val itemView =
-            LayoutInflater.from(parent.context).inflate(R.layout.events_list_items, parent, false)
-        return EventViewHolder(itemView)
-    }
-
-    override fun onBindViewHolder(holder: CurrentEventAdapter.EventViewHolder, position: Int) {
-        val currentItem = events[position]
-
-        holder.eventGroupName.text = currentItem.groupName
-
-        APIService().doGet<EventResponse>("events/${currentItem.id}", object : APICallback<Any> {
-            override fun onSuccess(data: Any) {
-                Log.d("API_SERVICE", "Data: $data")
-
-                data as EventResponse
-
-                holder.eventName.text = data.name
-
-                val inputFormat =
-                    SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault())
-                val outputFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
-                val outputFormatWithYear = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-                val date = inputFormat.parse(data.time.start)
-                holder.eventDate.text = if (date != null) {
-                    "${outputFormat.format(date)} - ${
-                        outputFormatWithYear.format(
-                            inputFormat.parse(
-                                data.time.end
-                            )
-                        )
-                    }"
-                } else {
-                    ""
-                }
-            }
-
-            override fun onError(error: Throwable) {
-                Log.e("API_SERVICE", "Error: ${error.message}")
-            }
-        })
-    }
-
-    override fun getItemCount(): Int {
-        return events.size
-    }
-}
-
 class GroupList : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
+    private var currentContext: Context? = null
 
     private fun configTopAppBar() {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
@@ -242,6 +190,7 @@ class GroupList : Fragment() {
     override fun onResume() {
         super.onResume()
         configTopAppBar()
+        currentContext = requireContext()
     }
 
     override fun onCreateView(
@@ -255,6 +204,7 @@ class GroupList : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         configTopAppBar()
+        currentContext = requireContext()
 
         val newGroupBtn: Button = view.findViewById(R.id.newGroupButton)
         newGroupBtn.setOnClickListener {
@@ -262,79 +212,120 @@ class GroupList : Fragment() {
                 .replace(R.id.app_fragment, NewGroup()).addToBackStack("NewGroup").commit()
         }
 
-        val groupList = ArrayList<GroupResponse>()
-        val currentEvents = ArrayList<Event>()
+        val groupList = ArrayList<CustomGroupResponse>()
+        val accountEvents = ArrayList<Event>()
 
-        APIService().doGet<List<GroupResponse>>(
+        APIService(requireContext()).doGet<List<CustomGroupResponse>>(
             "accounts/${CredentialService().get()}/groups",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")
 
-                    data as List<GroupResponse>
+                    data as List<CustomGroupResponse>
 
-                    data.forEach {
-                        groupList.add(it)
+                    if (data.isEmpty()) {
+                        view.findViewById<TextView>(R.id.noGroupsTextView).isVisible = true
+                        view.findViewById<TextView>(R.id.materialTextView).isVisible = false
+                    } else {
+                        view.findViewById<TextView>(R.id.noGroupsTextView).isVisible = false
 
-                        it.events.forEach { event ->
-                            currentEvents.add(Event(it.name, event))
-                        }
-                    }
+                        data.forEach {
+                            groupList.add(it)
 
-                    val groupRecyclerView =
-                        view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerView2)
-                    groupRecyclerView.layoutManager =
-                        androidx.recyclerview.widget.LinearLayoutManager(
-                            view.context, androidx.recyclerview.widget.RecyclerView.VERTICAL, false
-                        )
-                    groupRecyclerView.adapter = GroupListAdapter(groupList)
-                    groupRecyclerView.setHasFixedSize(true)
-
-                    // Add click listener to each item
-                    val gestureDetector = GestureDetector(context,
-                        object : GestureDetector.SimpleOnGestureListener() {
-                            override fun onSingleTapUp(e: MotionEvent): Boolean {
-                                return true
+                            it.events.forEach { event ->
+                                accountEvents.add(Event(it.name, event))
                             }
+                        }
+
+                        val groupRecyclerView =
+                            view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerView2)
+                        groupRecyclerView.layoutManager =
+                            androidx.recyclerview.widget.LinearLayoutManager(
+                                view.context,
+                                androidx.recyclerview.widget.RecyclerView.VERTICAL,
+                                false
+                            )
+                        groupRecyclerView.adapter = GroupListAdapter(groupList, currentContext!!)
+                        groupRecyclerView.setHasFixedSize(true)
+
+                        // Add click listener to each item
+                        val gestureDetector = GestureDetector(context,
+                            object : GestureDetector.SimpleOnGestureListener() {
+                                override fun onSingleTapUp(e: MotionEvent): Boolean {
+                                    return true
+                                }
+                            })
+
+                        groupRecyclerView.addOnItemTouchListener(object :
+                            RecyclerView.OnItemTouchListener {
+                            override fun onInterceptTouchEvent(
+                                rv: RecyclerView, e: MotionEvent
+                            ): Boolean {
+                                val childView = rv.findChildViewUnder(e.x, e.y)
+                                if (childView != null && gestureDetector.onTouchEvent(e)) {
+                                    val position = rv.getChildAdapterPosition(childView)
+                                    val groupResponse =
+                                        (rv.adapter as GroupListAdapter).getItem(position)
+
+                                    val groupDetailsFragment = GroupDetails()
+                                    val bundle = Bundle()
+                                    bundle.putString("groupId", groupResponse.id)
+                                    groupDetailsFragment.arguments = bundle
+                                    parentFragmentManager.beginTransaction()
+                                        .replace(R.id.app_fragment, groupDetailsFragment)
+                                        .addToBackStack("GroupDetails").commit()
+
+                                    return true
+                                }
+                                return false
+                            }
+
+                            override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
+
+                            override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
                         })
 
-                    groupRecyclerView.addOnItemTouchListener(object :
-                        RecyclerView.OnItemTouchListener {
-                        override fun onInterceptTouchEvent(
-                            rv: RecyclerView, e: MotionEvent
-                        ): Boolean {
-                            val childView = rv.findChildViewUnder(e.x, e.y)
-                            if (childView != null && gestureDetector.onTouchEvent(e)) {
-                                val position = rv.getChildAdapterPosition(childView)
-                                val groupResponse =
-                                    (rv.adapter as GroupListAdapter).getItem(position)
+                        val upComingEvents =
+                            accountEvents.filter {
+                                // Parse ISO 8601 date string
+                                val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                                parser.timeZone = TimeZone.getTimeZone("UTC")
 
-                                val groupDetailsFragment = GroupDetails()
-                                val bundle = Bundle()
-                                bundle.putString("groupId", groupResponse.id)
-                                groupDetailsFragment.arguments = bundle
-                                parentFragmentManager.beginTransaction()
-                                    .replace(R.id.app_fragment, groupDetailsFragment)
-                                    .addToBackStack("GroupDetails").commit()
+                                val formattedDateEnd = parser.parse(it.event.time.end)
 
-                                return true
+                                // Create a Calendar instance and set it to the parsed date
+                                val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                                calendar.time = formattedDateEnd!!
+
+                                // Set the time to the end of the day
+                                calendar.set(Calendar.HOUR_OF_DAY, 23)
+                                calendar.set(Calendar.MINUTE, 59)
+                                calendar.set(Calendar.SECOND, 59)
+                                calendar.set(Calendar.MILLISECOND, 999)
+
+                                val endOfDayTimestamp = calendar.time.time
+
+                                endOfDayTimestamp > System.currentTimeMillis()
                             }
-                            return false
+
+                        val latestEvents =
+                            upComingEvents.sortedByDescending { it.event.time.start }.takeLast(3)
+
+                        if (latestEvents.isNotEmpty()) {
+                            view.findViewById<TextView>(R.id.materialTextView).isVisible = true
                         }
 
-                        override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
-
-                        override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
-                    })
-
-                    val eventRecyclerView =
-                        view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.currentEventsRecyclerView)
-                    eventRecyclerView.layoutManager =
-                        androidx.recyclerview.widget.LinearLayoutManager(
-                            view.context, androidx.recyclerview.widget.RecyclerView.VERTICAL, false
-                        )
-                    eventRecyclerView.adapter = CurrentEventAdapter(currentEvents)
-                    eventRecyclerView.setHasFixedSize(true)
+                        val eventRecyclerView =
+                            view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.currentEventsRecyclerView)
+                        eventRecyclerView.layoutManager =
+                            androidx.recyclerview.widget.LinearLayoutManager(
+                                view.context,
+                                androidx.recyclerview.widget.RecyclerView.VERTICAL,
+                                false
+                            )
+                        eventRecyclerView.adapter = EventAdapter(latestEvents, currentContext!!)
+                        eventRecyclerView.setHasFixedSize(true)
+                    }
                 }
 
                 override fun onError(error: Throwable) {

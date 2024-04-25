@@ -2,7 +2,7 @@ package com.example.datto.DataClass
 
 import com.google.gson.annotations.SerializedName
 
-data class Time (
+data class Time(
     var start: String,
     var end: String,
 )
@@ -13,4 +13,5 @@ data class EventResponse(
     var name: String,
     var description: String,
     var time: Time,
+    var memory: String,
 )

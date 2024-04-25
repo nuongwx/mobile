@@ -1,6 +1,5 @@
 package com.example.datto
 
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -8,25 +7,33 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
-import com.db.williamchart.view.LineChartView
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.DataClass.GroupResponse
+import com.example.datto.DataClass.MemoryResponse
 import com.example.datto.GlobalVariable.GlobalVariable
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.AxisBase
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.gson.annotations.SerializedName
 import com.squareup.picasso.Picasso
-import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+import java.util.TimeZone
 
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+private const val ARG_PARAM1 = "groupId"
 
 /**
  * A simple [Fragment] subclass.
@@ -34,18 +41,18 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 
-class MemoryThumbnail(val imgUrl: URL)
-
-class MemoriesListAdapter(private val memories: ArrayList<MemoryThumbnail>) :
+class MemoriesListAdapter(private val memories: ArrayList<MemoryResponse>) :
     RecyclerView.Adapter<MemoriesListAdapter.MemoriesViewHolder>() {
 
     inner class MemoriesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val memoryThumbnail: ImageView = itemView.findViewById(R.id.memoryThumbnail)
         val imageButton: ImageButton = itemView.findViewById(R.id.floatingActionButton)
 
+        var setOnClickListener: (() -> Unit)? = null
+
         init {
             itemView.setOnClickListener {
-                Toast.makeText(itemView.context, itemView.toString(), Toast.LENGTH_SHORT).show()
+                setOnClickListener?.invoke()
             }
         }
     }
@@ -62,22 +69,44 @@ class MemoriesListAdapter(private val memories: ArrayList<MemoryThumbnail>) :
     override fun onBindViewHolder(holder: MemoriesListAdapter.MemoriesViewHolder, position: Int) {
         val currentItem = memories[position]
 
-        if (position == 0) return
-        else { // hide button
-            holder.imageButton.visibility = View.GONE
-        } // create a thread to fetch the image
-        val thread = Thread {
-            try {
-                val bitmap =
-                    BitmapFactory.decodeStream(currentItem.imgUrl.openConnection().getInputStream())
-                holder.memoryThumbnail.post {
-                    holder.memoryThumbnail.setImageBitmap(bitmap)
+        if (position == 0) {
+            // set unique button for the first item
+            holder.imageButton.visibility = View.VISIBLE
+            holder.setOnClickListener = {
+                val newMemoryFragment = NewMemory().apply {
+                    arguments = Bundle().apply {
+                        putString(
+                            "groupId",
+                            (holder.itemView.context as MainActivity).supportFragmentManager.fragments.last().arguments?.getString(
+                                "groupId"
+                            )
+                        )
+                    }
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
+                val transaction =
+                    (holder.itemView.context as MainActivity).supportFragmentManager.beginTransaction()
+                transaction.replace(R.id.app_fragment, newMemoryFragment)
+                transaction.addToBackStack(null)
+                transaction.commit()
+            }
+        } else { // hide button
+            holder.imageButton.visibility = View.GONE
+
+            Picasso.get().load(GlobalVariable.BASE_URL + "files/" + currentItem.thumbnail)
+                .into(holder.memoryThumbnail)
+
+            holder.setOnClickListener = {
+                val MemoryViewFragment = MemoryView()
+                val transaction =
+                    (holder.itemView.context as MainActivity).supportFragmentManager.beginTransaction()
+                val bundle = Bundle()
+                bundle.putString("id", currentItem.id)
+                MemoryViewFragment.arguments = bundle
+                transaction.replace(R.id.app_fragment, MemoryViewFragment)
+                transaction.addToBackStack(null)
+                transaction.commit()
             }
         }
-        thread.start()
     }
 
     override fun getItemCount(): Int {
@@ -85,17 +114,26 @@ class MemoriesListAdapter(private val memories: ArrayList<MemoryThumbnail>) :
     }
 }
 
+data class FundData(
+    @SerializedName("_id")
+    val id: String,
+    val amount: Double,
+    val paidAt: String
+)
+
+data class GroupFundsResponse(
+    @SerializedName("_id")
+    val id: String,
+    val funds: List<FundData>
+)
 
 class GroupDetails : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private var groupId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+            groupId = it.getString(ARG_PARAM1)
         }
     }
 
@@ -108,10 +146,9 @@ class GroupDetails : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val groupId = arguments?.getString("groupId")
         var group: GroupResponse? = null
 
-        APIService().doGet<GroupResponse>("groups/${groupId}",
+        APIService(requireContext()).doGet<GroupResponse>("groups/${groupId}",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Data: $data")
@@ -120,7 +157,7 @@ class GroupDetails : Fragment() {
 
                     group = data
 
-                    configTopAppBar(data.name)
+                    configTopAppBar(data.name, if (data.thumbnail != null) data.thumbnail else "")
 
                     val coverImage: ImageView = view.findViewById(R.id.imageView)
                     val thread = Thread {
@@ -131,7 +168,7 @@ class GroupDetails : Fragment() {
                                 if (imageUrl != null) {
                                     Picasso.get().load(imageUrl).into(coverImage)
                                 } else {
-                                    Picasso.get().load(R.drawable.avatar).into(coverImage)
+                                    Picasso.get().load(R.drawable.cover).into(coverImage)
                                 }
                             }
                         } catch (e: Exception) {
@@ -140,10 +177,12 @@ class GroupDetails : Fragment() {
                     }
                     thread.start()
 
-                    val toEventList: ConstraintLayout = view.findViewById(R.id.eventsListGroupDetailsLL)
+                    val toEventList: ConstraintLayout =
+                        view.findViewById(R.id.eventsListGroupDetailsLL)
                     toEventList.setOnClickListener {
                         val bundle = Bundle()
-                        bundle.putStringArrayList("eventIds", ArrayList(data.events))
+                        bundle.putString("groupId", data.id)
+                        bundle.putString("groupName", data.name)
                         val GroupDetailsEventListFragment = GroupDetailsEventList()
                         GroupDetailsEventListFragment.arguments = bundle
 
@@ -153,11 +192,13 @@ class GroupDetails : Fragment() {
                         transaction.commit()
                     }
 
-                    val toMemberList: ConstraintLayout = view.findViewById(R.id.membersListGroupDetailsLL)
+                    val toMemberList: ConstraintLayout =
+                        view.findViewById(R.id.membersListGroupDetailsLL)
                     toMemberList.setOnClickListener {
                         val bundle = Bundle()
                         bundle.putStringArrayList("memberIds", ArrayList(data.members))
                         bundle.putString("inviteCode", data.inviteCode)
+                        bundle.putString("groupId", data.id)
                         val GroupDetailsMemberList = GroupDetailsMemberList()
                         GroupDetailsMemberList.arguments = bundle
 
@@ -175,42 +216,174 @@ class GroupDetails : Fragment() {
 
 
         // create a thread to fetch the images
-        val memories = arrayListOf<MemoryThumbnail>()
-        memories.add(MemoryThumbnail(URL("https://www.gstatic.com/webp/gallery/1.jpg")))
-        memories.add(MemoryThumbnail(URL("https://www.gstatic.com/webp/gallery/2.jpg")))
-        memories.add(MemoryThumbnail(URL("https://www.gstatic.com/webp/gallery/3.jpg")))
+        val memories = ArrayList<MemoryResponse>()
+        memories.clear()
+        memories.add(MemoryResponse("", "😎", ""))
 
-        val memoriesRecyclerView: RecyclerView =
-            view.findViewById(R.id.recyclerView) // scroll horizontally
-        memoriesRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(
-            view.context, RecyclerView.HORIZONTAL, false
-        )
-        memoriesRecyclerView.adapter = MemoriesListAdapter(memories)
-        memoriesRecyclerView.setHasFixedSize(true)
+        APIService(requireContext()).doGet<List<MemoryResponse>>(
+            "groups/${groupId}/memories",
+            object : APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    Log.d("API_SERVICE", "Data: $data")
 
-        val chart: LineChartView = view.findViewById(R.id.chart)
-        val entries: List<Pair<String, Float>> = listOf(
-            "Jan" to 4f,
-            "Feb" to 2f,
-            "Mar" to 3f,
-            "Apr" to 1f,
-            "May" to 5f,
-            "Jun" to 2f,
-            "Jul" to 4f,
-            "Aug" to 3f,
-            "Sep" to 4f,
-            "Oct" to 2f,
-            "Nov" to 3f,
-            "Dec" to 6f
-        )
-        chart.show(entries)
+                    data as List<MemoryResponse>
+
+                    data.forEach() {
+                        memories.add(it)
+                    }
+
+                    val memoriesRecyclerView: RecyclerView =
+                        view.findViewById(R.id.memoriesCoverGroupDetailsRecyclerView) // scroll horizontally
+                    memoriesRecyclerView.layoutManager =
+                        androidx.recyclerview.widget.LinearLayoutManager(
+                            view.context, RecyclerView.HORIZONTAL, false
+                        )
+                    val adapter = MemoriesListAdapter(memories)
+                    memoriesRecyclerView.adapter = adapter
+                    memoriesRecyclerView.setHasFixedSize(true)
+                }
+
+                override fun onError(error: Throwable) {
+                    Log.e("API_SERVICE", "Error: ${error.message}")
+                }
+            })
+
+        val lineChart: LineChart = view.findViewById(R.id.lineChart)
+        APIService(requireContext()).doGet<List<GroupFundsResponse>>("groups/${groupId}/funds",
+            object : APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    Log.d("API_SERVICE", "Data: $data")
+
+                    data as List<GroupFundsResponse>
+
+                    // Check data.funds is not an empty list
+                    if (data.isEmpty() || data[0].funds.isEmpty()) {
+                        return
+                    }
+
+                    val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                    sdf.timeZone = TimeZone.getTimeZone("UTC")
+                    val targetFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+                    targetFormat.timeZone = TimeZone.getTimeZone("UTC")
+
+                    val positiveAmountsByDay = mutableMapOf<String, Double>()
+                    val negativeAmountsByDay = mutableMapOf<String, Double>()
+
+                    data.flatMap { groupFundsResponse ->
+                        groupFundsResponse.funds.map { fundData ->
+                            val fullDate = sdf.parse(fundData.paidAt)!!.let {
+                                targetFormat.format(it)
+                            }
+
+                            if (fundData.amount >= 0) {
+                                positiveAmountsByDay[fullDate] = positiveAmountsByDay.getOrDefault(
+                                    fullDate,
+                                    0.0
+                                ) + fundData.amount
+                            } else {
+                                negativeAmountsByDay[fullDate] = negativeAmountsByDay.getOrDefault(
+                                    fullDate,
+                                    0.0
+                                ) + fundData.amount
+                            }
+                        }
+                    }
+
+                    var positiveEntries = positiveAmountsByDay.map { (fullDate, amount) ->
+                        val date = targetFormat.parse(fullDate)
+                        val calendar = Calendar.getInstance()
+                        calendar.time = date
+                        val dayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
+                        Entry(dayOfYear.toFloat(), amount.toFloat())
+                    }
+
+                    var negativeEntries = negativeAmountsByDay.map { (fullDate, amount) ->
+                        val date = targetFormat.parse(fullDate)
+                        val calendar = Calendar.getInstance()
+                        calendar.time = date
+                        val dayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
+                        Entry(dayOfYear.toFloat(), -1 * amount.toFloat())
+                    }
+
+                    positiveEntries = positiveEntries.sortedBy { it.x }
+                    negativeEntries = negativeEntries.sortedBy { it.x }
+
+                    val positiveLineDataSet =
+                        LineDataSet(positiveEntries, "Funds").apply {
+                            setColor(
+                                ContextCompat.getColor(
+                                    requireContext(),
+                                    R.color.md_theme_primary
+                                )
+                            )
+                            setCircleColor(
+                                ContextCompat.getColor(
+                                    requireContext(),
+                                    R.color.md_theme_primary
+                                )
+                            )
+                        }
+                    val negativeLineDataSet =
+                        LineDataSet(negativeEntries, "Expenses").apply {
+                            setColor(
+                                ContextCompat.getColor(
+                                    requireContext(),
+                                    R.color.md_theme_tertiary
+                                )
+                            )
+                            setCircleColor(
+                                ContextCompat.getColor(
+                                    requireContext(),
+                                    R.color.md_theme_tertiary
+                                )
+                            )
+                        }
+                    val lineData = LineData(positiveLineDataSet, negativeLineDataSet)
+
+                    lineChart.xAxis.valueFormatter = object : ValueFormatter() {
+                        override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+                            val calendar = Calendar.getInstance()
+                            calendar.set(Calendar.DAY_OF_YEAR, value.toInt())
+                            return SimpleDateFormat("MMM dd", Locale.US).format(calendar.time)
+                        }
+                    }
+                    lineChart.description.isEnabled = false // Disable the description
+                    lineChart.xAxis.position = XAxis.XAxisPosition.BOTTOM // Set the x-axis position
+                    val font = ResourcesCompat.getFont(requireContext(), R.font.be_vietnam)
+                    lineChart.xAxis.typeface = font
+                    lineChart.axisLeft.typeface = font
+                    lineChart.axisRight.typeface = font
+                    lineChart.legend.typeface = font
+                    lineChart.data = lineData
+                    lineChart.invalidate() // refresh the chart
+                }
+
+                override fun onError(error: Throwable) {
+                    Log.e("API_SERVICE", "Error: ${error.message}")
+                }
+            })
     }
 
-    private fun configTopAppBar(title: String) {
+    private fun configTopAppBar(name: String, thumbnail: String) {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
         val menuItem = appBar.menu.findItem(R.id.edit)
-        menuItem.isVisible = false
-        appBar.title = title
+        menuItem.isEnabled = true
+        menuItem.isVisible = true
+        menuItem.title = null
+        menuItem.setIcon(R.drawable.ic_edit)
+        menuItem.setOnMenuItemClickListener {
+            val groupEditFragment = GroupEdit()
+            val bundle = Bundle()
+            bundle.putString("groupId", groupId)
+            bundle.putString("groupName", name)
+            bundle.putString("thumbnail", thumbnail)
+            groupEditFragment.arguments = bundle
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.app_fragment, groupEditFragment)
+                .addToBackStack("GroupEdit").commit()
+            true
+        }
+        appBar.title = name
         appBar.navigationIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_back)
     }
 
@@ -228,7 +401,6 @@ class GroupDetails : Fragment() {
         fun newInstance(param1: String, param2: String) = GroupDetails().apply {
             arguments = Bundle().apply {
                 putString(ARG_PARAM1, param1)
-                putString(ARG_PARAM2, param2)
             }
         }
     }
