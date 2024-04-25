@@ -8,6 +8,6 @@
         <domain includeSubdomains="true">192.168.1.6</domain>
         <domain includeSubdomains="true">192.168.101.87</domain>
         <domain includeSubdomains="true">192.168.2.10</domain>
-        <domain includeSubdomains="true">192.168.50.71</domain>
+        <domain includeSubdomains="true">192.168.50.105</domain>
     </domain-config>
 </network-security-config>
