@@ -46,6 +46,11 @@ class MainActivity : AppCompatActivity() {
         // Update widget
         WidgetUpdater().update(this)
 
+        // Credential validation
+        if (CredentialService().get() != "") {
+            CredentialService().credentialValidation(this)
+        }
+
         // Set up layout
         if (CredentialService().get() == "") {
             setContentView(R.layout.activity_main)

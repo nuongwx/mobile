@@ -3,6 +3,7 @@ package com.example.datto.API
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import com.example.datto.Credential.CredentialService
 import com.example.datto.GlobalVariable.GlobalVariable
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -28,6 +29,8 @@ class RetrofitInstance {
         val maxAge = 60 * 60 * 24 * 7 // 1 week
         val timeout = 10L // 10 seconds
 
+        val token = CredentialService().getJWTToken()
+
         val okHttpClient = OkHttpClient.Builder()
             // Specify the cache we created earlier.
             .cache(myCache)
@@ -41,10 +44,20 @@ class RetrofitInstance {
                 // Get the request from the chain.
                 var request = chain.request()
 
+                // Add the JWT token to the "x-access-token" header.
+                request = request.newBuilder()
+                    .addHeader("x-access-token", token)
+                    .build()
+
                 request = if (hasNetwork(context))
                     request.newBuilder().header("Cache-Control", "public, max-age=5").build()
                 else
                     request.newBuilder().header("Cache-Control", "public, only-if-cached, max-stale=$maxAge").build()
+
+                request = if (token != "" && CredentialService().isExpired())
+                    request.newBuilder().header("Cache-Control", "public, only-if-cached, max-stale=$maxAge").build()
+                else
+                    request
 
                 try {
                     // Try to proceed with the request.

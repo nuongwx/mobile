@@ -35,6 +35,7 @@ import com.kizitonwose.calendar.view.CalendarView
 import com.kizitonwose.calendar.view.MonthDayBinder
 import com.kizitonwose.calendar.view.MonthHeaderFooterBinder
 import com.kizitonwose.calendar.view.ViewContainer
+import com.squareup.picasso.Picasso
 import java.lang.reflect.Type
 import java.net.URL
 import java.time.LocalDate
@@ -107,7 +108,7 @@ class W2M : Fragment() {
             eventId = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
-        Toast.makeText(requireContext(), eventId, Toast.LENGTH_SHORT).show()
+
         APIService(requireContext()).doGet<Array<AvailabilityResponse>>("events/${eventId}/calendars",
             object : APICallback<Any> {
                 override fun onSuccess(data: Any) {
@@ -208,6 +209,10 @@ class W2M : Fragment() {
             override fun create(view: View): DayViewContainer {
                 return DayViewContainer(view).apply {
                     textView.setOnClickListener { // val date = day.date
+                        if(voting) {
+                            return@setOnClickListener
+                        }
+
                         val availability = event?.availability?.find { it.person == userId }
                         if (availability != null) { // list all the users that are available on that day
 
@@ -225,14 +230,6 @@ class W2M : Fragment() {
                                         itemView.findViewById(R.id.memberRemoveButton)
 
                                     init {
-                                        itemView.setOnClickListener {
-                                            Toast.makeText(
-                                                itemView.context,
-                                                itemView.toString(),
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
-
                                         removeButton.visibility = View.GONE
                                     }
                                 }
@@ -251,20 +248,7 @@ class W2M : Fragment() {
                                 ) {
                                     val currentItem = members[position]
                                     holder.memberName.text = currentItem.name
-
-                                    val thread = Thread {
-                                        try {
-                                            val bitmap = BitmapFactory.decodeStream(
-                                                currentItem.image.openConnection().getInputStream()
-                                            )
-                                            holder.memberImage.post {
-                                                holder.memberImage.setImageBitmap(bitmap)
-                                            }
-                                        } catch (e: Exception) {
-                                            e.printStackTrace()
-                                        }
-                                    }
-                                    thread.start()
+                                    Picasso.get().load(currentItem.image.toString()).into(holder.memberImage)
                                 }
 
                                 override fun getItemCount() = members.size
@@ -567,8 +551,6 @@ class W2M : Fragment() {
         updateSchedules()
 
         configTopAppBar()
-        // Toast.makeText(requireContext(), eventId, Toast.LENGTH_SHORT).show()
-
     }
 
     fun updateSchedules() {

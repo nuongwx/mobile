@@ -64,8 +64,8 @@ class SignInActivity : AppCompatActivity() {
                         APICallback<Any> {
                         override fun onSuccess(data: Any) {
                             data as NewAccountResponse
-                            Log.d("API_SERVICE", "Data: ${data.id}")
-                            CredentialService().set(data.id)
+                            Log.d("API_SERVICE", "Data: ${data.token}")
+                            CredentialService().set(data.token)
                             val i = Intent(applicationContext, MainActivity::class.java)
                             startActivity(i)
                         }

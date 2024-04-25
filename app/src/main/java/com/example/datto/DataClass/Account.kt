@@ -17,8 +17,7 @@ data class NewAccountRequest(
 )
 
 data class NewAccountResponse(
-    @SerializedName("_id")
-    var id: String,
+    var token: String
 )
 
 data class AccountRequest(

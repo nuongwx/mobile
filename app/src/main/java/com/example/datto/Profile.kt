@@ -17,6 +17,7 @@ import com.example.datto.API.APIService
 import com.example.datto.Credential.CredentialService
 import com.example.datto.DataClass.AccountResponse
 import com.example.datto.GlobalVariable.GlobalVariable
+import com.example.datto.utils.WidgetUpdater
 import com.google.android.material.appbar.MaterialToolbar
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -145,16 +146,7 @@ class Profile : Fragment() {
             parentFragmentManager.popBackStack(null, parentFragmentManager.backStackEntryCount)
 
             // Update widget
-            val widgetUpdateIntent = Intent(requireContext(), EventWidget::class.java)
-            widgetUpdateIntent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-
-            // Use an array and EXTRA_APPWIDGET_IDS instead of AppWidgetManager.EXTRA_APPWIDGET_ID,
-            // since it seems the onUpdate() is only fired on that:
-            val ids = AppWidgetManager.getInstance(requireContext()).getAppWidgetIds(
-                ComponentName(requireContext(), EventWidget::class.java)
-            )
-            widgetUpdateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
-            requireContext().sendBroadcast(widgetUpdateIntent)
+            WidgetUpdater().update(requireContext())
 
             // Move back to main activity
             startActivity(Intent(requireContext(), MainActivity::class.java))

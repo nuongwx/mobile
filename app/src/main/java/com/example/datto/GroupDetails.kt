@@ -93,19 +93,9 @@ class MemoriesListAdapter(private val memories: ArrayList<MemoryResponse>) :
             }
         } else { // hide button
             holder.imageButton.visibility = View.GONE
-            val thread = Thread {
-                try {
-                    val bitmap = BitmapFactory.decodeStream(
-                        URL(GlobalVariable.BASE_URL + "files/" + currentItem.thumbnail).openStream()
-                    )
-                    holder.memoryThumbnail.post {
-                        holder.memoryThumbnail.setImageBitmap(bitmap)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-            thread.start()
+
+            Picasso.get().load(GlobalVariable.BASE_URL + "files/" + currentItem.thumbnail)
+                .into(holder.memoryThumbnail)
 
             holder.setOnClickListener = {
                 val MemoryViewFragment = MemoryView()
