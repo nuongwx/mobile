@@ -19,21 +19,30 @@
         android:text="@string/hello_blank_fragment"
         android:textColor="?attr/fullscreenTextColor"
         android:textSize="50sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:visibility="gone"
+        tools:visibility="gone" />
 
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/swipeRight"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+        android:fitsSystemWindows="true"
+        android:visibility="gone"
+        tools:visibility="gone">
 
         <LinearLayout
             android:id="@+id/fullscreen_content_controls"
             style="@style/Widget.Theme.Datto.ButtonBar.Fullscreen"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
+            android:layout_gravity="center_horizontal"
             android:orientation="horizontal"
             tools:ignore="UselessParent">
 
@@ -44,6 +53,13 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/dummy_button" />
+
+            <Button
+                android:id="@+id/button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Button" />
 
         </LinearLayout>
     </FrameLayout>
