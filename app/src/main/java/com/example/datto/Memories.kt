@@ -1,8 +1,10 @@
 package com.example.datto
 
+import android.app.Activity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.DisplayMetrics
 import android.view.GestureDetector
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -41,7 +43,9 @@ data class YAGR(
 )
 
 
-class MemoryViewAdapter(private val memoryIdList: List<Pair<String, String>>) :
+class MemoryViewAdapter(
+    private val memoryIdList: List<Pair<String, String>>, private val activity: Activity
+) :
     RecyclerView.Adapter<MemoryViewAdapter.MemoryViewHolder>() {
 
     inner class MemoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -59,10 +63,13 @@ class MemoryViewAdapter(private val memoryIdList: List<Pair<String, String>>) :
         val currentItem = memoryIdList[position]
         val ctx = holder.itemView.context
 
-        // somehow does not work
-        // holder.memoryImage.layoutParams = holder.memoryImage.layoutParams.apply {
-        //     height = screenHeight
-        // }
+        // Get the screen height
+        val displayMetrics = DisplayMetrics()
+        activity.windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val screenHeight = displayMetrics.heightPixels
+
+        // Set the ImageView height to the screen height
+        holder.memoryImage.layoutParams.height = screenHeight + 64
 
         APIService(ctx).doGet<MemoryResponse>(
             "memories/${currentItem.second}",
@@ -176,7 +183,7 @@ class Memories : Fragment() {
         )
         recyclerView?.setHasFixedSize(true)
 
-        var adapter = MemoryViewAdapter(listOf())
+        var adapter = MemoryViewAdapter(listOf(), requireActivity())
         recyclerView?.adapter = adapter
 
         val snapHelper = PagerSnapHelper()
@@ -227,7 +234,7 @@ class Memories : Fragment() {
                     } else {
                         recyclerView?.visibility = View.VISIBLE
                         fullscreenContent?.visibility = View.GONE
-                        adapter = MemoryViewAdapter(memoryIdList)
+                        adapter = MemoryViewAdapter(memoryIdList, requireActivity())
                         recyclerView?.adapter = adapter
                         adapter.notifyDataSetChanged()
                     }
