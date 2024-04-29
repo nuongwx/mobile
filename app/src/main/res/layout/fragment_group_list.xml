@@ -69,7 +69,6 @@
             android:gravity="center"
             android:text="No groups"
             android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
-            android:textColor="@color/material_dynamic_neutral80"
             android:textFontWeight="600"
             android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="parent"

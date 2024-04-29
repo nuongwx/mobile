@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -11,13 +12,16 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.widget.NestedScrollView
 import com.example.datto.Credential.CredentialService
+import com.example.datto.utils.FirebaseNotification
 import com.example.datto.utils.WidgetUpdater
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.messaging.FirebaseMessaging
 
 class MainActivity : AppCompatActivity() {
     // Handle back button to exit app
@@ -36,12 +40,16 @@ class MainActivity : AppCompatActivity() {
         findViewById(R.id.app_top_app_bar)
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         // Disable dark mode
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+
+        //Notification init
+        FirebaseMessaging.getInstance().isAutoInitEnabled = true
 
         // Update widget
         WidgetUpdater().update(this)
@@ -51,6 +59,11 @@ class MainActivity : AppCompatActivity() {
             CredentialService().credentialValidation(this)
         }
 
+        val firebaseNotification = FirebaseNotification(this)
+        firebaseNotification.subscribeToTopic("news")
+        firebaseNotification.unsubscribeFromTopic("weather")
+//        firebaseNotification.compose("news", "Breaking News", "A major event just happened!")
+//        firebaseNotification.compose("news", "Scheduled News", "A scheduled event is about to happen!", "2024:04:29T13:47:00")
         // Set up layout
         if (CredentialService().get() == "") {
             setContentView(R.layout.activity_main)
