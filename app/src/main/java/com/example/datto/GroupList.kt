@@ -20,6 +20,7 @@ import com.example.datto.Credential.CredentialService
 import com.example.datto.DataClass.AccountResponse
 import com.example.datto.DataClass.EventResponse
 import com.example.datto.GlobalVariable.GlobalVariable
+import com.example.datto.utils.FirebaseNotification
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.gson.annotations.SerializedName
 import com.squareup.picasso.Picasso
@@ -215,6 +216,8 @@ class GroupList : Fragment() {
         val groupList = ArrayList<CustomGroupResponse>()
         val accountEvents = ArrayList<Event>()
 
+        val ctx = requireContext()
+
         APIService(requireContext()).doGet<List<CustomGroupResponse>>(
             "accounts/${CredentialService().get()}/groups",
             object : APICallback<Any> {
@@ -231,7 +234,9 @@ class GroupList : Fragment() {
 
                         data.forEach {
                             groupList.add(it)
-
+                            FirebaseNotification(ctx).subscribeToTopic(
+                                it.id
+                            )
                             it.events.forEach { event ->
                                 accountEvents.add(Event(it.name, event))
                             }

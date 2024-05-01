@@ -19,6 +19,7 @@ import com.example.datto.API.APIService
 import com.example.datto.DataClass.BucketResponse
 import com.example.datto.DataClass.EventResponse
 import com.example.datto.DataClass.MemoryRequest
+import com.example.datto.utils.FirebaseNotification
 import com.example.datto.utils.WidgetUpdater
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -133,7 +134,11 @@ class NewMemory : Fragment() {
                                 override fun onSuccess(data: Any) {
                                     Toast.makeText(context, "Memory created", Toast.LENGTH_SHORT)
                                         .show()
-
+                                    FirebaseNotification(requireContext()).compose(
+                                        groupId!!,
+                                        "A new memory has been created!",
+                                        "Click to view? or something like that"
+                                    )
                                     WidgetUpdater().update(requireContext())
                                     parentFragmentManager.popBackStack()
                                 }
@@ -199,6 +204,9 @@ class NewMemory : Fragment() {
                         view.findViewById<MaterialAutoCompleteTextView>(R.id.create_memory_dropdown)
                     events = eventList.associate { it.id to it.name }
                     eventDropdown.setSimpleItems(events.values.toTypedArray())
+                    eventDropdown.setOnItemClickListener { _, _, position, _ ->
+                        eventId = events.keys.elementAt(position)
+                    }
                 }
 
                 override fun onError(error: Throwable) {
