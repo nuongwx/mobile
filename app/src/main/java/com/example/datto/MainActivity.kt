@@ -59,11 +59,12 @@ class MainActivity : AppCompatActivity() {
             CredentialService().credentialValidation(this)
         }
 
-        val firebaseNotification = FirebaseNotification(this)
-        firebaseNotification.subscribeToTopic("news")
-        firebaseNotification.unsubscribeFromTopic("weather")
+//        val firebaseNotification = FirebaseNotification(this)
+//        firebaseNotification.subscribeToTopic("news")
+//        firebaseNotification.unsubscribeFromTopic("weather")
 //        firebaseNotification.compose("news", "Breaking News", "A major event just happened!")
-//        firebaseNotification.compose("news", "Scheduled News", "A scheduled event is about to happen!", "2024:04:29T13:47:00")
+//        firebaseNotification.compose("news", "Scheduled News", "A scheduled event is about to happen!", "2024-05-01T16:51:00")
+
         // Set up layout
         if (CredentialService().get() == "") {
             setContentView(R.layout.activity_main)
@@ -74,6 +75,7 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(this, SignUpActivity::class.java))
             }
         } else {
+
             // Set default layout
             setContentView(R.layout.activity_app_layout)
 

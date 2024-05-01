@@ -21,6 +21,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
+import com.example.datto.DataClass.MessageRequest
 import com.example.datto.DataClass.Notification
 import com.example.datto.DataClass.NotificationRequest
 import com.example.datto.MainActivity
@@ -68,11 +69,9 @@ class FirebaseNotification(private val context: Context) {
             }
     }
 
-    fun compose(topic: String, title: String, body: String, sendAt: String = "") {
+    fun compose(topic: String, title: String, body: String, sendAt: String = "now") {
         try {
-            val newNotification = Notification(title, body)
-            val sendAtValue = if (sendAt == "") { "now" } else { sendAt }
-            val newRequest = NotificationRequest(topic, sendAtValue, newNotification)
+            val newRequest = MessageRequest(NotificationRequest(topic, sendAt, Notification(title, body)))
 
             APIService(context).doPost<Any>(
                 "notifications",
@@ -80,7 +79,7 @@ class FirebaseNotification(private val context: Context) {
                 object :
                     APICallback<Any> {
                     override fun onSuccess(data: Any) {
-                        Log.d(TAG, "Send message $title successfully")
+                        Log.d(TAG, "Send message $title successfully: $data")
                         Log.d("API_SERVICE", "Send message $title successfully")
                     }
 
