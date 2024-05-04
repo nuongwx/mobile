@@ -5,6 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/on_boarding_bg"
     tools:context=".MainActivity">
     <RelativeLayout
         android:layout_width="match_parent"
@@ -12,24 +13,30 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         >
-        <Button
-            android:id="@+id/sign_in_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:text="@string/sign_in_title"
-            android:textAllCaps="true" />
-
         <TextView
             android:id="@+id/or_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:textAlignment="center"
-            android:text="OR"
-            android:layout_below="@+id/sign_in_button" />
+            android:textAlignment="textStart"
+            android:textSize="28dp"
+            android:textColor="#000"
+            android:textStyle="bold"
+            android:text="Date together, let memories last forever"
+            />
+
+
+        <Button
+            android:id="@+id/sign_in_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="12dp"
+            android:layout_marginTop="20dp"
+            android:text="@string/sign_in_title"
+            android:textAllCaps="true"
+            android:layout_below="@+id/or_text"/>
 
         <Button
             android:id="@+id/sign_up_button"
@@ -37,10 +44,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="32dp"
             android:text="Sign up"
             android:textAllCaps="true"
-            android:layout_below="@+id/or_text" />
+            android:layout_below="@+id/sign_in_button" />
 
 
     </RelativeLayout>

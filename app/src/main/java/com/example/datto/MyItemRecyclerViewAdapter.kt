@@ -22,6 +22,7 @@ class NotificationItem(
     val topic: String,
     val title: String,
     val body: String,
+    var sendAt: String,
 )
 class MyItemRecyclerViewAdapter(
     private val values: List<NotificationItem>
@@ -44,6 +45,7 @@ class MyItemRecyclerViewAdapter(
         holder.idView.text = item.id
         holder.titleView.text = item.title
         holder.bodyView.text = item.body
+        holder.timeView.text = item.sendAt
 
         if (position != values.size - 1) {
             // add divider
@@ -77,6 +79,7 @@ class MyItemRecyclerViewAdapter(
         val idView: TextView = binding.itemNumber
         val titleView: TextView = binding.notificationListItemTitle
         val bodyView: TextView = binding.notificationListItemBody
+        val timeView: TextView = binding.notificationListItemTime
         var onClickListener: View.OnClickListener? = null
 
         init {

@@ -59,8 +59,8 @@ class MainActivity : AppCompatActivity() {
             CredentialService().credentialValidation(this)
         }
 
-//        val firebaseNotification = FirebaseNotification(this)
-//        firebaseNotification.subscribeToTopic("news")
+        val firebaseNotification = FirebaseNotification(this)
+        firebaseNotification.subscribeToTopic("everyone")
 //        firebaseNotification.unsubscribeFromTopic("weather")
 //        firebaseNotification.compose("news", "Breaking News", "A major event just happened!")
 //        firebaseNotification.compose("news", "Scheduled News", "A scheduled event is about to happen!", "2024-05-01T16:51:00")

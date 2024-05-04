@@ -12,6 +12,8 @@ import com.example.datto.API.APIService
 import com.example.datto.Credential.CredentialService
 import com.example.datto.utils.FirebaseNotification
 import com.google.android.material.appbar.MaterialToolbar
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 /**
  * A fragment representing a list of Items.
@@ -63,6 +65,13 @@ class Notification : Fragment() {
                 override fun onSuccess(data: Any) {
                     data as List<NotificationItem>
                     notifications.clear()
+                    for (notification in data) {
+                        val originalFormat =
+                            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                        val targetFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.US)
+                        val date = originalFormat.parse(notification.sendAt)
+                        notification.sendAt = targetFormat.format(date!!)
+                    }
                     notifications.addAll(data)
                     adapter.notifyDataSetChanged()
                 }
@@ -76,17 +85,17 @@ class Notification : Fragment() {
     private fun configAppBar() {
         val appBar = requireActivity().findViewById<MaterialToolbar>(R.id.app_top_app_bar)
         val menuItem = appBar.menu.findItem(R.id.edit)
-        menuItem.isEnabled = true
-        menuItem.title = "Test Notification"
-        menuItem.setIcon(null)
-        menuItem.setOnMenuItemClickListener {
-            FirebaseNotification(requireContext()).compose(
-                "66195ac2c2f63b123dc73596",
-                "brand new message!",
-                "oh body of the message!"
-            )
-            true
-        }
+        menuItem.isVisible = false
+//        menuItem.title = "Test Notification"
+//        menuItem.setIcon(null)
+//        menuItem.setOnMenuItemClickListener {
+//            FirebaseNotification(requireContext()).compose(
+//                "everyone",
+//                "brand new message!",
+//                "oh body of the message!"
+//            )
+//            true
+//        }
 
         appBar.title = "Notification"
         appBar.navigationIcon = null
