@@ -7,5 +7,6 @@ data class NewGroupRequest (
 )
 
 data class NewGroupResponse (
-    var inviteCode: String
+    var inviteCode: String,
+    var groupId: String,
 )

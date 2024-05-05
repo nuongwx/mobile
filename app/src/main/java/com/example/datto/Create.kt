@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.Credential.CredentialService
-import com.example.datto.DataClass.GroupResponse
+import com.example.datto.utils.FirebaseNotification
 import com.example.datto.utils.WidgetUpdater
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -18,6 +18,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import java.text.SimpleDateFormat
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -71,6 +72,14 @@ class Create : Fragment() {
                 originalFormat.parse(startDateValue)!!.let { targetFormat.format(it) }
             val formattedEnd = originalFormat.parse(endDateValue)!!.let { targetFormat.format(it) }
 
+            // Format date before
+            val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+            val originalDate = LocalDate.parse(startDateValue, formatter)
+            val newFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+            val oneDayBefore = originalDate.minusDays(1)
+            val formattedDate = oneDayBefore.atStartOfDay().format(newFormatter)
+
+
             val data = mapOf(
                 "name" to name, "start" to formattedStart, "end" to formattedEnd
             )
@@ -87,6 +96,13 @@ class Create : Fragment() {
                             requireActivity().supportFragmentManager.popBackStack()
                             return
                         }
+
+                        FirebaseNotification(requireContext()).compose(
+                            group,
+                            "Get ready for $name",
+                            "$name will take place on $startDateValue",
+                            formattedDate
+                        )
 
                         requireActivity().supportFragmentManager.beginTransaction()
                             .replace(R.id.app_fragment, GroupList()).addToBackStack("GroupList")

@@ -12,16 +12,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.RecyclerView
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.DataClass.BucketResponse
 import com.example.datto.DataClass.EventResponse
 import com.example.datto.DataClass.MemoryRequest
+import com.example.datto.utils.FirebaseNotification
 import com.example.datto.utils.WidgetUpdater
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -72,6 +70,11 @@ class NewMemory : Fragment() {
                 return@setOnMenuItemClickListener false
             }
 
+            if (eventId == null) {
+                Toast.makeText(context, "Please select an event", Toast.LENGTH_SHORT).show()
+                return@setOnMenuItemClickListener false
+            }
+
             val bitmap = (imageUpload.drawable as BitmapDrawable).bitmap
             val stream = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
@@ -91,9 +94,9 @@ class NewMemory : Fragment() {
             // Get event name
             val eventName =
                 view?.findViewById<MaterialAutoCompleteTextView>(R.id.create_memory_dropdown)?.text.toString()
-            if (eventId == null) {
-                eventId = events.filterValues { it == eventName }.keys.first()
-            }
+            // if (eventId == null) {
+            //     eventId = events.filterValues { it == eventName }.keys.first()
+            // }
 
             // Create multipart body
             val requestBody =
@@ -131,7 +134,11 @@ class NewMemory : Fragment() {
                                 override fun onSuccess(data: Any) {
                                     Toast.makeText(context, "Memory created", Toast.LENGTH_SHORT)
                                         .show()
-
+                                    FirebaseNotification(requireContext()).compose(
+                                        groupId!!,
+                                        "A new memory has been created!",
+                                        "Click to view? or something like that"
+                                    )
                                     WidgetUpdater().update(requireContext())
                                     parentFragmentManager.popBackStack()
                                 }
@@ -197,6 +204,9 @@ class NewMemory : Fragment() {
                         view.findViewById<MaterialAutoCompleteTextView>(R.id.create_memory_dropdown)
                     events = eventList.associate { it.id to it.name }
                     eventDropdown.setSimpleItems(events.values.toTypedArray())
+                    eventDropdown.setOnItemClickListener { _, _, position, _ ->
+                        eventId = events.keys.elementAt(position)
+                    }
                 }
 
                 override fun onError(error: Throwable) {

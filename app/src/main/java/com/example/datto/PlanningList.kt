@@ -60,7 +60,7 @@ class PlanningList : Fragment() {
                     view.findViewById<RecyclerView>(R.id.eventDetailsPlanningListRecyclerView)
                 recyclerView.layoutManager = LinearLayoutManager(view.context)
                 recyclerView.adapter = FunkyDatedPlanningAdapter(plannings)
-                recyclerView.setHasFixedSize(true)
+                // recyclerView.setHasFixedSize(true)
             }
 
             override fun onError(error: Throwable) {

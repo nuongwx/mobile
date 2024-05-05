@@ -25,10 +25,11 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/currentEventsRecyclerView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@id/materialTextView2"
+            android:layout_height="0dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/materialTextView" />
+            app:layout_constraintTop_toBottomOf="@+id/materialTextView"
+            tools:itemCount="1"
+            tools:listitem="@layout/events_list_items" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/materialTextView2"
@@ -45,11 +46,11 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView2"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/materialTextView2" />
+            app:layout_constraintTop_toBottomOf="@+id/materialTextView2"
+            tools:listitem="@layout/groups_list_items" />
 
         <Button
             android:id="@+id/newGroupButton"
@@ -68,7 +69,6 @@
             android:gravity="center"
             android:text="No groups"
             android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
-            android:textColor="@color/material_dynamic_neutral80"
             android:textFontWeight="600"
             android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="parent"
