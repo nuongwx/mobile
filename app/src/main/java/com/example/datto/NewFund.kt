@@ -15,6 +15,8 @@ import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.DataClass.EventMemberResponse
 import com.example.datto.DataClass.FundRequest
+import com.example.datto.DataClass.GroupInfo
+import com.example.datto.utils.FirebaseNotification
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -164,14 +166,19 @@ class NewFund (
                         originalFormat.parse(paidAt.text.toString())!!
                     val formattedPaidAt = targetFormat.format(tempFormatted)
 
+                    val paidByFullname = paidBy.text.toString()
+                    val paidBy = if (paidBy.text.toString() == "Budget") "" else
+                        paidByItems.filterValues { it == paidBy.text.toString() }.keys.first()
+
+                    val amount = if (type.text.toString() == typeItems[0]) {
+                        amount.text.toString().replace(",", "").toDouble()
+                    } else {
+                        -amount.text.toString().replace(",", "").toDouble()
+                    }
+
                     val fundRequest = FundRequest(
-                        paidBy = if (paidBy.text.toString() == "Budget") "" else
-                            paidByItems.filterValues { it == paidBy.text.toString() }.keys.first(),
-                        amount = if (type.text.toString() == typeItems[0]) {
-                            amount.text.toString().replace(",", "").toDouble()
-                        } else {
-                            -amount.text.toString().replace(",", "").toDouble()
-                        },
+                        paidBy,
+                        amount,
                         info = description.text.toString(),
                         paidAt = formattedPaidAt,
                     )
@@ -187,6 +194,23 @@ class NewFund (
                         override fun onError(error: Throwable) {
                             Log.d("API_SERVICE", "Error: $error")
                             Toast.makeText(context, "Failed to add fund", Toast.LENGTH_SHORT).show()
+                        }
+                    })
+
+                    APIService(requireContext()).doGet<GroupInfo>("events/$param1/group-info", object :
+                        APICallback<Any> {
+                        override fun onSuccess(data: Any) {
+                            data as GroupInfo
+                            FirebaseNotification(requireContext()).compose(
+                                data.groupId,
+                                "New updates about the fund in ${data.groupName}",
+                                "$paidByFullname just updated the fund changes: $amount")
+
+                            Log.d("API_SERVICE", "Get group info successfully")
+                        }
+
+                        override fun onError(error: Throwable) {
+                            Log.e("API_SERVICE", "Error: ${error.message}")
                         }
                     })
 

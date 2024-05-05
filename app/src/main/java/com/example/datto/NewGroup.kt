@@ -19,6 +19,7 @@ import com.example.datto.Credential.CredentialService
 import com.example.datto.DataClass.BucketResponse
 import com.example.datto.DataClass.NewGroupRequest
 import com.example.datto.DataClass.NewGroupResponse
+import com.example.datto.utils.FirebaseNotification
 import com.google.android.material.appbar.MaterialToolbar
 import com.squareup.picasso.Picasso
 import okhttp3.MediaType
@@ -75,6 +76,8 @@ class NewGroup : Fragment() {
                                     .replace(R.id.app_fragment, newGroupInviteCode)
                                     .addToBackStack("NewGroupInviteCode")
                                     .commit()
+
+                                FirebaseNotification(requireContext()).subscribeToTopic(data.groupId)
                             }
 
                             override fun onError(error: Throwable) {
@@ -129,6 +132,8 @@ class NewGroup : Fragment() {
                                                 .replace(R.id.app_fragment, newGroupInviteCode)
                                                 .addToBackStack("NewGroupInviteCode")
                                                 .commit()
+
+                                            FirebaseNotification(requireContext()).subscribeToTopic(data.groupId)
                                         }
 
                                         override fun onError(error: Throwable) {

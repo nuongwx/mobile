@@ -16,3 +16,7 @@ data class GroupResponse(
     var inviteCode: String,
     val thumbnail: String,
 )
+
+data class GroupIdResponse(
+    var id: String,
+)

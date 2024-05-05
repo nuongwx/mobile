@@ -16,8 +16,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.DataClass.FundResponse
+import com.example.datto.DataClass.GroupInfo
 import com.example.datto.DataClass.SplitFundResponse
 import com.example.datto.GlobalVariable.GlobalVariable
+import com.example.datto.utils.FirebaseNotification
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.squareup.picasso.Picasso
@@ -216,6 +218,8 @@ class FundList (
 
                         data as SplitFundResponse
 
+                        var bodyMessage = ""
+
                         // Set up dialog
                         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_split_funds, null)
 
@@ -239,15 +243,35 @@ class FundList (
                         // Set recycler view for dialog
                         val splitFundList = ArrayList<DialogSplitFundItem>()
 
+
                         for (splitFund in data.data) {
                             splitFundList.add(DialogSplitFundItem(splitFund.account.id, splitFund.amount, splitFund.account.profile.fullName, splitFund.account.profile.avatar ?: ""))
+                            bodyMessage += "${splitFund.account.profile.fullName}: ${splitFund.amount}\n"
                         }
+                        bodyMessage += "Remaining funds: ${format.format(data.remainingFunds)}"
+
 
                         val dialogRecyclerView = dialogView.findViewById<RecyclerView>(R.id.dialog_split_funds_list)
                         dialogRecyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
                         dialogRecyclerView.adapter = SplitFundAdapter(splitFundList)
                         // dialogRecyclerView.setHasFixedSize(true)
 
+                        APIService(requireContext()).doGet<GroupInfo>("events/$param1/group-info", object :
+                            APICallback<Any> {
+                            override fun onSuccess(data: Any) {
+                                data as GroupInfo
+                                FirebaseNotification(requireContext()).compose(
+                                    data.groupId,
+                                    "New updates on fund sharing in ${data.groupName}",
+                                    bodyMessage)
+
+                                Log.d("API_SERVICE", "Get group info successfully")
+                            }
+
+                            override fun onError(error: Throwable) {
+                                Log.e("API_SERVICE", "Error: ${error.message}")
+                            }
+                        })
                         Log.d("API_SERVICE", "Data: ${data}")
                     }
 
