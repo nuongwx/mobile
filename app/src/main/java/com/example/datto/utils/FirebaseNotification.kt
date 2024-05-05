@@ -94,27 +94,6 @@ class FirebaseNotification(private val context: Context) {
         }
     }
 
-    fun getGroupInfo(eventId: String): GroupInfo {
-        var result = GroupInfo("", "")
-        try {
-
-            APIService(context).doGet<GroupInfo>("events/$eventId/group-info",object :
-                APICallback<Any> {
-                override fun onSuccess(data: Any) {
-                    data as GroupInfo
-                    result = data
-                    Log.d("API_SERVICE", "Get group info successfully")
-                }
-
-                override fun onError(error: Throwable) {
-                    Log.e("API_SERVICE", "Error: ${error.message}")
-                }
-            })
-        } catch (e: Exception) {
-            Log.e(TAG, "Exception occurred: ${e.message}")
-        }
-        return result
-    }
 
 }
 

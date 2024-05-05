@@ -15,6 +15,7 @@ import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.DataClass.EventMemberResponse
 import com.example.datto.DataClass.FundRequest
+import com.example.datto.DataClass.GroupInfo
 import com.example.datto.utils.FirebaseNotification
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -195,18 +196,22 @@ class NewFund (
                         }
                     })
 
-                    val groupInfo = param1?.let { it1 ->
-                        FirebaseNotification(requireContext()).getGroupInfo(
-                            it1
-                        )
-                    }
+                    APIService(requireContext()).doGet<GroupInfo>("events/$param1/group-info", object :
+                        APICallback<Any> {
+                        override fun onSuccess(data: Any) {
+                            data as GroupInfo
+                            FirebaseNotification(requireContext()).compose(
+                                data.groupId,
+                                "New updates about the fund in ${data.groupName}",
+                                "$paidBy just updated the fund changes: $amount")
 
-                    if (groupInfo != null) {
-                        FirebaseNotification(requireContext()).compose(
-                            groupInfo.groupId,
-                            "New updates about the fund in ${groupInfo.groupName}",
-                            "$paidBy just updated the fund changes: $amount")
-                    }
+                            Log.d("API_SERVICE", "Get group info successfully")
+                        }
+
+                        override fun onError(error: Throwable) {
+                            Log.e("API_SERVICE", "Error: ${error.message}")
+                        }
+                    })
 
                     true
                 }

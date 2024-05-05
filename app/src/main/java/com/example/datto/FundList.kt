@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.DataClass.FundResponse
+import com.example.datto.DataClass.GroupInfo
 import com.example.datto.DataClass.SplitFundResponse
 import com.example.datto.GlobalVariable.GlobalVariable
 import com.example.datto.utils.FirebaseNotification
@@ -255,19 +256,22 @@ class FundList (
                         dialogRecyclerView.adapter = SplitFundAdapter(splitFundList)
                         // dialogRecyclerView.setHasFixedSize(true)
 
-                        val groupInfo = param1?.let { it1 ->
-                            FirebaseNotification(requireContext()).getGroupInfo(
-                                it1
-                            )
-                        }
+                        APIService(requireContext()).doGet<GroupInfo>("events/$param1/group-info", object :
+                            APICallback<Any> {
+                            override fun onSuccess(data: Any) {
+                                data as GroupInfo
+                                FirebaseNotification(requireContext()).compose(
+                                    data.groupId,
+                                    "New updates on fund sharing in ${data.groupName}",
+                                    bodyMessage)
 
-                        if (groupInfo != null) {
-                            FirebaseNotification(requireContext()).compose(
-                                groupInfo.groupId,
-                                "New updates on fund sharing in ${groupInfo.groupName}",
-                                bodyMessage)
-                        }
+                                Log.d("API_SERVICE", "Get group info successfully")
+                            }
 
+                            override fun onError(error: Throwable) {
+                                Log.e("API_SERVICE", "Error: ${error.message}")
+                            }
+                        })
                         Log.d("API_SERVICE", "Data: ${data}")
                     }
 
