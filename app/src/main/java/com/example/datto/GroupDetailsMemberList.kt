@@ -53,10 +53,6 @@ class MemberListAdapter(
         val removeButton: ImageButton = itemView.findViewById(R.id.memberRemoveButton)
 
         init {
-            itemView.setOnClickListener {
-                Toast.makeText(itemView.context, itemView.toString(), Toast.LENGTH_SHORT).show()
-            }
-
             removeButton.setOnClickListener {
                 APIService(context).doDelete<Any>("groups/${groupId}/members/${members[absoluteAdapterPosition].id}", object : APICallback<Any> {
                     override fun onSuccess(data: Any) {

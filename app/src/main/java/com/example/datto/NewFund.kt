@@ -23,12 +23,14 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Currency
 import java.util.Locale
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -201,10 +203,16 @@ class NewFund (
                         APICallback<Any> {
                         override fun onSuccess(data: Any) {
                             data as GroupInfo
+
+                            // Format currency
+                            val format: NumberFormat = NumberFormat.getCurrencyInstance()
+                            format.setMaximumFractionDigits(0)
+                            format.currency = Currency.getInstance("VND")
+
                             FirebaseNotification(requireContext()).compose(
                                 data.groupId,
                                 "New updates about the fund in ${data.groupName}",
-                                "$paidByFullname just updated the fund changes: $amount")
+                                "$paidByFullname just updated the fund changes: ${format.format(amount)}")
 
                             Log.d("API_SERVICE", "Get group info successfully")
                         }

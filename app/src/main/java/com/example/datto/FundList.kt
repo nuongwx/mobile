@@ -256,22 +256,26 @@ class FundList (
                         dialogRecyclerView.adapter = SplitFundAdapter(splitFundList)
                         // dialogRecyclerView.setHasFixedSize(true)
 
-                        APIService(requireContext()).doGet<GroupInfo>("events/$param1/group-info", object :
-                            APICallback<Any> {
-                            override fun onSuccess(data: Any) {
-                                data as GroupInfo
-                                FirebaseNotification(requireContext()).compose(
-                                    data.groupId,
-                                    "New updates on fund sharing in ${data.groupName}",
-                                    bodyMessage)
+                        // Send notification button
+                        dialogView.findViewById<Button>(R.id.dialog_split_funds_save_button).setOnClickListener {
+                            APIService(requireContext()).doGet<GroupInfo>("events/$param1/group-info", object :
+                                APICallback<Any> {
+                                override fun onSuccess(data: Any) {
+                                    data as GroupInfo
+                                    FirebaseNotification(requireContext()).compose(
+                                        data.groupId,
+                                        "New updates on fund sharing in ${data.groupName}",
+                                        bodyMessage)
 
-                                Log.d("API_SERVICE", "Get group info successfully")
-                            }
+                                    Log.d("API_SERVICE", "Get group info successfully")
+                                }
 
-                            override fun onError(error: Throwable) {
-                                Log.e("API_SERVICE", "Error: ${error.message}")
-                            }
-                        })
+                                override fun onError(error: Throwable) {
+                                    Log.e("API_SERVICE", "Error: ${error.message}")
+                                }
+                            })
+                        }
+
                         Log.d("API_SERVICE", "Data: ${data}")
                     }
 
