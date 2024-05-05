@@ -246,7 +246,7 @@ class FundList (
 
                         for (splitFund in data.data) {
                             splitFundList.add(DialogSplitFundItem(splitFund.account.id, splitFund.amount, splitFund.account.profile.fullName, splitFund.account.profile.avatar ?: ""))
-                            bodyMessage += "${splitFund.account.profile.fullName}: ${splitFund.amount}\n"
+                            bodyMessage += "${splitFund.account.profile.fullName}: ${format.format(splitFund.amount)}\n"
                         }
                         bodyMessage += "Remaining funds: ${format.format(data.remainingFunds)}"
 

@@ -14,6 +14,7 @@ import com.example.datto.utils.FirebaseNotification
 import com.google.android.material.appbar.MaterialToolbar
 import java.text.SimpleDateFormat
 import java.util.Locale
+import java.util.TimeZone
 
 /**
  * A fragment representing a list of Items.
@@ -68,7 +69,9 @@ class Notification : Fragment() {
                     for (notification in data) {
                         val originalFormat =
                             SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                        originalFormat.timeZone = TimeZone.getTimeZone("GMT+7")
                         val targetFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.US)
+                        targetFormat.timeZone = TimeZone.getTimeZone("GMT+7")
                         val date = originalFormat.parse(notification.sendAt)
                         notification.sendAt = targetFormat.format(date!!)
                     }
