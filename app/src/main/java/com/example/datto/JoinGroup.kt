@@ -12,7 +12,9 @@ import androidx.core.content.ContextCompat
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.Credential.CredentialService
+import com.example.datto.DataClass.GroupIdResponse
 import com.example.datto.DataClass.JoinGroupRequest
+import com.example.datto.utils.FirebaseNotification
 import com.google.android.material.appbar.MaterialToolbar
 
 // TODO: Rename parameter arguments, choose names that match
@@ -67,12 +69,13 @@ class JoinGroup : Fragment() {
             val joinGroupRequest = JoinGroupRequest(CredentialService().get(), inviteCode)
 
             // Call API to join group
-            APIService(requireContext()).doPost<Any>("groups/join", joinGroupRequest, object :
+            APIService(requireContext()).doPost<GroupIdResponse>("groups/join", joinGroupRequest, object :
                 APICallback<Any> {
                 override fun onSuccess(data: Any) {
                     Log.d("API_SERVICE", "Join group success")
                     Toast.makeText(requireContext(), "Join group success", Toast.LENGTH_SHORT).show()
-
+                    data as GroupIdResponse
+                    FirebaseNotification(requireContext()).subscribeToTopic(data.id)
                     // Back to previous fragment
                     requireActivity().supportFragmentManager.popBackStack()
                 }

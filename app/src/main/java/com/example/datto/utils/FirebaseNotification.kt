@@ -21,6 +21,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
+import com.example.datto.DataClass.GroupInfo
 import com.example.datto.DataClass.MessageRequest
 import com.example.datto.DataClass.Notification
 import com.example.datto.DataClass.NotificationRequest
@@ -91,6 +92,28 @@ class FirebaseNotification(private val context: Context) {
         } catch (e: Exception) {
             Log.e(TAG, "Exception occurred: ${e.message}")
         }
+    }
+
+    fun getGroupInfo(eventId: String): GroupInfo {
+        var result = GroupInfo("", "")
+        try {
+
+            APIService(context).doGet<GroupInfo>("events/$eventId/group-info",object :
+                APICallback<Any> {
+                override fun onSuccess(data: Any) {
+                    data as GroupInfo
+                    result = data
+                    Log.d("API_SERVICE", "Get group info successfully")
+                }
+
+                override fun onError(error: Throwable) {
+                    Log.e("API_SERVICE", "Error: ${error.message}")
+                }
+            })
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception occurred: ${e.message}")
+        }
+        return result
     }
 
 }

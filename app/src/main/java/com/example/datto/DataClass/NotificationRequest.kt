@@ -14,3 +14,8 @@ data class Notification(
     var title: String,
     var body: String,
 )
+
+data class GroupInfo(
+    var groupId: String,
+    var groupName: String,
+)

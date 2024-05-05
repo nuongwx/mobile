@@ -15,6 +15,7 @@ import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.DataClass.EventMemberResponse
 import com.example.datto.DataClass.FundRequest
+import com.example.datto.utils.FirebaseNotification
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -164,14 +165,18 @@ class NewFund (
                         originalFormat.parse(paidAt.text.toString())!!
                     val formattedPaidAt = targetFormat.format(tempFormatted)
 
+                    val paidBy = if (paidBy.text.toString() == "Budget") "" else
+                        paidByItems.filterValues { it == paidBy.text.toString() }.keys.first()
+
+                    val amount = if (type.text.toString() == typeItems[0]) {
+                        amount.text.toString().replace(",", "").toDouble()
+                    } else {
+                        -amount.text.toString().replace(",", "").toDouble()
+                    }
+
                     val fundRequest = FundRequest(
-                        paidBy = if (paidBy.text.toString() == "Budget") "" else
-                            paidByItems.filterValues { it == paidBy.text.toString() }.keys.first(),
-                        amount = if (type.text.toString() == typeItems[0]) {
-                            amount.text.toString().replace(",", "").toDouble()
-                        } else {
-                            -amount.text.toString().replace(",", "").toDouble()
-                        },
+                        paidBy,
+                        amount,
                         info = description.text.toString(),
                         paidAt = formattedPaidAt,
                     )
@@ -189,6 +194,19 @@ class NewFund (
                             Toast.makeText(context, "Failed to add fund", Toast.LENGTH_SHORT).show()
                         }
                     })
+
+                    val groupInfo = param1?.let { it1 ->
+                        FirebaseNotification(requireContext()).getGroupInfo(
+                            it1
+                        )
+                    }
+
+                    if (groupInfo != null) {
+                        FirebaseNotification(requireContext()).compose(
+                            groupInfo.groupId,
+                            "New updates about the fund in ${groupInfo.groupName}",
+                            "$paidBy just updated the fund changes: $amount")
+                    }
 
                     true
                 }
