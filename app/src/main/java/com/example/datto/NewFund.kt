@@ -166,6 +166,7 @@ class NewFund (
                         originalFormat.parse(paidAt.text.toString())!!
                     val formattedPaidAt = targetFormat.format(tempFormatted)
 
+                    val paidByFullname = paidBy.text.toString()
                     val paidBy = if (paidBy.text.toString() == "Budget") "" else
                         paidByItems.filterValues { it == paidBy.text.toString() }.keys.first()
 
@@ -203,7 +204,7 @@ class NewFund (
                             FirebaseNotification(requireContext()).compose(
                                 data.groupId,
                                 "New updates about the fund in ${data.groupName}",
-                                "$paidBy just updated the fund changes: $amount")
+                                "$paidByFullname just updated the fund changes: $amount")
 
                             Log.d("API_SERVICE", "Get group info successfully")
                         }
