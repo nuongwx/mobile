@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import com.example.datto.API.APICallback
 import com.example.datto.API.APIService
 import com.example.datto.Credential.CredentialService
@@ -61,9 +62,32 @@ class Create : Fragment() {
             val startDateValue = startDate.text.toString()
             val endDateValue = endDate.text.toString()
 
-            val group =
-                groups.filterValues { it == view?.findViewById<MaterialAutoCompleteTextView>(R.id.create_group_dropdown)?.text.toString() }.keys.first()
+            // Check name is not empty
+            if (name == "") {
+                Toast.makeText(requireContext(), "Name cannot be empty", Toast.LENGTH_SHORT).show()
+                return@setOnMenuItemClickListener true
+            }
 
+            // Check start date is not empty
+            if (startDateValue == "") {
+                Toast.makeText(requireContext(), "Start date cannot be empty", Toast.LENGTH_SHORT).show()
+                return@setOnMenuItemClickListener true
+            }
+
+            // Check end date is not empty
+            if (endDateValue == "") {
+                Toast.makeText(requireContext(), "End date cannot be empty", Toast.LENGTH_SHORT).show()
+                return@setOnMenuItemClickListener true
+            }
+
+            val groupName = view?.findViewById<MaterialAutoCompleteTextView>(R.id.create_group_dropdown)?.text.toString()
+            if (groupName == "") {
+                Toast.makeText(requireContext(), "Group cannot be empty", Toast.LENGTH_SHORT).show()
+                return@setOnMenuItemClickListener true
+            }
+
+            val group =
+                groups.filterValues { it == groupName }.keys.first()
 
             // Format date
             val originalFormat = SimpleDateFormat("dd/MM/yyyy", Locale.US)
